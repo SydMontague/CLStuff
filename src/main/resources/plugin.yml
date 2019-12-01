@@ -1,0 +1,18 @@
+name: CLStuff
+main: de.craftlancer.clstuff.CLStuff
+version: ${project.version}
+api-version: 1.14
+loadbefore: [WorldGuard]
+commands:
+  stats:
+    description: Displays your total playtime.
+  map:
+    description: Displays the link to dynmap.
+  discord:
+    description: Displays the link to discord.
+  ping:
+    description: Displays a player's ping.
+  nodropflag:
+    description: Add | List | Remove items excluded in the nodropflag.
+  cchelp:
+    description: CraftCititzen help commands.
