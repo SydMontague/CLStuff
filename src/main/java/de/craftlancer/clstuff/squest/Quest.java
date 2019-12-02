@@ -77,7 +77,7 @@ public class Quest implements Listener {
         
         ItemStack item = event.getItem();
         
-        remaining.stream().filter(a -> a.isSimilar(item) || a.getAmount() != 0).forEach(a -> {
+        remaining.stream().filter(a -> a.isSimilar(item) && a.getAmount() != 0).forEach(a -> {
             int givenAmount = item.getAmount();
             int remainAmount = a.getAmount();
             
@@ -90,7 +90,7 @@ public class Quest implements Listener {
     
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        if(event.getBlock().getLocation().equals(chestLocation) && !event.getPlayer().hasPermission("clstuff.squest.admin"))
+        if(event.getBlock().getLocation().equals(chestLocation))
             event.setCancelled(true);
     }
     
@@ -150,5 +150,9 @@ public class Quest implements Listener {
         
         remaining.remove(index);
         return true;
+    }
+    
+    public String getName() {
+        return name;
     }
 }

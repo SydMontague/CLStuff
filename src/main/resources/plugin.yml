@@ -18,3 +18,46 @@ commands:
     description: Add | List | Remove items excluded in the nodropflag.
   cchelp:
     description: CraftCititzen help commands.
+  squest:
+    description: Server quests
+  time:
+    description: Shows server time
+permissions:
+  clstuff.nodrop.admin:
+    default: op
+  clstuff.squest.admin:
+    default: op
+    children:
+      clstuff.squest.create: true
+      clstuff.squest.delete: true
+      clstuff.squest.reward: true
+      clstuff.squest.requirements: true
+      clstuff.squest.description: true
+      clstuff.squest.start: true
+      clstuff.squest.exempt: true
+  clstuff.squest.user:
+    default: true
+    children:
+      clstuff.squest.list: true
+      clstuff.squest.info: true
+      clstuff.squest.progress: true
+  clstuff.squest.create:
+    default: false
+  clstuff.squest.delete:
+    default: false
+  clstuff.squest.reward:
+    default: false
+  clstuff.squest.requirements:
+    default: false
+  clstuff.squest.description:
+    default: false
+  clstuff.squest.start:
+    default: false
+  clstuff.squest.list:
+    default: false
+  clstuff.squest.info:
+    default: false
+  clstuff.squest.progress:
+    default: false
+  clstuff.squest.exempt:
+    default: false

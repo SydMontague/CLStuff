@@ -13,6 +13,13 @@ public class CCHelpCommandHandler extends CommandHandler {
         registerSubCommand("portal", new CCHelpCommand(plugin, this::portalHelp), "portals");
         registerSubCommand("capture", new CCHelpCommand(plugin, this::captureHelp), "conquerpoints", "capturepoints", "capturepoint", "conquerpoint", "alinor");
         registerSubCommand("aether", new CCHelpCommand(plugin, this::shardHelp), "shards", "aethershard", "shard", "aethershards");
+        registerSubCommand("help", new CCHelpCommand(plugin, this::help));
+    }
+    
+    private void help(CommandSender sender) {
+        sender.sendMessage("/cchelp aether");
+        sender.sendMessage("/cchelp portal");
+        sender.sendMessage("/cchelp capture");
     }
     
     private void portalHelp(CommandSender sender) {
