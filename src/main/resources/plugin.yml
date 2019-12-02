@@ -4,6 +4,8 @@ version: ${project.version}
 api-version: 1.14
 loadbefore: [WorldGuard]
 commands:
+  howtoplay:
+    description: Gives you a how to play book.
   stats:
     description: Displays your total playtime.
   map:
