@@ -28,29 +28,29 @@ public class QuestRequirementListCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if(!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§2You are not allowed to use this command.";
 
         if(args.length < 3)
-            return "Yor must specify the name of the quest and an amount.";
+            return "§2Yor must specify the name of the quest and an amount.";
         
         String name = args[2];
         Optional<Quest> quest = getQuests().getQuest(name);
         
         if(!quest.isPresent())
-            return "A quest with this name doesn't exist.";
+            return "§2A quest with this name doesn't exist.";
         
-        sender.sendMessage("ID - Item - Amount - Action");
+        sender.sendMessage("§2ID - Item - Amount - Action");
         int i = 0;
         for (ItemStack a : quest.get().getRemaining()) {
             BaseComponent item = new TextComponent(a.getType().name());
             item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
                     new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a).save(new NBTTagCompound()).toString()) }));
             
-            BaseComponent delete = new TextComponent("[Delete]");
+            BaseComponent delete = new TextComponent("§2[Delete]");
             delete.setColor(ChatColor.RED);
             delete.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/squest requirement remove " + name + " " + i));
             
-            BaseComponent comp = new TextComponent(Integer.toString(i++));
+            BaseComponent comp = new TextComponent("§2" + Integer.toString(i++));
             comp.addExtra(" - ");
             comp.addExtra(item);
             comp.addExtra(" - ");

@@ -23,10 +23,10 @@ public class QuestRequirementAddCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if(!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§2You are not allowed to use this command.";
 
         if(args.length < 4)
-            return "Yor must specify the name of the quest and an amount.";
+            return "§2Yor must specify the name of the quest and an amount.";
         
         Player player = (Player) sender;
         String name = args[2];
@@ -35,9 +35,9 @@ public class QuestRequirementAddCommand extends QuestCommand {
         Optional<Quest> quest = getQuests().getQuest(name);
         
         if(!quest.isPresent())
-            return "A quest with this name doesn't exist.";
+            return "§2A quest with this name doesn't exist.";
         if(item.getType().isAir())
-            return "You must hold an item in your main hand.";
+            return "§2You must hold an item in your main hand.";
         
         item.setAmount(amount);
         quest.get().addItem(item);

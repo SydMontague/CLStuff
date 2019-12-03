@@ -17,19 +17,19 @@ public class QuestCreateCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if(!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§eYou are not allowed to use this command.";
         
         if(args.length < 2)
-            return "Yor must specify a name for the quest.";
+            return "§eYor must specify a name for the quest.";
         
         String name = args[1];
         
         if(getQuests().hasQuest(name))
-            return "A quest with this name already exists.";
+            return "§eA quest with this name already exists.";
         
         Player p = (Player) sender;
         p.setMetadata(ServerQuests.METADATA_KEY, new FixedMetadataValue(getPlugin(), name));
-        return "Right click a chest to create a server quest based on it.";
+        return "§eRight click a chest to create a server quest based on it.";
     }
     
     @Override

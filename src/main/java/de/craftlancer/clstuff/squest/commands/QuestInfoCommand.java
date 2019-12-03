@@ -26,34 +26,34 @@ public class QuestInfoCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if (!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§eYou are not allowed to use this command.";
         
         if (args.length < 2)
-            return "Yor must specify a name of the quest.";
+            return "§eYor must specify a name of the quest.";
         
         String name = args[1];
         Optional<Quest> quest = getQuests().getQuest(name);
         
         if (!quest.isPresent())
-            return "A quest with this name doesn't exist.";
+            return "§eA quest with this name doesn't exist.";
         
         
         Location loc = quest.get().getChestLocation();
         
-        sender.sendMessage("Name: " + quest.get().getName());
-        sender.sendMessage("Description: " + quest.get().getDescription());
-        sender.sendMessage("State: " + quest.get().getState());
-        sender.sendMessage(String.format("Location: %d,%d,%d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+        sender.sendMessage("§eName: §r" + quest.get().getName());
+        sender.sendMessage("§eDescription: §r" + quest.get().getDescription());
+        sender.sendMessage("§eState: §r" + quest.get().getState());
+        sender.sendMessage(String.format("§eLocation: §r%d,%d,%d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
         
-        sender.sendMessage("Item - Remaining");
+        sender.sendMessage("§eItem - Remaining");
         quest.get().getRemaining().forEach(a -> {
             BaseComponent item = new TextComponent(a.getType().name());
             item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
                     new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a).save(new NBTTagCompound()).toString()) }));
             
-            BaseComponent comp = new TextComponent();
+            BaseComponent comp = new TextComponent("§e");
             comp.addExtra(item);
-            comp.addExtra(" ");
+            comp.addExtra(" §r");
             comp.addExtra(Integer.toString(a.getAmount()));
             
             sender.spigot().sendMessage(comp);

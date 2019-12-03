@@ -21,21 +21,21 @@ public class QuestDescriptionCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if (!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§eYou are not allowed to use this command.";
         
         if (args.length < 3)
-            return "Yor must specify a name of the quest and a description.";
+            return "§eYor must specify a name of the quest and a description.";
         
         String name = args[1];
         String description = args[2];
         Optional<Quest> quest = getQuests().getQuest(name);
         
         if (!quest.isPresent())
-            return "A quest with this name doesn't exist.";
+            return "§eA quest with this name doesn't exist.";
         
         quest.get().setDescription(description);
         getQuests().save();
-        return "Quest description set.";
+        return "§eQuest description set.";
     }
     
     @Override

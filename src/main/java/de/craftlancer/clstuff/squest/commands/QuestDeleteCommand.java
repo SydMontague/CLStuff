@@ -20,18 +20,18 @@ public class QuestDeleteCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if (!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§eYou are not allowed to use this command.";
         
         if (args.length < 2)
-            return "Yor must specify a name of the quest.";
+            return "§eYor must specify a name of the quest.";
         
         String name = args[1];
         
         if (!getQuests().hasQuest(name))
-            return "A quest with this name doesn't exist.";
+            return "§eA quest with this name doesn't exist.";
         
         getQuests().removeQuest(name);
-        return "Quest removed.";
+        return "§eQuest removed.";
     }
     
     @Override

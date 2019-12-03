@@ -15,10 +15,10 @@ public class QuestListCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if (!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§2You are not allowed to use this command.";
         
-        sender.sendMessage("Name - #Items");
-        getQuests().getQuests().forEach(a -> sender.sendMessage(a.getName() + " " + a.getRemaining().size() + " " + a.getState()));
+        sender.sendMessage("§2Name - #Items");
+        getQuests().getQuests().forEach(a -> sender.sendMessage("§2" + a.getName() + " " + a.getRemaining().size() + " " + a.getState()));
         
         return null;
     }

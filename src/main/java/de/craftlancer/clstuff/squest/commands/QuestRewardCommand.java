@@ -24,37 +24,37 @@ public class QuestRewardCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if (!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§2You are not allowed to use this command.";
         
         if (args.length < 3)
-            return "Yor must specify a name of the quest, a reward type.";
+            return "§2Yor must specify a name of the quest, a reward type.";
         
         String name = args[1];
         String rewardType = args[2];
         Optional<Quest> quest = getQuests().getQuest(name);
         
         if (!quest.isPresent())
-            return "A quest with this name doesn't exist.";
+            return "§2A quest with this name doesn't exist.";
         
         switch (rewardType.toLowerCase()) {
             case "command":
                 if (args.length < 4)
-                    return "You must specify a command string to use.";
+                    return "§2You must specify a command string to use.";
                 
                 quest.get().setReward(new CommandReward(args[3]));
                 break;
             case "broadcast":
                 if (args.length < 4)
-                    return "You must specify a broadcast string to use.";
+                    return "§2You must specify a broadcast string to use.";
                 
                 quest.get().setReward(new BroadcastReward(args[3]));
                 break;
             default:
-                return "A reward type with this name doesn't exist.";
+                return "§2A reward type with this name doesn't exist.";
         }
         
         getQuests().save();
-        return "Reward set.";
+        return "§2Reward set.";
     }
     
     @Override

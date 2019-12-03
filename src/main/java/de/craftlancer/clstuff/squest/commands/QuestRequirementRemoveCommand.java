@@ -21,24 +21,24 @@ public class QuestRequirementRemoveCommand extends QuestCommand {
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if(!checkSender(sender))
-            return "You are not allowed to use this command.";
+            return "§2You are not allowed to use this command.";
 
         if(args.length < 4)
-            return "Yor must specify the name of the quest and an index.";
+            return "§2Yor must specify the name of the quest and an index.";
         
         String name = args[2];
         int index = Integer.parseInt(args[3]);
         Optional<Quest> quest = getQuests().getQuest(name);
         
         if(!quest.isPresent())
-            return "A quest with this name doesn't exist.";
+            return "§2A quest with this name doesn't exist.";
         
         if(quest.get().removeItem(index)) {
             getQuests().save();
-            return "Item successfully removed.";
+            return "§2Item successfully removed.";
         }
         else
-            return "Couldn't remove item.";
+            return "§2Couldn't remove item.";
     }
     
     @Override
