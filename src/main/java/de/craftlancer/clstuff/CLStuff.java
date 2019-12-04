@@ -5,16 +5,21 @@ import java.time.format.DateTimeFormatter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.squest.ServerQuests;
+import net.md_5.bungee.api.ChatColor;
 
 public class CLStuff extends JavaPlugin implements Listener {
     
@@ -74,5 +79,17 @@ public class CLStuff extends JavaPlugin implements Listener {
     public void lecternFix(BlockPlaceEvent event) {
         if (event.getBlock().getType() == Material.LECTERN && event.getItemInHand().getType() == Material.WRITTEN_BOOK)
             event.setCancelled(false);
+    }
+    
+    @EventHandler
+    public void onElytraCraft(CraftItemEvent event) {
+        ItemStack result = event.getRecipe().getResult();
+        Player player = (Player) event.getWhoClicked();
+        
+        if(result.getType() == Material.ELYTRA) {
+            event.setResult(Result.DENY);
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1F, 1F);
+            player.sendMessage(ChatColor.RED + "You cannot use elytras in crafting tables!");
+        }
     }
 }
