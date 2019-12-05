@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.Statistic;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -19,6 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.squest.ServerQuests;
+import de.craftlancer.core.LambdaRunnable;
 import net.md_5.bungee.api.ChatColor;
 
 public class CLStuff extends JavaPlugin implements Listener {
@@ -69,6 +71,11 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
+        new LambdaRunnable(
+                () -> Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))).runTaskTimer(this,
+                                                                                                                                                       36000L,
+                                                                                                                                                       36000L);
+        
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
         
@@ -86,7 +93,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         ItemStack result = event.getRecipe().getResult();
         Player player = (Player) event.getWhoClicked();
         
-        if(result.getType() == Material.ELYTRA) {
+        if (result.getType() == Material.ELYTRA) {
             event.setResult(Result.DENY);
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1F, 1F);
             player.sendMessage(ChatColor.RED + "You cannot use elytras in crafting tables!");
