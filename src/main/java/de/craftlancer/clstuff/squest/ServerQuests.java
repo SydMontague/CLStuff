@@ -17,6 +17,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -111,7 +112,9 @@ public class ServerQuests implements Listener {
     }
     
     public boolean removeQuest(String name) {
+        quests.stream().filter(a -> a.getName().equalsIgnoreCase(name)).forEach(HandlerList::unregisterAll);
         boolean result = quests.removeIf(a -> a.getName().equalsIgnoreCase(name));
+        
         save();
         return result;
     }
