@@ -15,6 +15,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -98,5 +99,24 @@ public class CLStuff extends JavaPlugin implements Listener {
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1F, 1F);
             player.sendMessage(ChatColor.RED + "You cannot use elytras in crafting tables!");
         }
+    }
+    
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onChestPlace(BlockPlaceEvent event) {
+        if(event.getBlock().getType() != Material.CHEST)
+            return;
+        
+        Player p = event.getPlayer();
+        if(p.getStatistic(Statistic.USE_ITEM, Material.CHEST) != 0)
+            return;
+        
+        event.getPlayer().performCommand("sethome");
+        p.sendMessage(ChatColor.GOLD + "This happened because you placed down your first chest.");
+        p.sendMessage(ChatColor.GOLD + "You can change your spawnpoint at any time using /sethome.");
+    }
+    
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onRespawn(PlayerRespawnEvent event) {
+        event.getPlayer().setPortalCooldown(600);
     }
 }
