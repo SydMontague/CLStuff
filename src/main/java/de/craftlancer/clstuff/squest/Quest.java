@@ -18,6 +18,16 @@ import org.bukkit.inventory.ItemStack;
 
 import de.craftlancer.clstuff.CLStuff;
 
+// TODO allow multiple rewards
+// TODO broadcast when someone donates anything
+// TODO reward type: item, potion effect, title?? (-> extensible for more)
+// TODO log contribution
+// TODO reward output type: everyone                    | item, potion
+// TODO reward output type: X most donated              | item, potion
+// TODO reward output type: donations above X%          | item, potion
+// TODO reward output type: X% based on contribution    | item
+// TODO reward output type: everyone who donated        | item, potion
+
 public class Quest implements Listener {
     private final UUID uuid;
     private final String name;
