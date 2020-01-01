@@ -23,6 +23,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import de.craftlancer.clstuff.CLStuff;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.util.DiscordUtil;
 
 // TODO allow multiple rewards
 // TODO reward type: item, potion effect, title?? (-> extensible for more)
@@ -36,7 +38,6 @@ import de.craftlancer.clstuff.CLStuff;
 // squest reward add
 // squest reward list
 // squest reward remove
-
 
 // /squest reward add <quest> <type> <distribution key> <extra data>
 // <extra data>:
@@ -64,7 +65,7 @@ public class Quest implements Listener {
     private List<QuestRequirement> requirements = new ArrayList<>();
     private List<QuestReward> rewards = new ArrayList<>();
     
-    //private QuestReward reward = new EmptyReward();
+    // private QuestReward reward = new EmptyReward();
     private Set<UUID> rewardPlayers = new HashSet<>();
     
     public Quest(CLStuff plugin, String name, Location chestLocation) {
@@ -120,10 +121,15 @@ public class Quest implements Listener {
             return;
         
         ItemStack item = event.getItem();
-
-        if(requirements.stream().anyMatch(a -> a.isRequiredItem(item))) {
-            Bukkit.broadcastMessage(ChatColor.GRAY + p.getDisplayName() + " delivered " + ChatColor.WHITE + item.getAmount() + " " + item.getType().name() + " to "
-                    + ChatColor.GREEN + getName());
+        
+        if (requirements.stream().anyMatch(a -> a.isRequiredItem(item))) {
+            Bukkit.broadcastMessage(ChatColor.GRAY + p.getDisplayName() + " delivered " + ChatColor.WHITE + item.getAmount() + " " + item.getType().name()
+                    + " to " + ChatColor.GREEN + getName());
+            
+            if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null)
+                DiscordUtil.queueMessage(DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("event"),
+                                         p.getDisplayName() + " delivered " + item.getAmount() + " " + item.getType().name() + " to " + getName());
+            
             requirements.stream().filter(a -> a.isRequiredItem(item)).forEach(a -> a.contribute(p, item));
         }
         
@@ -158,8 +164,7 @@ public class Quest implements Listener {
             return;
         
         // if all requirements are met or enough points are collected if applicable
-        if (!(requirements.stream().allMatch(QuestRequirement::isFinished) || (requiredPoints > 0
-                && requiredPoints <= getCurrentPoints())))
+        if (!(requirements.stream().allMatch(QuestRequirement::isFinished) || (requiredPoints > 0 && requiredPoints <= getCurrentPoints())))
             return;
         
         rewards.forEach(a -> a.questCompleted(this));
@@ -215,11 +220,11 @@ public class Quest implements Listener {
     public void setRequiredPoints(int requiredPoints) {
         this.requiredPoints = requiredPoints;
     }
-
+    
     public void addReward(QuestReward reward) {
         rewards.add(reward);
     }
-
+    
     public boolean removeReward(int index) {
         if (index >= rewards.size())
             return false;
@@ -227,11 +232,11 @@ public class Quest implements Listener {
         rewards.remove(index);
         return true;
     }
-
+    
     public List<QuestReward> getRewards() {
         return Collections.unmodifiableList(rewards);
     }
-
+    
     public int getCurrentPoints() {
         return requirements.stream().collect(Collectors.summingInt(a -> a.getWeight() * a.getCurrentAmount()));
     }
