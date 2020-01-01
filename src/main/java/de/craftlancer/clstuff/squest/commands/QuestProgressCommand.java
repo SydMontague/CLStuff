@@ -37,16 +37,22 @@ public class QuestProgressCommand extends QuestCommand {
         Quest quest = getQuests().getQuest(name).get();
         
         sender.sendMessage("§2Name: " + quest.getName());
-        sender.sendMessage("§2Item - Remaining");
-        quest.getRemaining().forEach(a -> {
-            BaseComponent item = new TextComponent(a.getType().name());
+        sender.sendMessage("§2Points: " + quest.getCurrentPoints() + " / " + quest.getRequiredPoints());
+        sender.sendMessage("§2Item - Remaining - Weight");
+        quest.getRequirements().forEach(a -> {
+            BaseComponent item = new TextComponent(a.getItem().getType().name());
             item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
-                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a).save(new NBTTagCompound()).toString()) }));
+                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
             
             BaseComponent comp = new TextComponent("§2");
             comp.addExtra(item);
             comp.addExtra(" §r");
-            comp.addExtra(Integer.toString(a.getAmount()));
+            comp.addExtra(Integer.toString(a.getCurrentAmount()));
+            comp.addExtra(" / ");
+            comp.addExtra(Integer.toString(a.getTargetAmount()));
+            comp.addExtra(" - ");
+            comp.addExtra(Integer.toString(a.getWeight()));
+            
             sender.spigot().sendMessage(comp);
         });
         

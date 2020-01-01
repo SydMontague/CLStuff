@@ -2,40 +2,70 @@ package de.craftlancer.clstuff.squest;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import de.craftlancer.clstuff.CLStuff;
 
 // TODO allow multiple rewards
-// TODO broadcast when someone donates anything
 // TODO reward type: item, potion effect, title?? (-> extensible for more)
-// TODO log contribution
-// TODO reward output type: everyone                    | item, potion
-// TODO reward output type: X most donated              | item, potion
-// TODO reward output type: donations above X%          | item, potion
+// TODO reward output type: everyone online             | item, potion, command
+// TODO reward output type: X most donated              | item, potion, command
+// TODO reward output type: donations above X%          | item, potion, command
 // TODO reward output type: X% based on contribution    | item
-// TODO reward output type: everyone who donated        | item, potion
+// TODO reward output type: everyone who donated        | item, potion, command
+// TODO output rewards on login -> store remaining rewards
+
+// squest reward add
+// squest reward list
+// squest reward remove
+
+
+// /squest reward add <quest> <type> <distribution key> <extra data>
+// <extra data>:
+// item -> <amount>
+// command -> <commandString>
+// potion -> <type> <level> <time>
+// broadcast -> <message> <discord>
+
+// <distribution key>
+// EVERYONE -> everyone
+// MOST_DONATED -> most:X (rank)
+// DONATION_ABOVE -> above:X (%)
+// DONATION_SHARE -> share
+// EVERY_DONATOR -> alldonated
 
 public class Quest implements Listener {
     private final UUID uuid;
     private final String name;
     private final Location chestLocation;
-    private List<ItemStack> remaining = new ArrayList<>();
+    
     private String description = "";
-    private QuestReward reward = new EmptyReward();
     private QuestState state = QuestState.INACTIVE;
+    private int requiredPoints = -1;
+    
+    private List<QuestRequirement> requirements = new ArrayList<>();
+    private List<QuestReward> rewards = new ArrayList<>();
+    
+    //private QuestReward reward = new EmptyReward();
+    private Set<UUID> rewardPlayers = new HashSet<>();
     
     public Quest(CLStuff plugin, String name, Location chestLocation) {
         this.uuid = UUID.randomUUID();
@@ -51,10 +81,12 @@ public class Quest implements Listener {
         this.name = config.getString("name");
         this.chestLocation = config.getLocation("chestLocation");
         
-        this.remaining = (List<ItemStack>) config.getList("items", new ArrayList<>());
+        this.requirements = (List<QuestRequirement>) config.getList("requirements", new ArrayList<>());
+        
         this.description = config.getString("description");
         this.state = QuestState.valueOf(config.getString("state", QuestState.INACTIVE.name()));
-        this.reward = (QuestReward) config.get("reward");
+        this.rewards = (List<QuestReward>) config.getList("rewards");
+        this.rewardPlayers = config.getStringList("unrewardedPlayers").stream().map(UUID::fromString).collect(Collectors.toSet());
         
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
@@ -65,10 +97,12 @@ public class Quest implements Listener {
         configSection.set("name", name);
         configSection.set("chestLocation", chestLocation);
         
-        configSection.set("items", remaining);
+        configSection.set("requirements", requirements);
+        configSection.set("unrewardedPlayers", new ArrayList<>(rewardPlayers));
+        
         configSection.set("description", description);
         configSection.set("state", state.name());
-        configSection.set("reward", reward);
+        configSection.set("rewards", rewards);
     }
     
     @EventHandler
@@ -86,39 +120,55 @@ public class Quest implements Listener {
             return;
         
         ItemStack item = event.getItem();
-        
-        remaining.stream().filter(a -> a.isSimilar(item) && a.getAmount() != 0).forEach(a -> {
-            int givenAmount = item.getAmount();
-            int remainAmount = a.getAmount();
-            
-            a.setAmount(Math.max(remainAmount - givenAmount, 0));
-            item.setAmount(Math.max(givenAmount - remainAmount, 0));
-        });
+
+        if(requirements.stream().anyMatch(a -> a.isRequiredItem(item))) {
+            Bukkit.broadcastMessage(ChatColor.GRAY + p.getDisplayName() + " delivered " + ChatColor.WHITE + item.getAmount() + " " + item.getType().name() + " to "
+                    + ChatColor.GREEN + getName());
+            requirements.stream().filter(a -> a.isRequiredItem(item)).forEach(a -> a.contribute(p, item));
+        }
         
         checkFinished();
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        if(event.getBlock().getLocation().equals(chestLocation))
+        if (event.getBlock().getLocation().equals(chestLocation))
             event.setCancelled(true);
     }
     
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player p = event.getPlayer();
+        if (!rewardPlayers.contains(p.getUniqueId()))
+            return;
+        
+        rewards.forEach(a -> a.rewardPlayer(this, p));
+        rewardPlayers.remove(p.getUniqueId());
+    }
+    
     public void startQuest() {
-        if(state != QuestState.INACTIVE)
+        if (state != QuestState.INACTIVE)
             return;
         
         state = QuestState.ACTIVE;
     }
     
     public void checkFinished() {
-        if(state != QuestState.ACTIVE)
-            return;
-
-        if(!remaining.stream().allMatch(a -> a.getAmount() == 0))
+        if (state != QuestState.ACTIVE)
             return;
         
-        reward.questCompleted();
+        // if all requirements are met or enough points are collected if applicable
+        if (!(requirements.stream().allMatch(QuestRequirement::isFinished) || (requiredPoints > 0
+                && requiredPoints <= getCurrentPoints())))
+            return;
+        
+        rewards.forEach(a -> a.questCompleted(this));
+        rewardPlayers = requirements.stream().map(a -> a.getContribution().keySet()).flatMap(Set::stream).collect(Collectors.toCollection(HashSet::new));
+        
+        Bukkit.getOnlinePlayers().stream().filter(a -> rewardPlayers.contains(a.getUniqueId())).forEach(p -> {
+            rewards.forEach(a -> a.rewardPlayer(this, p));
+            rewardPlayers.remove(p.getUniqueId());
+        });
         state = QuestState.COMPLETED;
     }
     
@@ -138,31 +188,52 @@ public class Quest implements Listener {
         return state;
     }
     
-    public QuestReward getReward() {
-        return reward;
+    public List<QuestRequirement> getRequirements() {
+        return Collections.unmodifiableList(requirements);
     }
     
-    public void setReward(QuestReward reward) {
-        this.reward = reward;
-    }
-    
-    public List<ItemStack> getRemaining() {
-        return Collections.unmodifiableList(remaining);
-    }
-    
-    public boolean addItem(ItemStack item) {
-        return remaining.add(item);
+    public boolean addItem(ItemStack item, int weight) {
+        return requirements.add(new QuestRequirement(item, weight));
     }
     
     public boolean removeItem(int index) {
-        if(index >= remaining.size())
+        if (index >= requirements.size())
             return false;
         
-        remaining.remove(index);
+        requirements.remove(index);
         return true;
     }
     
     public String getName() {
         return name;
     }
+    
+    public int getRequiredPoints() {
+        return requiredPoints;
+    }
+    
+    public void setRequiredPoints(int requiredPoints) {
+        this.requiredPoints = requiredPoints;
+    }
+
+    public void addReward(QuestReward reward) {
+        rewards.add(reward);
+    }
+
+    public boolean removeReward(int index) {
+        if (index >= rewards.size())
+            return false;
+        
+        rewards.remove(index);
+        return true;
+    }
+
+    public List<QuestReward> getRewards() {
+        return Collections.unmodifiableList(rewards);
+    }
+
+    public int getCurrentPoints() {
+        return requirements.stream().collect(Collectors.summingInt(a -> a.getWeight() * a.getCurrentAmount()));
+    }
+    
 }

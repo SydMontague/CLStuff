@@ -83,6 +83,11 @@ public class CLStuff extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
     }
     
+    @Override
+    public void onDisable() {
+        serverQuests.save();
+    }
+    
     @EventHandler(priority = EventPriority.HIGHEST)
     public void lecternFix(BlockPlaceEvent event) {
         if (event.getBlock().getType() == Material.LECTERN && event.getItemInHand().getType() == Material.WRITTEN_BOOK)

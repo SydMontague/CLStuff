@@ -18,7 +18,7 @@ public class QuestListCommand extends QuestCommand {
             return "§2You are not allowed to use this command.";
         
         sender.sendMessage("§2Name - #Items");
-        getQuests().getQuests().forEach(a -> sender.sendMessage("§2" + a.getName() + " " + a.getRemaining().size() + " " + a.getState()));
+        getQuests().getQuests().forEach(a -> sender.sendMessage("§2" + a.getName() + " " + a.getRequirements().size() + " " + a.getState()));
         
         return null;
     }

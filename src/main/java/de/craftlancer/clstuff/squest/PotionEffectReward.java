@@ -9,35 +9,40 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.HoverEvent.Action;
 
-public class CommandReward implements QuestReward {
-    private String command = "";
-    
-    // TODO put in super class
+public class PotionEffectReward implements QuestReward {
+    private PotionEffectType type;
+    private int level;
+    private int duration;
     private RewardDistributionType distribution;
     private int distrX = 0;
     
-    public CommandReward(String command, RewardDistributionType distribution, int distrX) {
-        this.command = command;
+    public PotionEffectReward(PotionEffectType type, int level, int duration, RewardDistributionType distribution, int distrX) {
+        this.type = type;
+        this.level = level;
+        this.duration = duration;
         this.distribution = distribution;
         this.distrX = distrX;
     }
     
-    public CommandReward(Map<String, Object> map) {
-        this.command = map.getOrDefault("command", "").toString();
-        this.distribution = RewardDistributionType.valueOf(map.get("distribution").toString());
-        this.distrX = (int) map.getOrDefault("distrX", 0);
+    public PotionEffectReward(Map<String, Object> map) {
+        type = PotionEffectType.getByName(map.get("type").toString());
+        level = (int) map.getOrDefault("level", 0);
+        duration = (int) map.getOrDefault("duration", 0);
+        distribution = RewardDistributionType.valueOf(map.get("distribution").toString());
+        distrX = (int) map.getOrDefault("distrX", 0);
     }
     
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("command", command);
+        map.put("type", type.getName());
+        map.put("level", level);
+        map.put("duration", duration);
         map.put("distribution", distribution.name());
         map.put("distrX", distrX);
         return map;
@@ -46,9 +51,9 @@ public class CommandReward implements QuestReward {
     @Override
     public void questCompleted(Quest quest) {
         if (distribution == RewardDistributionType.EVERYONE_ONLINE)
-            Bukkit.getOnlinePlayers().forEach(a -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format(command, a.getName())));
+            Bukkit.getOnlinePlayers().forEach(a -> a.addPotionEffect(type.createEffect(duration, level), true));
     }
-
+    
     @Override
     public void rewardPlayer(Quest quest, Player p) {
         int totalPoints = quest.getRequirements().stream().map(a -> a.getTargetAmount() * a.getWeight()).collect(Collectors.summingInt(Integer::intValue));
@@ -58,12 +63,12 @@ public class CommandReward implements QuestReward {
         switch (distribution) {
             case DONATED_ABOVE:
                 if (totalPoints * distrX / 100 < playerPoints)
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format(command, p.getName()));
+                    p.addPotionEffect(type.createEffect(duration, level), true);
                 break;
             case DONATION_SHARE:
             case EVERY_DONATOR:
                 if (playerPoints != 0)
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format(command, p.getName()));
+                    p.addPotionEffect(type.createEffect(duration, level), true);
                 break;
             case MOST_DONATED:
                 Map<UUID, Integer> ranking = new HashMap<>();
@@ -74,7 +79,7 @@ public class CommandReward implements QuestReward {
                                             .anyMatch(a -> a.getKey().equals(p.getUniqueId()));
                 
                 if(isEligable) 
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.format(command, p.getName()));
+                    p.addPotionEffect(type.createEffect(duration, level), true);
                 break;
             default:
                 break;
@@ -83,13 +88,16 @@ public class CommandReward implements QuestReward {
     
     @Override
     public String getType() {
-        return "command";
+        return "potion";
     }
 
     @Override
     public BaseComponent getComponent() {
-        BaseComponent base = new TextComponent("[Text]");
-        base.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new BaseComponent[] { new TextComponent(command) }));
+        BaseComponent base = new TextComponent(type.getName());
+        base.addExtra(" ");
+        base.addExtra(Integer.toString(level));
+        base.addExtra(" ");
+        base.addExtra(Integer.toString(duration));
         return base;
     }
 }

@@ -9,52 +9,34 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-import de.craftlancer.clstuff.squest.BroadcastReward;
-import de.craftlancer.clstuff.squest.CommandReward;
 import de.craftlancer.clstuff.squest.Quest;
 import de.craftlancer.clstuff.squest.ServerQuests;
-import de.craftlancer.core.Utils;
 
-public class QuestRewardCommand extends QuestCommand {
+public class QuestRequiredPointsCommand extends QuestCommand {
     
-    public QuestRewardCommand(Plugin plugin, ServerQuests quests) {
-        super("clstuff.squest.description", plugin, true, quests);
+    public QuestRequiredPointsCommand(Plugin plugin, ServerQuests quests) {
+        super("clstuff.squest.reward", plugin, true, quests);
     }
     
     @Override
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if (!checkSender(sender))
-            return "§2You are not allowed to use this command.";
+            return "§eYou are not allowed to use this command.";
         
         if (args.length < 3)
-            return "§2Yor must specify a name of the quest, a reward type.";
+            return "§eYor must specify a name of the quest and a description.";
         
         String name = args[1];
-        String rewardType = args[2];
+        
+        int requiredPoints = Integer.parseInt(args[2]);
         Optional<Quest> quest = getQuests().getQuest(name);
         
         if (!quest.isPresent())
-            return "§2A quest with this name doesn't exist.";
+            return "§eA quest with this name doesn't exist.";
         
-        switch (rewardType.toLowerCase()) {
-            case "command":
-                if (args.length < 4)
-                    return "§2You must specify a command string to use.";
-                
-                quest.get().setReward(new CommandReward(args[3]));
-                break;
-            case "broadcast":
-                if (args.length < 4)
-                    return "§2You must specify a broadcast string to use.";
-                
-                quest.get().setReward(new BroadcastReward(args[3]));
-                break;
-            default:
-                return "§2A reward type with this name doesn't exist.";
-        }
-        
+        quest.get().setRequiredPoints(requiredPoints);
         getQuests().save();
-        return "§2Reward set.";
+        return "§eRequired points for Quest set.";
     }
     
     @Override
@@ -70,8 +52,6 @@ public class QuestRewardCommand extends QuestCommand {
         if (args.length == 2)
             return getQuests().getQuests().stream().map(Quest::getName).filter(a -> a.toLowerCase().startsWith(args[1].toLowerCase()))
                               .collect(Collectors.toList());
-        if (args.length == 3)
-            return Utils.getMatches(args[2], new String[] { "command", "broadcast" });
         
         return Collections.emptyList();
     }

@@ -53,7 +53,7 @@ public class QuestRequirementRemoveCommand extends QuestCommand {
         if (args.length == 2)
             return getQuests().getQuests().stream().map(Quest::getName).collect(Collectors.toList());
         if (args.length == 3)
-            return getQuests().getQuests().stream().map(Quest::getName).filter(a -> a.toLowerCase().startsWith(args[1].toLowerCase()))
+            return getQuests().getQuests().stream().map(Quest::getName).filter(a -> a.toLowerCase().startsWith(args[2].toLowerCase()))
                               .collect(Collectors.toList());
         
         return Collections.emptyList();

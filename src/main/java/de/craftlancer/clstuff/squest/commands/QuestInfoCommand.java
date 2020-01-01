@@ -43,23 +43,28 @@ public class QuestInfoCommand extends QuestCommand {
         sender.sendMessage("§eName: §r" + quest.get().getName());
         sender.sendMessage("§eDescription: §r" + quest.get().getDescription());
         sender.sendMessage("§eState: §r" + quest.get().getState());
+        sender.sendMessage("§eRequired Points: §r" + quest.get().getRequiredPoints());
+        sender.sendMessage("§eCurrent Points: §r" + quest.get().getCurrentPoints());
         sender.sendMessage(String.format("§eLocation: §r%d,%d,%d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
         
-        sender.sendMessage("§eItem - Remaining");
-        quest.get().getRemaining().forEach(a -> {
-            BaseComponent item = new TextComponent(a.getType().name());
+        sender.sendMessage("§eItem - Progress");
+        quest.get().getRequirements().forEach(a -> {
+            BaseComponent item = new TextComponent(a.getItem().getType().name());
             item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
-                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a).save(new NBTTagCompound()).toString()) }));
+                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
             
             BaseComponent comp = new TextComponent("§e");
             comp.addExtra(item);
             comp.addExtra(" §r");
-            comp.addExtra(Integer.toString(a.getAmount()));
+            comp.addExtra(Integer.toString(a.getCurrentAmount()));
+            comp.addExtra(" / ");
+            comp.addExtra(Integer.toString(a.getTargetAmount()));
+            comp.addExtra(" - ");
+            comp.addExtra(Integer.toString(a.getWeight()));
             
             sender.spigot().sendMessage(comp);
         });
 
-        getQuests().save();
         return null;
     }
     

@@ -25,10 +25,11 @@ public class QuestCommandHandler extends CommandHandler {
         
         registerSubCommand("create", new QuestCreateCommand(plugin, quests));
         registerSubCommand("delete", new QuestDeleteCommand(plugin, quests));
-        registerSubCommand("reward", new QuestRewardCommand(plugin, quests));
+        registerSubCommand("reward", new QuestRewardCommandHandler(plugin, quests));
         registerSubCommand("start", new QuestStartCommand(plugin, quests));
         registerSubCommand("description", new QuestDescriptionCommand(plugin, quests));
         registerSubCommand("requirement", new QuestRequirementCommandHandler(plugin, quests));
+        registerSubCommand("requiredPoints", new QuestRequiredPointsCommand(plugin, quests));
         
         registerSubCommand("list", new QuestListCommand(plugin, quests));
         registerSubCommand("progress", new QuestProgressCommand(plugin, quests));

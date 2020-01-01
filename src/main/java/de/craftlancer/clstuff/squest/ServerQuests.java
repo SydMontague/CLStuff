@@ -44,6 +44,9 @@ public class ServerQuests implements Listener {
         ConfigurationSerialization.registerClass(EmptyReward.class);
         ConfigurationSerialization.registerClass(CommandReward.class);
         ConfigurationSerialization.registerClass(BroadcastReward.class);
+        ConfigurationSerialization.registerClass(QuestRequirement.class);
+        ConfigurationSerialization.registerClass(PotionEffectReward.class);
+        ConfigurationSerialization.registerClass(ItemReward.class);
     }
     
     private final CLStuff plugin;

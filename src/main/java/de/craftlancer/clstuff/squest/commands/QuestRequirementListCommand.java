@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import de.craftlancer.clstuff.squest.Quest;
+import de.craftlancer.clstuff.squest.QuestRequirement;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -41,10 +41,10 @@ public class QuestRequirementListCommand extends QuestCommand {
         
         sender.sendMessage("§2ID - Item - Amount - Action");
         int i = 0;
-        for (ItemStack a : quest.get().getRemaining()) {
-            BaseComponent item = new TextComponent(a.getType().name());
+        for (QuestRequirement a : quest.get().getRequirements()) {
+            BaseComponent item = new TextComponent(a.getItem().getType().name());
             item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
-                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a).save(new NBTTagCompound()).toString()) }));
+                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
             
             BaseComponent delete = new TextComponent("§2[Delete]");
             delete.setColor(ChatColor.RED);
@@ -54,7 +54,7 @@ public class QuestRequirementListCommand extends QuestCommand {
             comp.addExtra(" - ");
             comp.addExtra(item);
             comp.addExtra(" - ");
-            comp.addExtra(Integer.toString(a.getAmount()));
+            comp.addExtra(Integer.toString(a.getTargetAmount()));
             comp.addExtra(" | ");
             comp.addExtra(delete);
             
@@ -76,7 +76,7 @@ public class QuestRequirementListCommand extends QuestCommand {
         if (args.length == 2)
             return getQuests().getQuests().stream().map(Quest::getName).collect(Collectors.toList());
         if (args.length == 3)
-            return getQuests().getQuests().stream().map(Quest::getName).filter(a -> a.toLowerCase().startsWith(args[1].toLowerCase()))
+            return getQuests().getQuests().stream().map(Quest::getName).filter(a -> a.toLowerCase().startsWith(args[2].toLowerCase()))
                               .collect(Collectors.toList());
         
         return Collections.emptyList();

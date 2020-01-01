@@ -7,16 +7,14 @@ import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import de.craftlancer.clstuff.squest.Quest;
 import de.craftlancer.clstuff.squest.ServerQuests;
 
-public class QuestRequirementAddCommand extends QuestCommand {
+public class QuestRewardRemoveCommand extends QuestCommand {
     
-    public QuestRequirementAddCommand(Plugin plugin, ServerQuests quests) {
+    public QuestRewardRemoveCommand(Plugin plugin, ServerQuests quests) {
         super("", plugin, false, quests);
     }
 
@@ -26,25 +24,21 @@ public class QuestRequirementAddCommand extends QuestCommand {
             return "§2You are not allowed to use this command.";
 
         if(args.length < 4)
-            return "§2Yor must specify the name of the quest and an amount.";
+            return "§2Yor must specify the name of the quest and an index.";
         
-        Player player = (Player) sender;
         String name = args[2];
-        int amount = Integer.parseInt(args[3]);
-        int weight = args.length >= 5 ? Integer.parseInt(args[4]) : 1;
-        ItemStack item = player.getInventory().getItemInMainHand().clone();
+        int index = Integer.parseInt(args[3]);
         Optional<Quest> quest = getQuests().getQuest(name);
         
         if(!quest.isPresent())
             return "§2A quest with this name doesn't exist.";
-        if(item.getType().isAir())
-            return "§2You must hold an item in your main hand.";
         
-        item.setAmount(amount);
-        quest.get().addItem(item, weight);
-        getQuests().save();
-        
-        return "§2Requirement added";
+        if(quest.get().removeReward(index)) {
+            getQuests().save();
+            return "§2Reward successfully removed.";
+        }
+        else
+            return "§2Couldn't remove reward.";
     }
     
     @Override
@@ -52,6 +46,7 @@ public class QuestRequirementAddCommand extends QuestCommand {
         // TODO Auto-generated method stub
         
     }
+
     
     @Override
     protected List<String> onTabComplete(CommandSender sender, String[] args) {

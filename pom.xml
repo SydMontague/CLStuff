@@ -21,6 +21,11 @@
       <id>sk89q-repo</id>
       <url>http://maven.sk89q.com/repo/</url>
     </repository>
+    
+    <repository>
+      <id>Scarsz-Nexus</id>
+      <url>https://nexus.scarsz.me/content/groups/public/</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -56,6 +61,13 @@
           <artifactId>bukkit</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.discordsrv</groupId>
+      <artifactId>discordsrv</artifactId>
+      <version>1.18.4</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
