@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import github.scarsz.discordsrv.DiscordSRV;
@@ -39,7 +40,7 @@ public class BroadcastReward implements QuestReward {
     public void questCompleted(Quest quest) {
         Bukkit.broadcastMessage(message);
         if(discord)
-            DiscordUtil.queueMessage(DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("event"), message);
+            DiscordUtil.queueMessage(DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("event"), ChatColor.stripColor(message));
     }
 
     @Override
