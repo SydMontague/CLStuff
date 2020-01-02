@@ -26,15 +26,6 @@ import de.craftlancer.clstuff.CLStuff;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.util.DiscordUtil;
 
-// TODO allow multiple rewards
-// TODO reward type: item, potion effect, title?? (-> extensible for more)
-// TODO reward output type: everyone online             | item, potion, command
-// TODO reward output type: X most donated              | item, potion, command
-// TODO reward output type: donations above X%          | item, potion, command
-// TODO reward output type: X% based on contribution    | item
-// TODO reward output type: everyone who donated        | item, potion, command
-// TODO output rewards on login -> store remaining rewards
-
 // squest reward add
 // squest reward list
 // squest reward remove
@@ -65,7 +56,6 @@ public class Quest implements Listener {
     private List<QuestRequirement> requirements = new ArrayList<>();
     private List<QuestReward> rewards = new ArrayList<>();
     
-    // private QuestReward reward = new EmptyReward();
     private Set<UUID> rewardPlayers = new HashSet<>();
     
     public Quest(CLStuff plugin, String name, Location chestLocation) {

@@ -11,8 +11,8 @@ commands:
     description: Displays your total playtime.
   map:
     description: Displays the link to dynmap.
-  discord:
-    description: Displays the link to discord.
+  wiki:
+    description: Displays the link to the wiki.
   ping:
     description: Displays a player's ping.
   nodropflag:

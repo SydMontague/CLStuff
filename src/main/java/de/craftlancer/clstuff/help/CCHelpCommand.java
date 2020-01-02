@@ -12,7 +12,11 @@ public class CCHelpCommand extends SubCommand {
     private Consumer<CommandSender> function;
     
     public CCHelpCommand(Plugin plugin, Consumer<CommandSender> function) {
-        super("", plugin, true);
+        this("", plugin, function);
+    }
+
+    public CCHelpCommand(String string, Plugin plugin, Consumer<CommandSender> function) {
+        super(string, plugin, true);
         this.function = function;
     }
 
