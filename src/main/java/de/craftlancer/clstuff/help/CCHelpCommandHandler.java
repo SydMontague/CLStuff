@@ -33,7 +33,6 @@ public class CCHelpCommandHandler extends CommandHandler {
         registerSubCommand("aether", new CCHelpCommand(getPlugin(), this::shardHelp), "shards", "aethershard", "shard", "aethershards");
         registerSubCommand("stonecrusher", new CCHelpCommand(getPlugin(), this::stonecrusherHelp), "stone");
         registerSubCommand("clan", new CCHelpCommand(getPlugin(), this::clanHelp), "clans");
-        registerSubCommand("help", new CCHelpCommand(getPlugin(), this::help));
         registerSubCommand("reload", new CCHelpCommand("clstuff.cchelp.reload", getPlugin(), this::reloadWrapper));
         
         Configuration config = YamlConfiguration.loadConfiguration(new File(getPlugin().getDataFolder(), "cchelp.yml"));
@@ -50,16 +49,6 @@ public class CCHelpCommandHandler extends CommandHandler {
     private void reloadWrapper(CommandSender sender) {
         if (sender.hasPermission("clstuff.cchelp.reload"))
             reload();
-    }
-    
-    private void help(CommandSender sender) {
-        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW + "Need help? Visit our "
-                + ChatColor.DARK_GREEN + "/discord" + ChatColor.YELLOW + " or " + ChatColor.DARK_GREEN + "/wiki");
-        sender.sendMessage(ChatColor.YELLOW + "/cchelp clans");
-        sender.sendMessage(ChatColor.YELLOW + "/cchelp portal");
-        sender.sendMessage(ChatColor.YELLOW + "/cchelp capture");
-        sender.sendMessage(ChatColor.YELLOW + "/cchelp aether");
-        sender.sendMessage(ChatColor.YELLOW + "/cchelp stonecrusher");
     }
     
     private void stonecrusherHelp(CommandSender sender) {
