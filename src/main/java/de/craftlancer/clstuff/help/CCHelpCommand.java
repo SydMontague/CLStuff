@@ -28,6 +28,7 @@ public class CCHelpCommand extends SubCommand {
     
     @Override
     public void help(CommandSender arg0) {
+        // nothing to send
     }
     
 }

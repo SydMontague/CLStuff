@@ -40,7 +40,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         useDiscord = Bukkit.getPluginManager().getPlugin("DiscordSRV") != null;
         
         getCommand("wiki").setExecutor((a,b,c,d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.DARK_GREEN + "https://craftlancer.de/wiki/");
+            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN + "https://craftlancer.de/wiki/");
             return true;
         });
         getCommand("howtoplay").setExecutor((a, b, c, d) -> {
@@ -51,7 +51,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         });
         getCommand("stats").setExecutor(new StatsCommandExecutor());
         getCommand("map").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.DARK_GREEN + "https://craftlancer.de/map.html");
+            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN + "https://craftlancer.de/map.html");
             return true;
         });
         getCommand("ping").setExecutor((a, b, c, d) -> {

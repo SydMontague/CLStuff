@@ -53,8 +53,8 @@ public class CCHelpCommandHandler extends CommandHandler {
     }
     
     private void help(CommandSender sender) {
-        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW + "Need help? Visit our"
-                + ChatColor.DARK_GREEN + "/discord" + ChatColor.YELLOW + "or" + ChatColor.DARK_GREEN + "/wiki");
+        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW + "Need help? Visit our "
+                + ChatColor.DARK_GREEN + "/discord" + ChatColor.YELLOW + " or " + ChatColor.DARK_GREEN + "/wiki");
         sender.sendMessage(ChatColor.YELLOW + "/cchelp clans");
         sender.sendMessage(ChatColor.YELLOW + "/cchelp portal");
         sender.sendMessage(ChatColor.YELLOW + "/cchelp capture");
@@ -63,7 +63,7 @@ public class CCHelpCommandHandler extends CommandHandler {
     }
     
     private void stonecrusherHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
+        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
                 + "The Stone Crusher is a machine used to extract");
         sender.sendMessage(ChatColor.YELLOW + "small amounts of ore from stone and gravel. Just fill the top chest with stone, cobble or gravel.");
         sender.sendMessage(ChatColor.YELLOW + "Visit: " + ChatColor.DARK_GREEN + "https://craftlancer.de/wiki/index.php/Stone_Crusher" + ChatColor.YELLOW
@@ -71,7 +71,7 @@ public class CCHelpCommandHandler extends CommandHandler {
     }
     
     private void portalHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
+        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
                 + "Get your first portal by ranking up to hireling rank. ");
         sender.sendMessage(ChatColor.YELLOW + "Be careful where you place it, since it can't be moved later.");
         sender.sendMessage(ChatColor.YELLOW + "Make sure to have enough space for a frame to generate and place down your portal (lectern).");
@@ -83,7 +83,7 @@ public class CCHelpCommandHandler extends CommandHandler {
     }
     
     private void captureHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
+        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
                 + "Right click the sign of a Capture Point to start capturing it.");
         sender.sendMessage(ChatColor.YELLOW + "Once the timer is full you can loot the chest, after 5 minutes everyone can open the chest.");
         sender.sendMessage(ChatColor.YELLOW + "Dying in Alinor will only drop Aether shards, you'll keep all other items.");
@@ -92,7 +92,7 @@ public class CCHelpCommandHandler extends CommandHandler {
     }
     
     private void shardHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
+        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
                 + "Aether shards are gained by capturing points in Alinor.");
         sender.sendMessage(ChatColor.YELLOW + "They can be used to buy portals, custom heads and other valuable items.");
         sender.sendMessage(ChatColor.YELLOW + "Visit: " + ChatColor.DARK_GREEN + "https://craftlancer.de/wiki/index.php/Aether" + ChatColor.YELLOW
@@ -100,7 +100,7 @@ public class CCHelpCommandHandler extends CommandHandler {
     }
     
     private void clanHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
+        sender.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen]" + ChatColor.YELLOW
                 + "Clans are our factions or guilds, each Clan may pick a minecraft color to represent them.");
         sender.sendMessage(ChatColor.YELLOW + "Use: " + ChatColor.DARK_GREEN + "/clan create <name> <tag> <color>" + ChatColor.YELLOW + " to create a clan.");
         sender.sendMessage(ChatColor.YELLOW + "If you are not sure what colors you may use just leave it blank.");
