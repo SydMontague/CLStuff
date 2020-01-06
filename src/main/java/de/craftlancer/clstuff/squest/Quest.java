@@ -124,7 +124,7 @@ public class Quest implements Listener {
                         
                         if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null)
                             DiscordUtil.queueMessage(DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("event"),
-                                                     ChatColor.stripColor(p.getName()) + " delivered " + amount + " " + type.name() + " to " + getName());
+                                                     ChatColor.stripColor(p.getName()) + " delivered " + amount + " " + type.name() + " to **" + getName() + "**");
                     });
                     
                     itr.remove();
