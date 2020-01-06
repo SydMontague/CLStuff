@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 import de.craftlancer.clstuff.squest.Quest;
+import de.craftlancer.clstuff.squest.QuestState;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -36,7 +37,8 @@ public class QuestInfoCommand extends QuestCommand {
         
         if (!quest.isPresent())
             return "§eA quest with this name doesn't exist.";
-        
+        if (quest.get().getState() == QuestState.INACTIVE && !sender.hasPermission("clstuff.squest.admin"))
+            return "§eThis quest has not been started yet.";
         
         Location loc = quest.get().getChestLocation();
         
@@ -50,8 +52,8 @@ public class QuestInfoCommand extends QuestCommand {
         sender.sendMessage("§eItem - Progress");
         quest.get().getRequirements().forEach(a -> {
             BaseComponent item = new TextComponent(a.getItem().getType().name());
-            item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
-                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
+            item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] { new TextComponent(
+                    org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
             
             BaseComponent comp = new TextComponent("§e");
             comp.addExtra(item);
@@ -64,7 +66,7 @@ public class QuestInfoCommand extends QuestCommand {
             
             sender.spigot().sendMessage(comp);
         });
-
+        
         return null;
     }
     

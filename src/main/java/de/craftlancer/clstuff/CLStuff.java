@@ -90,6 +90,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         serverQuests.save();
+        Bukkit.getScheduler().cancelTasks(this);
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)

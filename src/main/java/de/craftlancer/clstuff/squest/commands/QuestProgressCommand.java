@@ -2,6 +2,7 @@ package de.craftlancer.clstuff.squest.commands;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
@@ -9,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 import de.craftlancer.clstuff.squest.Quest;
+import de.craftlancer.clstuff.squest.QuestState;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -30,19 +32,20 @@ public class QuestProgressCommand extends QuestCommand {
             return "§2Yor must specify a name of the quest.";
         
         String name = args[1];
+        Optional<Quest> quest = getQuests().getQuest(name);
         
-        if (!getQuests().hasQuest(name))
+        if (!quest.isPresent())
             return "§2A quest with this name doesn't exist.";
+        if (quest.get().getState() == QuestState.INACTIVE && !sender.hasPermission("clstuff.squest.admin"))
+            return "§eThis quest has not been started yet.";
         
-        Quest quest = getQuests().getQuest(name).get();
-        
-        sender.sendMessage("§2Name: " + quest.getName());
-        sender.sendMessage("§2Points: " + quest.getCurrentPoints() + " / " + quest.getRequiredPoints());
+        sender.sendMessage("§2Name: " + quest.get().getName());
+        sender.sendMessage("§2Points: " + quest.get().getCurrentPoints() + " / " + quest.get().getRequiredPoints());
         sender.sendMessage("§2Item - Remaining - Weight");
-        quest.getRequirements().forEach(a -> {
+        quest.get().getRequirements().forEach(a -> {
             BaseComponent item = new TextComponent(a.getItem().getType().name());
-            item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
-                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
+            item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] { new TextComponent(
+                    org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
             
             BaseComponent comp = new TextComponent("§2");
             comp.addExtra(item);

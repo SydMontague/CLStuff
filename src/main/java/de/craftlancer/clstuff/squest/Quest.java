@@ -2,8 +2,12 @@ package de.craftlancer.clstuff.squest;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -12,6 +16,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +29,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.LambdaRunnable;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.util.DiscordUtil;
 
@@ -42,9 +49,12 @@ import github.scarsz.discordsrv.util.DiscordUtil;
 // MOST_DONATED -> most:X (rank)
 // DONATION_ABOVE -> above:X (%)
 // DONATION_SHARE -> share
-// EVERY_DONATOR -> alldonated
+// EVERY_DONATOR -> all donated
 
 public class Quest implements Listener {
+    private static final int CONTRIB_TIMEOUT = 200; // 10s
+    
+    // persistent variables
     private final UUID uuid;
     private final String name;
     private final Location chestLocation;
@@ -58,16 +68,23 @@ public class Quest implements Listener {
     
     private Set<UUID> rewardPlayers = new HashSet<>();
     
+    // runtime variables
+    private CLStuff plugin;
+    private Map<UUID, Map<Material, Integer>> contribMap = new HashMap<>();
+    
     public Quest(CLStuff plugin, String name, Location chestLocation) {
+        this.plugin = plugin;
         this.uuid = UUID.randomUUID();
         this.name = name;
         this.chestLocation = chestLocation;
         
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        startBroadcastTask();
     }
     
     @SuppressWarnings("unchecked")
     public Quest(CLStuff plugin, ConfigurationSection config) {
+        this.plugin = plugin;
         this.uuid = UUID.fromString(config.getName());
         this.name = config.getString("name");
         this.chestLocation = config.getLocation("chestLocation");
@@ -80,6 +97,43 @@ public class Quest implements Listener {
         this.rewardPlayers = config.getStringList("unrewardedPlayers").stream().map(UUID::fromString).collect(Collectors.toSet());
         
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        startBroadcastTask();
+    }
+    
+    private void startBroadcastTask() {
+        new LambdaRunnable(() -> {
+            Iterator<Entry<UUID, Map<Material, Integer>>> itr = contribMap.entrySet().iterator();
+            
+            while (itr.hasNext()) {
+                Entry<UUID, Map<Material, Integer>> tmp = itr.next();
+                Map<Material, Integer> map = tmp.getValue();
+                
+                // this should not happen
+                if (!map.containsKey(Material.CAVE_AIR))
+                    throw new IllegalStateException("Contribution Map doesn't contain CAVE_AIR, but is required to as timing helper.");
+                
+                if (map.get(Material.CAVE_AIR) == 0) {
+                    OfflinePlayer p = Bukkit.getOfflinePlayer(tmp.getKey());
+                    
+                    map.forEach((type, amount) -> {
+                        if (type == Material.CAVE_AIR)
+                            return;
+                        
+                        Bukkit.broadcastMessage(ChatColor.GRAY + p.getName() + " delivered " + ChatColor.WHITE + amount + " " + type.name() + " to "
+                                + ChatColor.GREEN + getName());
+                        
+                        if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null)
+                            DiscordUtil.queueMessage(DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("event"),
+                                                     ChatColor.stripColor(p.getName()) + " delivered " + amount + " " + type.name() + " to " + getName());
+                    });
+                    
+                    itr.remove();
+                }
+                else
+                    map.merge(Material.CAVE_AIR, -1, (first, second) -> first + second);
+                
+            }
+        }).runTaskTimer(plugin, 1, 1);
     }
     
     public void save(ConfigurationSection config) {
@@ -113,12 +167,9 @@ public class Quest implements Listener {
         ItemStack item = event.getItem();
         
         if (requirements.stream().anyMatch(a -> a.isRequiredItem(item))) {
-            Bukkit.broadcastMessage(ChatColor.GRAY + p.getDisplayName() + " delivered " + ChatColor.WHITE + item.getAmount() + " " + item.getType().name()
-                    + " to " + ChatColor.GREEN + getName());
-            
-            if (Bukkit.getPluginManager().getPlugin("DiscordSRV") != null)
-                DiscordUtil.queueMessage(DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("event"),
-                                         ChatColor.stripColor(p.getDisplayName()) + " delivered " + item.getAmount() + " " + item.getType().name() + " to " + getName());
+            Map<Material, Integer> tmp = contribMap.computeIfAbsent(p.getUniqueId(), a -> new HashMap<>());
+            tmp.merge(item.getType(), item.getAmount(), (a, b) -> a + b);
+            tmp.put(Material.CAVE_AIR, CONTRIB_TIMEOUT);
             
             requirements.stream().filter(a -> a.isRequiredItem(item)).forEach(a -> a.contribute(p, item));
         }
