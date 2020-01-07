@@ -3,22 +3,24 @@ package de.craftlancer.clstuff.squest;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.util.DiscordUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
 import net.md_5.bungee.api.chat.TextComponent;
 
-public class BroadcastReward implements QuestReward {
+public class DiscordReward implements QuestReward {
     private String message = "";
     
-    public BroadcastReward(String command) {
+    public DiscordReward(String command) {
         this.message = command;
     }
     
-    public BroadcastReward(Map<String, Object> map) {
+    public DiscordReward(Map<String, Object> map) {
         this.message = (String) map.getOrDefault("message", "");
     }
     
@@ -31,7 +33,7 @@ public class BroadcastReward implements QuestReward {
     
     @Override
     public void questCompleted(Quest quest) {
-        Bukkit.broadcastMessage(message);
+        DiscordUtil.queueMessage(DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("event"), ChatColor.stripColor(message));
     }
 
     @Override
@@ -41,7 +43,7 @@ public class BroadcastReward implements QuestReward {
     
     @Override
     public String getType() {
-        return "broadcast";
+        return "discord";
     }
 
     @Override

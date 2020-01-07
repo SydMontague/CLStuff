@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import de.craftlancer.clstuff.squest.Quest;
@@ -42,7 +43,10 @@ public class QuestRequirementListCommand extends QuestCommand {
         sender.sendMessage("§2ID - Item - Amount - Action");
         int i = 0;
         for (QuestRequirement a : quest.get().getRequirements()) {
-            BaseComponent item = new TextComponent(a.getItem().getType().name());
+            ItemStack itemStack = a.getItem();
+            String itemName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
+            
+            BaseComponent item = new TextComponent(itemName);
             item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
                     new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
             

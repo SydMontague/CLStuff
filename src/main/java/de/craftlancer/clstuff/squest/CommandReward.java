@@ -67,7 +67,7 @@ public class CommandReward implements QuestReward {
                 break;
             case MOST_DONATED:
                 Map<UUID, Integer> ranking = new HashMap<>();
-                quest.getRequirements().forEach(a -> a.getContribution().forEach((b, c) -> ranking.merge(b, c, (d, e) -> d + e)));
+                quest.getRequirements().forEach(a -> a.getContribution().forEach((b, c) -> ranking.merge(b, c * a.getWeight(), (d, e) -> d + e)));
 
                 @SuppressWarnings("unchecked") 
                 boolean isEligable = ranking.entrySet().stream().sorted(Comparator.comparingInt(a -> ((Entry<UUID, Integer>) a).getValue()).reversed()).limit(distrX)

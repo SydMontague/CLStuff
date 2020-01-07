@@ -15,6 +15,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import de.craftlancer.clstuff.squest.BroadcastReward;
 import de.craftlancer.clstuff.squest.CommandReward;
+import de.craftlancer.clstuff.squest.DiscordReward;
 import de.craftlancer.clstuff.squest.ItemReward;
 import de.craftlancer.clstuff.squest.PotionEffectReward;
 import de.craftlancer.clstuff.squest.Quest;
@@ -66,9 +67,13 @@ public class QuestRewardAddCommand extends QuestCommand {
                     return "§2You must specify a broadcast string to use.";
                 
                 String message = ChatColor.translateAlternateColorCodes('&', args[5]);
-                boolean discord = args.length >= 7 ? Boolean.parseBoolean(args[6]) : false;
+                quest.get().addReward(new BroadcastReward(message));
+                break;
+            case "discord":
+                if (args.length < 6)
+                    return "§2You must specify a broadcast string to use.";
                 
-                quest.get().addReward(new BroadcastReward(message, discord));
+                quest.get().addReward(new DiscordReward(args[5]));
                 break;
             case "potion":
                 if(args.length < 8)
@@ -112,15 +117,11 @@ public class QuestRewardAddCommand extends QuestCommand {
             return getQuests().getQuests().stream().map(Quest::getName).filter(a -> a.toLowerCase().startsWith(args[2].toLowerCase()))
                               .collect(Collectors.toList());
         if (args.length == 4)
-            return Utils.getMatches(args[3], new String[] { "command", "broadcast", "item", "potion" });
+            return Utils.getMatches(args[3], new String[] { "command", "broadcast", "discord", "item", "potion" });
         if (args.length == 5)
             return Utils.getMatches(args[4], new String[] { "EVERYONE_ONLINE", "MOST_DONATED:", "DONATED_ABOVE:", "EVERY_DONATOR", "DONATION_SHARE" });
         
         switch(args[3]) {
-            case "broadcast":
-                if(args.length == 7)
-                    return Utils.getMatches(args[6], new String[] { "true", "false" });
-                break;
             case "potion":
                 if(args.length == 6) {
                     return Utils.getMatches(args[5], Arrays.stream(PotionEffectType.values()).map(a -> a.getName()).collect(Collectors.toList()));

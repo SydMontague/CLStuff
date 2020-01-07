@@ -191,6 +191,7 @@ public class Quest implements Listener {
         
         rewards.forEach(a -> a.rewardPlayer(this, p));
         rewardPlayers.remove(p.getUniqueId());
+        p.sendMessage("[§4Craft§fCitizen] " + ChatColor.YELLOW + "You got rewarded for your participation in the Server Quest " + getName() + "!");
     }
     
     public void startQuest() {

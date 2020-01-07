@@ -88,7 +88,7 @@ public class ItemReward implements QuestReward {
                 break;
             case MOST_DONATED:
                 Map<UUID, Integer> ranking = new HashMap<>();
-                quest.getRequirements().forEach(a -> a.getContribution().forEach((b, c) -> ranking.merge(b, c, (d, e) -> d + e)));
+                quest.getRequirements().forEach(a -> a.getContribution().forEach((b, c) -> ranking.merge(b, c * a.getWeight(), (d, e) -> d + e)));
 
                 @SuppressWarnings("unchecked") 
                 boolean isEligable = ranking.entrySet().stream().sorted(Comparator.comparingInt(a -> ((Entry<UUID, Integer>) a).getValue()).reversed()).limit(distrX)
@@ -111,7 +111,9 @@ public class ItemReward implements QuestReward {
     
     @Override
     public BaseComponent getComponent() {
-        BaseComponent base = new TextComponent(item.getType().name());
+        String itemName = item.hasItemMeta() && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : item.getType().name();
+        
+        BaseComponent base = new TextComponent(itemName);
         base.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
                 new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(item).save(new NBTTagCompound()).toString()) }));
 
