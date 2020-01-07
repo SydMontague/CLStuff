@@ -43,6 +43,7 @@ public class ServerQuests implements Listener {
     static {
         ConfigurationSerialization.registerClass(EmptyReward.class);
         ConfigurationSerialization.registerClass(CommandReward.class);
+        ConfigurationSerialization.registerClass(DiscordReward.class);
         ConfigurationSerialization.registerClass(BroadcastReward.class);
         ConfigurationSerialization.registerClass(QuestRequirement.class);
         ConfigurationSerialization.registerClass(PotionEffectReward.class);

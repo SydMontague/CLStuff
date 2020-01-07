@@ -143,7 +143,7 @@ public class Quest implements Listener {
         configSection.set("chestLocation", chestLocation);
         
         configSection.set("requirements", requirements);
-        configSection.set("unrewardedPlayers", new ArrayList<>(rewardPlayers));
+        configSection.set("unrewardedPlayers", rewardPlayers.stream().map(UUID::toString).collect(Collectors.toList()));
         
         configSection.set("description", description);
         configSection.set("state", state.name());
