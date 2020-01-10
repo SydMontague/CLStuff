@@ -172,7 +172,7 @@ public class WGNoDropFlag implements Listener, TabExecutor {
         
         if (state == State.ALLOW) {
             e.setKeepInventory(true);
-            e.getDrops().removeIf(a -> !excluded.stream().anyMatch(a::isSimilar));
+            e.getDrops().removeIf(a -> excluded.stream().noneMatch(a::isSimilar));
             e.getDrops().forEach(a -> player.getInventory().removeItem(a));
         }
     }
