@@ -2,6 +2,7 @@ name: CLStuff
 main: de.craftlancer.clstuff.CLStuff
 version: ${project.version}
 api-version: 1.14
+depend: [GriefPrevention]
 loadbefore: [WorldGuard]
 softdepend: [DiscordSRV]
 commands:
