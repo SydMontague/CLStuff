@@ -10,7 +10,6 @@ import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -25,6 +24,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.NMSUtils;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import net.md_5.bungee.api.ChatColor;
 
@@ -70,10 +70,12 @@ public class CLStuff extends JavaPlugin implements Listener {
             else if (a instanceof Player)
                 target = (Player) a;
             
+            
+            
             if (target == null)
                 a.sendMessage("No player found to check ping for.");
             else
-                a.sendMessage(target.getName() + "'s Ping: " + ((CraftPlayer) target).getHandle().ping + " ms");
+                a.sendMessage(target.getName() + "'s Ping: " + NMSUtils.getPing(target) + " ms");
             
             return true;
         });

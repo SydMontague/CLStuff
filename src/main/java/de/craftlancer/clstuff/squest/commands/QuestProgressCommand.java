@@ -7,16 +7,14 @@ import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import de.craftlancer.clstuff.squest.Quest;
 import de.craftlancer.clstuff.squest.QuestState;
 import de.craftlancer.clstuff.squest.ServerQuests;
+import de.craftlancer.core.Utils;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_14_R1.NBTTagCompound;
 
 public class QuestProgressCommand extends QuestCommand {
     
@@ -44,15 +42,8 @@ public class QuestProgressCommand extends QuestCommand {
         sender.sendMessage("§2Points: " + quest.get().getCurrentPoints() + " / " + quest.get().getRequiredPoints());
         sender.sendMessage("§2Item - Remaining - Weight");
         quest.get().getRequirements().forEach(a -> {
-            ItemStack itemStack = a.getItem();
-            String itemName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ? itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
-            
-            BaseComponent item = new TextComponent(itemName);
-            item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] { new TextComponent(
-                    org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a.getItem()).save(new NBTTagCompound()).toString()) }));
-            
             BaseComponent comp = new TextComponent("§2");
-            comp.addExtra(item);
+            comp.addExtra(Utils.getItemComponent(a.getItem()));
             comp.addExtra(" §r");
             comp.addExtra(Integer.toString(a.getCurrentAmount()));
             comp.addExtra(" / ");

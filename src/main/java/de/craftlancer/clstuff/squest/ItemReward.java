@@ -11,10 +11,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import de.craftlancer.core.Utils;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_14_R1.NBTTagCompound;
 
 public class ItemReward implements QuestReward {
     private ItemStack item;
@@ -111,12 +109,7 @@ public class ItemReward implements QuestReward {
     
     @Override
     public BaseComponent getComponent() {
-        String itemName = item.hasItemMeta() && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : item.getType().name();
-        
-        BaseComponent base = new TextComponent(itemName);
-        base.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
-                new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(item).save(new NBTTagCompound()).toString()) }));
-
+        BaseComponent base = Utils.getItemComponent(item);
         base.addExtra(" ");
         base.addExtra(Integer.toString(amount));
         return base;

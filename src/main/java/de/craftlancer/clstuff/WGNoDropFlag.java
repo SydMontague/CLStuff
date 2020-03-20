@@ -28,12 +28,11 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 
+import de.craftlancer.core.Utils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_14_R1.NBTTagCompound;
 
 public class WGNoDropFlag implements Listener, TabExecutor {
     private static final StateFlag NO_DROP_FLAG = new StateFlag("keep-inventory", false);
@@ -135,17 +134,13 @@ public class WGNoDropFlag implements Listener, TabExecutor {
         int i = 0;
         sender.sendMessage("Currently excluded items:");
         for (ItemStack a : excluded) {
-            BaseComponent item = new TextComponent(a.getType().name());
-            item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[] {
-                    new TextComponent(org.bukkit.craftbukkit.v1_14_R1.inventory.CraftItemStack.asNMSCopy(a).save(new NBTTagCompound()).toString()) }));
-            
             BaseComponent delete = new TextComponent("[Delete]");
             delete.setColor(ChatColor.RED);
             delete.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/nodropflag remove " + i));
             
             BaseComponent comp = new TextComponent(Integer.toString(i++));
             comp.addExtra(" - ");
-            comp.addExtra(item);
+            comp.addExtra(Utils.getItemComponent(a));
             comp.addExtra(" | ");
             comp.addExtra(delete);
             
