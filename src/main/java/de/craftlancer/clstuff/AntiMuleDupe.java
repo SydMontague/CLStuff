@@ -1,5 +1,7 @@
 package de.craftlancer.clstuff;
 
+import java.util.ArrayList;
+
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -15,6 +17,6 @@ public class AntiMuleDupe implements Listener {
         Entity vehicle = p.getVehicle();
 
         if(vehicle instanceof InventoryHolder)
-            ((InventoryHolder) vehicle).getInventory().getViewers().forEach(HumanEntity::closeInventory);
+            new ArrayList<HumanEntity>((((InventoryHolder) vehicle).getInventory().getViewers())).forEach(HumanEntity::closeInventory);
     }
 }
