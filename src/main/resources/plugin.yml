@@ -2,9 +2,9 @@ name: CLStuff
 main: de.craftlancer.clstuff.CLStuff
 version: ${project.version}
 api-version: 1.14
-depend: [GriefPrevention]
+depend: [CLCore]
+softdepend: [DiscordSRV, GriefPrevention]
 loadbefore: [WorldGuard]
-softdepend: [DiscordSRV]
 commands:
   howtoplay:
     description: Gives you a how to play book.
