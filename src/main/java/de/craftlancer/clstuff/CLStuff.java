@@ -70,8 +70,6 @@ public class CLStuff extends JavaPlugin implements Listener {
             else if (a instanceof Player)
                 target = (Player) a;
             
-            
-            
             if (target == null)
                 a.sendMessage("No player found to check ping for.");
             else
@@ -84,6 +82,8 @@ public class CLStuff extends JavaPlugin implements Listener {
             a.sendMessage(ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
             return true;
         });
+        
+        getCommand("wild").setExecutor(new WildCommand(getConfig().getInt("wild.minRadius", 1000), getConfig().getInt("wild.maxRadius", 5000)));
         
         new LambdaRunnable(
                 () -> Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))).runTaskTimer(this,

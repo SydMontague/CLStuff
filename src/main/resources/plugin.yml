@@ -24,6 +24,8 @@ commands:
     description: Server quests
   time:
     description: Shows server time
+  wild:
+    description: Teleports to a random location
 permissions:
   clstuff.nodrop.admin:
     default: op
