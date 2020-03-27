@@ -43,10 +43,44 @@ public class WildCommand implements CommandExecutor {
                 int locZ = (int) Math.sqrt((double) distance * distance - locX * locX) * (rng.nextBoolean() ? 1 : -1);
                 
                 loc = new Location(world, locX, world.getHighestBlockYAt(locX, locZ) + 1D, locZ);
-            } while (GriefPrevention.instance.dataStore.getClaimAt(loc, true, null) != null || !world.getHighestBlockAt(loc).getType().isSolid());
+            } while (!isValidLocation(loc));
             
             player.teleport(loc);
         }
+        return true;
+    }
+    
+    private boolean isValidLocation(Location loc) {
+        if (GriefPrevention.instance.dataStore.getClaimAt(loc, true, null) != null)
+            return false;
+        
+        if (!loc.getWorld().getHighestBlockAt(loc).getType().isSolid())
+            return false;
+        
+        switch (loc.getWorld().getBiome(loc.getBlockX(), loc.getBlockZ())) {
+            case DESERT:
+            case DESERT_HILLS:
+            case DESERT_LAKES:
+            case ICE_SPIKES:
+            case BADLANDS:
+            case COLD_OCEAN:
+            case DEEP_COLD_OCEAN:
+            case DEEP_FROZEN_OCEAN:
+            case DEEP_LUKEWARM_OCEAN:
+            case DEEP_OCEAN:
+            case DEEP_WARM_OCEAN:
+            case ERODED_BADLANDS:
+            case FROZEN_OCEAN:
+            case MUSHROOM_FIELD_SHORE:
+            case MUSHROOM_FIELDS:
+            case WARM_OCEAN:
+            case OCEAN:
+            case LUKEWARM_OCEAN:
+                return false;
+            default:
+                break;
+        }
+        
         return true;
     }
     

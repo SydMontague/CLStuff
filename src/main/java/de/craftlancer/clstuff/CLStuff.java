@@ -154,6 +154,14 @@ public class CLStuff extends JavaPlugin implements Listener {
         }
     }
     
+    @EventHandler
+    public void onPumpkinPlace(BlockPlaceEvent event) {
+        ItemStack item = event.getItemInHand();
+        
+        if(item.getType() == Material.CARVED_PUMPKIN && item.getItemMeta().hasCustomModelData())
+            event.setCancelled(true);
+    }
+    
     public boolean isUsingDiscord() {
         return useDiscord;
     }
