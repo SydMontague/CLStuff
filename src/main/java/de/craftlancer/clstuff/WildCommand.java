@@ -42,7 +42,7 @@ public class WildCommand implements CommandExecutor {
                 int locX = (int) (distance * rotation);
                 int locZ = (int) Math.sqrt((double) distance * distance - locX * locX) * (rng.nextBoolean() ? 1 : -1);
                 
-                loc = new Location(world, locX, world.getHighestBlockYAt(locX, locZ) + 1D, locZ);
+                loc = new Location(world, locX + 0.5D, world.getHighestBlockYAt(locX, locZ) + 1D, locZ + 0.5D);
             } while (!isValidLocation(loc));
             
             player.teleport(loc);
