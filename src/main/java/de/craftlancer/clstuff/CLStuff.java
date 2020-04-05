@@ -93,7 +93,8 @@ public class CLStuff extends JavaPlugin implements Listener {
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
         
-        Bukkit.getPluginManager().registerEvents(new AntiMuleDupe(), this);
+        Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
+        Bukkit.getPluginManager().registerEvents(new LagFixes(), this);
         Bukkit.getPluginManager().registerEvents(this, this);
     }
     
