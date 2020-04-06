@@ -59,7 +59,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         getCommand("stats").setExecutor(new StatsCommandExecutor());
         getCommand("map").setExecutor((a, b, c, d) -> {
             a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftlancer.de/map.html");
+                    + "https://craftlancer.de/livemap/");
             return true;
         });
         getCommand("ping").setExecutor((a, b, c, d) -> {
