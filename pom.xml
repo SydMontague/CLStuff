@@ -58,8 +58,14 @@
     <dependency>
       <groupId>com.SirBlobman.combatlogx</groupId>
       <artifactId>CombatLogX-API</artifactId>
+      
+      <version>RELEASE</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/depend/CombatLogX.jar</systemPath>
+      <!-- 
       <version>10.0.0.0-SNAPSHOT</version>
       <scope>provided</scope>
+      -->
     </dependency>
 
     <dependency>

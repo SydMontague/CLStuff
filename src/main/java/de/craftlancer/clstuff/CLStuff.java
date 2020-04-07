@@ -9,6 +9,9 @@ import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
@@ -141,7 +144,20 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     @EventHandler(priority = EventPriority.NORMAL)
     public void onRespawn(PlayerRespawnEvent event) {
-        event.getPlayer().setPortalCooldown(600);
+        Player player = event.getPlayer();
+        
+        player.setPortalCooldown(600);
+        
+        BossBar bar = Bukkit.createBossBar("Portal Cooldown", BarColor.PURPLE, BarStyle.SOLID);
+        
+        bar.addPlayer(event.getPlayer());
+        new LambdaRunnable(() -> {
+            bar.setProgress(player.getPortalCooldown() / 600D);
+            bar.setTitle(ChatColor.YELLOW + "Portal Cooldown " + ChatColor.GRAY + " - " + ChatColor.GOLD + " " + player.getPortalCooldown() / 20 + " "
+                    + ChatColor.YELLOW + "seconds");
+            if (player.getPortalCooldown() <= 0)
+                bar.removeAll();
+        }).runTaskTimer(this, 0, 20);
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)

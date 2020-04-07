@@ -46,7 +46,7 @@ public class CLAntiCheat implements Listener {
         Block block = player.getTargetBlockExact(8);
         InventoryHolder holder = inventory.getHolder();
         
-        if (block == null)
+        if (block == null || holder == null)
             return;
         
         double distBlock = block.getLocation().distanceSquared(player.getLocation());
