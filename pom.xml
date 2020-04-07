@@ -18,10 +18,14 @@
     </repository>
 
     <repository>
+      <id>codemc-repo</id>
+      <url>https://repo.codemc.io/repository/maven-public/</url>
+    </repository>
+    <repository>
       <id>sk89q-repo</id>
       <url>http://maven.sk89q.com/repo/</url>
     </repository>
-    
+
     <repository>
       <id>Scarsz-Nexus</id>
       <url>https://nexus.scarsz.me/content/groups/public/</url>
@@ -45,7 +49,18 @@
       <artifactId>clclans</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>de.craftlancer</groupId>
+      <artifactId>clfeatures</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
 
+    <dependency>
+      <groupId>com.SirBlobman.combatlogx</groupId>
+      <artifactId>CombatLogX-API</artifactId>
+      <version>10.0.0.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>com.github.TechFortress</groupId>
@@ -64,7 +79,7 @@
         </exclusion>
       </exclusions>
     </dependency>
-    
+
     <dependency>
       <groupId>com.discordsrv</groupId>
       <artifactId>discordsrv</artifactId>

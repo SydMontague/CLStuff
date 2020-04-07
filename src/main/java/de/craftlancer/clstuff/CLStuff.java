@@ -96,6 +96,9 @@ public class CLStuff extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
         Bukkit.getPluginManager().registerEvents(new LagFixes(), this);
         Bukkit.getPluginManager().registerEvents(this, this);
+        
+        if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
+            Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
     }
     
     @Override
@@ -159,7 +162,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     public void onPumpkinPlace(BlockPlaceEvent event) {
         ItemStack item = event.getItemInHand();
         
-        if(item.getType() == Material.CARVED_PUMPKIN && item.getItemMeta().hasCustomModelData())
+        if (item.getType() == Material.CARVED_PUMPKIN && item.getItemMeta().hasCustomModelData())
             event.setCancelled(true);
     }
     

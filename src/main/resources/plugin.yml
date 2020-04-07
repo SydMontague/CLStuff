@@ -3,7 +3,7 @@ main: de.craftlancer.clstuff.CLStuff
 version: ${project.version}
 api-version: 1.14
 depend: [CLCore]
-softdepend: [DiscordSRV]
+softdepend: [DiscordSRV, CombatLogX]
 loadbefore: [WorldGuard]
 commands:
   howtoplay:
