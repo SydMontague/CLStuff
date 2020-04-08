@@ -63,9 +63,11 @@ public class CLAntiCheat implements Listener {
             if (distBlock > distLeft + 1 || distBlock > distRight + 1)
                 return;
         }
-        else if (holder instanceof BlockInventoryHolder && ((BlockInventoryHolder) holder).getBlock().equals(block)
-                || distBlock > ((BlockInventoryHolder) holder).getBlock().getLocation().distanceSquared(player.getLocation()) + 1)
-            return;
+        else if (holder instanceof BlockInventoryHolder) {
+            BlockInventoryHolder bHolder = (BlockInventoryHolder) holder;
+            if (bHolder.getBlock().equals(block) || distBlock > bHolder.getBlock().getLocation().distanceSquared(player.getLocation()) + 1)
+                return;
+        }
         
         logger.info(() -> String.format("%s may have tried to block glitch at: %d %d %d | %s",
                                         player.getName(),
