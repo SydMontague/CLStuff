@@ -5,23 +5,55 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Tag;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
-public class WildCommand implements CommandExecutor {
+public class WildCommand implements CommandExecutor, Listener {
     
     private final Random rng = new Random();
     private final int minRadius;
     private final int maxRadius;
     
-    public WildCommand(int minRadius, int maxRadius) {
-        this.minRadius = minRadius;
-        this.maxRadius = maxRadius;
+    public WildCommand(CLStuff plugin) {
+        this.minRadius = plugin.getConfig().getInt("wild.minRadius", 1000);
+        this.maxRadius = plugin.getConfig().getInt("wild.maxRadius", 5000);
+        
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+    
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onInteract(PlayerInteractEvent event) {
+        if (!event.hasBlock())
+            return;
+        
+        Block block = event.getClickedBlock();
+        
+        if (!Tag.SIGNS.isTagged(block.getType()))
+            return;
+        
+        Sign sign = (Sign) block.getState();
+        
+        if (sign.getLine(1).equals("[Wild]"))
+            event.getPlayer().performCommand("wild");
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onSignEdit(SignChangeEvent event) {
+        if (event.getLine(1).equalsIgnoreCase("[Wild]") && !event.getPlayer().isOp())
+            event.setCancelled(true);
     }
     
     @Override

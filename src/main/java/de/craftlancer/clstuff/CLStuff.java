@@ -86,7 +86,7 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
-        getCommand("wild").setExecutor(new WildCommand(getConfig().getInt("wild.minRadius", 1000), getConfig().getInt("wild.maxRadius", 5000)));
+        getCommand("wild").setExecutor(new WildCommand(this));
         
         new LambdaRunnable(
                 () -> Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))).runTaskTimer(this,
