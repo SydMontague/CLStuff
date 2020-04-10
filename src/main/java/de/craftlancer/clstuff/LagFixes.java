@@ -31,6 +31,7 @@ public class LagFixes implements Listener {
             case EGG:
             case DISPENSE_EGG:
             case NATURAL:
+            case SPAWNER:
                 break;
             default:
                 return;
