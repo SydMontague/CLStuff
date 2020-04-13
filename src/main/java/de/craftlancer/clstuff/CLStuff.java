@@ -26,6 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.squest.ServerQuests;
+import de.craftlancer.core.CancelableRunnable;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.NMSUtils;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
@@ -151,12 +152,15 @@ public class CLStuff extends JavaPlugin implements Listener {
         BossBar bar = Bukkit.createBossBar("Portal Cooldown", BarColor.PURPLE, BarStyle.SOLID);
         
         bar.addPlayer(event.getPlayer());
-        new LambdaRunnable(() -> {
+        new CancelableRunnable(() -> {
             bar.setProgress(player.getPortalCooldown() / 600D);
             bar.setTitle(ChatColor.YELLOW + "Portal Cooldown " + ChatColor.GRAY + " - " + ChatColor.GOLD + " " + player.getPortalCooldown() / 20 + " "
                     + ChatColor.YELLOW + "seconds");
-            if (player.getPortalCooldown() <= 0)
+            if (player.getPortalCooldown() <= 0) {
                 bar.removeAll();
+                return true;
+            }
+            return false;
         }).runTaskTimer(this, 0, 20);
     }
     
