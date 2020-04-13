@@ -174,4 +174,7 @@ public class WGNoDropFlag implements Listener, TabExecutor {
         }
     }
     
+    public List<ItemStack> getExcluded() {
+        return Collections.unmodifiableList(excluded);
+    }
 }

@@ -189,4 +189,8 @@ public class CLStuff extends JavaPlugin implements Listener {
     public boolean isUsingDiscord() {
         return useDiscord;
     }
+    
+    public WGNoDropFlag getNoDropFlag() {
+        return flag;
+    }
 }
