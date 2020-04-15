@@ -89,16 +89,15 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("wild").setExecutor(new WildCommand(this));
         
-        new LambdaRunnable(
-                () -> Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))).runTaskTimer(this,
-                                                                                                                                                       36000L,
-                                                                                                                                                       36000L);
+        new LambdaRunnable(() ->
+            Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))
+        ).runTaskTimer(this, 36000L, 36000L);
         
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
         
         Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
-        Bukkit.getPluginManager().registerEvents(new LagFixes(), this);
+        Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
