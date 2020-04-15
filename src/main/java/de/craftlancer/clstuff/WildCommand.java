@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class WildCommand implements CommandExecutor, Listener {
+    private static final int CLAIM_DISTANCE = 100;
     
     private final Random rng = new Random();
     private final int minRadius;
@@ -83,7 +84,7 @@ public class WildCommand implements CommandExecutor, Listener {
     }
     
     private boolean isValidLocation(Location loc) {
-        if (GriefPrevention.instance.dataStore.getClaimAt(loc, true, null) != null)
+        if (GriefPrevention.instance.dataStore.getClaims().stream().anyMatch(a -> a.isNear(loc, CLAIM_DISTANCE)))
             return false;
         
         if (!loc.getWorld().getHighestBlockAt(loc).getType().isSolid())
