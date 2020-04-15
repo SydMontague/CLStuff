@@ -27,7 +27,9 @@ public class LagFixes implements Listener {
         
         new LambdaRunnable(() -> {
             Bukkit.getWorlds().stream()
-                  .flatMap(a -> a.getLivingEntities().stream()).filter(a -> a.hasMetadata(SPAWNER_MOB_META) && a.getTicksLived() > SPAWNER_MOB_TIMEOUT)
+                  .flatMap(a -> a.getLivingEntities().stream())
+                  .filter(a -> a.hasMetadata(SPAWNER_MOB_META) && a.getTicksLived() > SPAWNER_MOB_TIMEOUT)
+                  .filter(a -> a.getCustomName() == null)
                   .forEach(Entity::remove);
         }).runTaskTimer(plugin, SPAWNER_MOB_TIMEOUT, 100);
     }
