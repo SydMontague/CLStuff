@@ -2,6 +2,8 @@ package de.craftlancer.clstuff;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.EnumMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,6 +15,8 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -99,6 +103,32 @@ public class CLStuff extends JavaPlugin implements Listener {
             }
             return true;
         });
+        getCommand("countEntities").setExecutor((a,b,c,d) -> {
+            if(!a.isOp())
+                return true;
+            
+            Bukkit.getWorlds().forEach(w -> {
+                Map<EntityType, EntityEntry> entityMap = new EnumMap<>(EntityType.class);
+                int totalCount = 0;
+                int totalActiveCount = 0;
+                
+                for(Entity e : w.getEntities()) {
+                    boolean isActive = NMSUtils.isEntityActive(e);
+                    entityMap.putIfAbsent(e.getType(), new EntityEntry());
+                    entityMap.get(e.getType()).add(isActive);
+                    totalCount++;
+                    if(isActive)
+                        totalActiveCount++;
+                }
+                
+                a.sendMessage("Entities in World " + w.getName());
+                a.sendMessage(String.format("Total: %d/%d", totalActiveCount, totalCount));
+                entityMap.forEach((k,v) -> a.sendMessage(String.format("%s: %d/%d", k.name(), v.activeEntityCount, v.entityCount)));
+                a.sendMessage("=========");
+            });
+            
+            return true;
+        });
         
         new LambdaRunnable(() ->
             Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))
@@ -113,6 +143,15 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
+    }
+    
+    class EntityEntry {
+        int entityCount = 0;
+        int activeEntityCount = 0;
+        public void add(boolean isEntityActive) {
+            this.entityCount += 1;
+            this.activeEntityCount += isEntityActive ? 1 : 0;
+        }
     }
     
     @Override

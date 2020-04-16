@@ -28,6 +28,8 @@ commands:
     description: Teleports to a random location
   logIMIE:
     description: Debug command
+  countEntities:
+    description: Debug command
 permissions:
   clstuff.nodrop.admin:
     default: op
