@@ -61,6 +61,7 @@ public class LagFixes implements Listener {
             case DISPENSE_EGG:
             case NATURAL:
             case SPAWNER:
+            case NETHER_PORTAL:
                 break;
             default:
                 return;
@@ -72,7 +73,7 @@ public class LagFixes implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSpawnerSpawn(CreatureSpawnEvent event) {
-        if (event.getSpawnReason() == SpawnReason.SPAWNER)
+        if (event.getSpawnReason() == SpawnReason.SPAWNER || event.getSpawnReason() == SpawnReason.NETHER_PORTAL)
             event.getEntity().setMetadata(SPAWNER_MOB_META, new FixedMetadataValue(plugin, 0));
     }
 }
