@@ -20,6 +20,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -37,6 +38,8 @@ public class CLStuff extends JavaPlugin implements Listener {
     private WGNoDropFlag flag;
     private ServerQuests serverQuests;
     private boolean useDiscord = false;
+    
+    private boolean logMoveEvents = false;
     
     @Override
     public void onLoad() {
@@ -89,6 +92,14 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("wild").setExecutor(new WildCommand(this));
         
+        getCommand("logIMIE").setExecutor((a,b,c,d) -> {
+            if(a.isOp()) {
+                logMoveEvents = !logMoveEvents;
+                a.sendMessage("logMoveEvents is now " + logMoveEvents);
+            }
+            return true;
+        });
+        
         new LambdaRunnable(() ->
             Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))
         ).runTaskTimer(this, 36000L, 36000L);
@@ -108,6 +119,14 @@ public class CLStuff extends JavaPlugin implements Listener {
     public void onDisable() {
         serverQuests.save();
         Bukkit.getScheduler().cancelTasks(this);
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onItemMove(InventoryMoveItemEvent event) {
+        if(!logMoveEvents)
+            return;
+        
+        getLogger().info("IMIE: " + event.getInitiator().getLocation().toString());
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
