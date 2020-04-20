@@ -59,6 +59,11 @@ public class CLStuff extends JavaPlugin implements Listener {
                     + "https://craftlancer.de/wiki/");
             return true;
         });
+        getCommand("voteall").setExecutor((a, b, c, d) -> {
+            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
+                    + "https://craftlancer.de/votall.html");
+            return true;
+        });
         getCommand("howtoplay").setExecutor((a, b, c, d) -> {
             String commandLine = "minecraft:give " + a.getName()
                     + " written_book{pages:[\"[\\\"\\\",{\\\"text\\\":\\\" \\\\u0020 \\\\u0020 \\\\u263d\\\\u25ba\\\",\\\"color\\\":\\\"gold\\\"},{\\\"text\\\":\\\"Craft\\\",\\\"bold\\\":true,\\\"color\\\":\\\"dark_red\\\"},{\\\"text\\\":\\\"Citizen\\\",\\\"bold\\\":true,\\\"color\\\":\\\"gray\\\"},{\\\"text\\\":\\\"\\\\n\\\\nWelcome \\\",\\\"color\\\":\\\"reset\\\"},{\\\"text\\\":\\\"Peasant "
@@ -96,15 +101,15 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("wild").setExecutor(new WildCommand(this));
         
-        getCommand("logIMIE").setExecutor((a,b,c,d) -> {
-            if(a.isOp()) {
+        getCommand("logIMIE").setExecutor((a, b, c, d) -> {
+            if (a.isOp()) {
                 logMoveEvents = !logMoveEvents;
                 a.sendMessage("logMoveEvents is now " + logMoveEvents);
             }
             return true;
         });
-        getCommand("countEntities").setExecutor((a,b,c,d) -> {
-            if(!a.isOp())
+        getCommand("countEntities").setExecutor((a, b, c, d) -> {
+            if (!a.isOp())
                 return true;
             
             Bukkit.getWorlds().forEach(w -> {
@@ -112,27 +117,28 @@ public class CLStuff extends JavaPlugin implements Listener {
                 int totalCount = 0;
                 int totalActiveCount = 0;
                 
-                for(Entity e : w.getEntities()) {
+                for (Entity e : w.getEntities()) {
                     boolean isActive = NMSUtils.isEntityActive(e);
                     entityMap.putIfAbsent(e.getType(), new EntityEntry());
                     entityMap.get(e.getType()).add(isActive);
                     totalCount++;
-                    if(isActive)
+                    if (isActive)
                         totalActiveCount++;
                 }
                 
                 a.sendMessage("Entities in World " + w.getName());
                 a.sendMessage(String.format("Total: %d/%d", totalActiveCount, totalCount));
-                entityMap.forEach((k,v) -> a.sendMessage(String.format("%s: %d/%d", k.name(), v.activeEntityCount, v.entityCount)));
+                entityMap.forEach((k, v) -> a.sendMessage(String.format("%s: %d/%d", k.name(), v.activeEntityCount, v.entityCount)));
                 a.sendMessage("=========");
             });
             
             return true;
         });
         
-        new LambdaRunnable(() ->
-            Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))
-        ).runTaskTimer(this, 36000L, 36000L);
+        new LambdaRunnable(
+                () -> Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))).runTaskTimer(this,
+                                                                                                                                                       36000L,
+                                                                                                                                                       36000L);
         
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
@@ -148,6 +154,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     class EntityEntry {
         int entityCount = 0;
         int activeEntityCount = 0;
+        
         public void add(boolean isEntityActive) {
             this.entityCount += 1;
             this.activeEntityCount += isEntityActive ? 1 : 0;
@@ -162,7 +169,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onItemMove(InventoryMoveItemEvent event) {
-        if(!logMoveEvents)
+        if (!logMoveEvents)
             return;
         
         getLogger().info("IMIE: " + event.getInitiator().getLocation().toString());

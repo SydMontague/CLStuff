@@ -30,6 +30,8 @@ commands:
     description: Debug command
   countEntities:
     description: Debug command
+  voteall:
+    description: Opens all voting sites at once.
 permissions:
   clstuff.nodrop.admin:
     default: op
