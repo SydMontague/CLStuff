@@ -33,20 +33,26 @@ public class LagFixes implements Listener {
         
         new LambdaRunnable(() -> {
             spawnerEntities.removeIf(a -> {
+                if(!a.isValid())
+                    return true;
+                
                 if(a.getCustomName() == null && a.getTicksLived() > SPAWNER_MOB_TIMEOUT) {
                     a.remove();
                     return true;
                 }
                 
-                return a.isDead();
+                return false;
             });
             pillagerEntities.removeIf(a -> {
+                if(!a.isValid())
+                    return true;
+                
                 if(a.getCustomName() == null && a.getTicksLived() > PILLAGER_MOB_TIMEOUT) {
                     a.remove();
                     return true;
                 }
-                
-                return a.isDead();
+
+                return false;
             });
         }).runTaskTimer(plugin, SPAWNER_MOB_TIMEOUT, 100);
     }
