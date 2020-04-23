@@ -100,7 +100,7 @@ public class LagFixes implements Listener {
             event.getEntity().setMetadata(SPAWNER_MOB_META, new FixedMetadataValue(plugin, 0));
             spawnerEntities.add(event.getEntity());
         }
-        if (event.getSpawnReason() != SpawnReason.RAID || event.getEntityType() == EntityType.PILLAGER) {
+        if (event.getSpawnReason() == SpawnReason.RAID || event.getEntityType() == EntityType.PILLAGER) {
             event.getEntity().setMetadata(PILLAGER_MOB_META, new FixedMetadataValue(plugin, 0));
             pillagerEntities.add(event.getEntity());
         }

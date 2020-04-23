@@ -61,7 +61,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         });
         getCommand("voteall").setExecutor((a, b, c, d) -> {
             a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftlancer.de/votall.html");
+                    + "https://craftlancer.de/voteAll.html");
             return true;
         });
         getCommand("howtoplay").setExecutor((a, b, c, d) -> {
