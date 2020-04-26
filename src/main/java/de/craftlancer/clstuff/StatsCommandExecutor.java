@@ -1,6 +1,7 @@
 package de.craftlancer.clstuff;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,12 +12,14 @@ import de.craftlancer.core.Utils;
 
 public class StatsCommandExecutor implements CommandExecutor {
     
+    private CLStuff plugin;
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Player player = null;
+        OfflinePlayer player = null;
         
         if (args.length == 1)
-            player = Bukkit.getPlayer(args[0]);
+            player = Bukkit.getOfflinePlayer(args[0]);
         else if (sender instanceof Player)
             player = (Player) sender;
         
@@ -24,6 +27,7 @@ public class StatsCommandExecutor implements CommandExecutor {
             return false;
         
         sender.sendMessage("Playtime: " + Utils.ticksToTimeString(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
+        sender.sendMessage("Score: " + plugin.getRankings().getScore(player));
         return true;
     }
 }

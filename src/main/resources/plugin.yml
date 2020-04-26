@@ -32,6 +32,8 @@ commands:
     description: Debug command
   voteall:
     description: Opens all voting sites at once.
+  rankings:
+    description: Player rankings.
 permissions:
   clstuff.nodrop.admin:
     default: op

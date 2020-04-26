@@ -30,6 +30,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
+import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import de.craftlancer.core.CancelableRunnable;
 import de.craftlancer.core.LambdaRunnable;
@@ -41,6 +42,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     private WGNoDropFlag flag;
     private ServerQuests serverQuests;
+    private Rankings rankings;
     private boolean useDiscord = false;
     
     private boolean logMoveEvents = false;
@@ -135,6 +137,9 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
+        rankings = new Rankings(this);
+        getCommand("rankings").setExecutor(rankings);
+        
         new LambdaRunnable(
                 () -> Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))).runTaskTimer(this,
                                                                                                                                                        36000L,
@@ -161,9 +166,14 @@ public class CLStuff extends JavaPlugin implements Listener {
         }
     }
     
+    public Rankings getRankings() {
+        return rankings;
+    }
+    
     @Override
     public void onDisable() {
         serverQuests.save();
+        rankings.save();
         Bukkit.getScheduler().cancelTasks(this);
     }
     
