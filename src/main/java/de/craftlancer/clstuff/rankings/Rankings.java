@@ -131,9 +131,6 @@ public class Rankings implements CommandExecutor {
     }
     
     public int getScore(OfflinePlayer player) {
-        if (player.isBanned())
-            return 0;
-        
         return scoreMap.getOrDefault(player.getUniqueId(), 0);
     }
     
