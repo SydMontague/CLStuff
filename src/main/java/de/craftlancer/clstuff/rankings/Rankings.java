@@ -18,6 +18,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,7 @@ import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.LastSeenCache;
 import de.craftlancer.core.NMSUtils;
 import de.craftlancer.core.Utils;
+import de.craftlancer.core.util.Tuple;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.PlayerData;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -38,23 +40,23 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class Rankings implements CommandExecutor {
     private final Plugin plugin;
     private final File rankingsFile;
-    private final LastSeenCache lastSeenCache;
+    
+    final LastSeenCache lastSeenCache;
+    final TrophyChestFeature trophyChest;
     
     private boolean isUpdating = false;
-    private long lastUpdate = -1;
-    private Map<UUID, Integer> scoreMap = new HashMap<>();
+    private Map<UUID, RankingsEntry> scoreMap = new HashMap<>();
     
     public Rankings(Plugin plugin) {
         this.plugin = plugin;
         this.lastSeenCache = CLCore.getInstance().getLastSeenCache();
         this.rankingsFile = new File(plugin.getDataFolder(), "rankings.yml");
         
-        if(rankingsFile.exists()) {
+        this.trophyChest = ((TrophyChestFeature) CLFeatures.getInstance().getFeature("trophyChest"));
+        
+        if (rankingsFile.exists()) {
             YamlConfiguration config = YamlConfiguration.loadConfiguration(rankingsFile);
-            
-            lastUpdate = config.getLong("lastUpdate", -1);
-            scoreMap = config.getConfigurationSection("scoreMap").getValues(false).entrySet().stream()
-                             .collect(Collectors.toMap(a -> UUID.fromString(a.getKey()), b -> (Integer) b.getValue()));
+            scoreMap = config.getMapList("scoreMap").stream().map(RankingsEntry::new).collect(Collectors.toMap(RankingsEntry::getUUID, a -> a));
         }
     }
     
@@ -69,13 +71,13 @@ public class Rankings implements CommandExecutor {
                 sender.sendMessage(ClanUtils.TEXT_COLOR_UNIMPORTANT + String.format("Craftlancer Player Ranking | Page %d/%d", finalPage + 1, numPages));
                 sender.sendMessage(ClanUtils.TEXT_COLOR_UNIMPORTANT + ClanUtils.INDENTATION + "Rank - Tag - Name - Score");
                 
-                List<Map.Entry<UUID, Integer>> entries = Utils.paginate(updateScores().entrySet().stream()
-                                                                                     .sorted(Comparator.comparingInt(Map.Entry<UUID, Integer>::getValue)
-                                                                                                       .reversed()),
-                                                                       finalPage);
+                List<Tuple<UUID, Integer>> entries = Utils.paginate(updateScores().entrySet().stream()
+                                                                                  .map(a -> new Tuple<UUID, Integer>(a.getKey(), a.getValue().getScore()))
+                                                                                  .sorted(Comparator.comparingInt(Tuple<UUID, Integer>::getValue).reversed()),
+                                                                    finalPage);
                 
                 int i = 1 + Utils.ELEMENTS_PER_PAGE * finalPage;
-                for (Map.Entry<UUID, Integer> entry : entries) {
+                for (Tuple<UUID, Integer> entry : entries) {
                     BaseComponent base = new TextComponent(ClanUtils.INDENTATION);
                     base.addExtra(String.format("#%d", i++));
                     base.addExtra(" - ");
@@ -91,8 +93,7 @@ public class Rankings implements CommandExecutor {
     
     public void save() {
         YamlConfiguration config = new YamlConfiguration();
-        config.set("lastUpdate", lastUpdate);
-        config.set("scoreMap", scoreMap.entrySet().stream().collect(Collectors.toMap(a -> a.getKey().toString(), Map.Entry::getValue)));
+        config.set("scoreMap", scoreMap.values().stream().map(RankingsEntry::serialize).collect(Collectors.toList()));
         
         BukkitRunnable saveTask = new LambdaRunnable(() -> {
             try {
@@ -102,63 +103,115 @@ public class Rankings implements CommandExecutor {
                 plugin.getLogger().log(Level.SEVERE, "Error while saving Rankings: ", e);
             }
         });
-
+        
         if (NMSUtils.isRunning())
             saveTask.runTaskAsynchronously(plugin);
         else
             saveTask.run();
     }
     
-    public Map<UUID, Integer> updateScores() {
-        // don't update when an update is less than a minute old
-        if(isUpdating || lastUpdate + 60000 > System.currentTimeMillis())
+    public Map<UUID, RankingsEntry> updateScores() {
+        // don't update when an update is ongoing
+        if (isUpdating)
             return scoreMap;
         
         isUpdating = true;
-        
         Set<OfflinePlayer> bannedPlayer = Bukkit.getBannedPlayers();
         
         for (OfflinePlayer p : plugin.getServer().getOfflinePlayers())
-            scoreMap.put(p.getUniqueId(), bannedPlayer.contains(p) ? 0 : calculateScore(p));
-
-        lastUpdate = System.currentTimeMillis();
+            updatePlayer(p, bannedPlayer.contains(p) || p.isOp());
+        
         isUpdating = false;
         return scoreMap;
     }
     
-    public long getLastUpdate() {
-        return lastUpdate;
+    public int getScore(UUID uuid) {
+        return scoreMap.containsKey(uuid) ? scoreMap.get(uuid).getScore() : 0;
     }
     
     public int getScore(OfflinePlayer player) {
-        return scoreMap.getOrDefault(player.getUniqueId(), 0);
+        return getScore(player.getUniqueId());
     }
     
-    private int calculateScore(OfflinePlayer player) {
+    private void updatePlayer(OfflinePlayer player, boolean isBanned) {
         if (!player.hasPlayedBefore())
-            return 0;
-
+            return;
+        
         long lastSeen = lastSeenCache.getLastSeen(player);
+        RankingsEntry entry = scoreMap.computeIfAbsent(player.getUniqueId(), a -> new RankingsEntry(player.getUniqueId()));
         
-        if (lastSeen < lastUpdate)
-            return scoreMap.getOrDefault(player.getUniqueId(), 0);
+        if (isBanned)
+            entry.isBanned = true;
         
-        if(player.isBanned() || player.isOp())
-            return 0;
+        if (!player.isOnline() && lastSeen < entry.lastUpdate)
+            return;
         
         PlayerData data = GriefPrevention.instance.dataStore.getPlayerData(player.getUniqueId());
         
-        int unspent = data.getRemainingClaimBlocks();
-        int spent = data.getAccruedClaimBlocks() + data.getBonusClaimBlocks() - unspent;
-        int playtime = player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 1200;
-        double balance = CLCore.getInstance().getEconomy().getBalance(player);
-
-        long daysInactive = (System.currentTimeMillis() - lastSeen) / ClanUtils.MS_PER_DAY;
-        double totalPoints = unspent + playtime + balance;
-        totalPoints *= Math.max(0.1D, Math.min(1.0D, 1.03D - daysInactive / 100D));
-        totalPoints += spent * 1.25D;
-        totalPoints += ((TrophyChestFeature) CLFeatures.getInstance().getFeature("trophyChest")).getScore(player);
-
-        return (int) totalPoints;
+        entry.unspent = data.getRemainingClaimBlocks();
+        entry.spent = data.getAccruedClaimBlocks() + data.getBonusClaimBlocks() - entry.unspent;
+        entry.playtime = player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 1200;
+        entry.balance = CLCore.getInstance().getEconomy().getBalance(player);
+        entry.lastUpdate = System.currentTimeMillis();
+    }
+    
+    private class RankingsEntry implements ConfigurationSerializable {
+        private final UUID uuid;
+        
+        long lastUpdate = -1;
+        
+        int unspent = 0;
+        int spent = 0;
+        int playtime = 0;
+        double balance = 0;
+        boolean isBanned = false;
+        
+        public RankingsEntry(UUID uuid) {
+            this.uuid = uuid;
+        }
+        
+        public RankingsEntry(Map<?, ?> map) {
+            this.uuid = UUID.fromString(map.get("uuid").toString());
+            this.unspent = (int) map.get("unspent");
+            this.spent = (int) map.get("spent");
+            this.balance = (double) map.get("balance");
+            this.playtime = (int) map.get("playtime");
+            this.isBanned = (boolean) map.get("isBanned");
+            this.lastUpdate = (long) map.get("lastUpdate");
+        }
+        
+        @Override
+        public Map<String, Object> serialize() {
+            Map<String, Object> map = new HashMap<>();
+            
+            map.put("uuid", uuid.toString());
+            map.put("unspent", unspent);
+            map.put("spent", spent);
+            map.put("balance", balance);
+            map.put("playtime", playtime);
+            map.put("isBanned", isBanned);
+            map.put("lastUpdate", lastUpdate);
+            
+            return map;
+        }
+        
+        public UUID getUUID() {
+            return uuid;
+        }
+        
+        public int getScore() {
+            if (isBanned)
+                return 0;
+            
+            long lastSeen = lastSeenCache.getLastSeen(uuid);
+            
+            long daysInactive = (System.currentTimeMillis() - lastSeen) / ClanUtils.MS_PER_DAY;
+            double totalPoints = unspent + playtime + balance;
+            totalPoints *= Math.max(0.1D, Math.min(1.0D, 1.03D - daysInactive / 100D));
+            totalPoints += spent * 1.25D;
+            totalPoints += trophyChest.getScore(uuid);
+            
+            return (int) totalPoints;
+        }
     }
 }
