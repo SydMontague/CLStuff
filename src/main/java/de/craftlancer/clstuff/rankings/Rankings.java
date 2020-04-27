@@ -139,9 +139,7 @@ public class Rankings implements CommandExecutor {
         
         long lastSeen = lastSeenCache.getLastSeen(player);
         RankingsEntry entry = scoreMap.computeIfAbsent(player.getUniqueId(), a -> new RankingsEntry(player.getUniqueId()));
-        
-        if (isBanned)
-            entry.isBanned = true;
+        entry.isBanned = isBanned;
         
         if (!player.isOnline() && lastSeen < entry.lastUpdate)
             return;
