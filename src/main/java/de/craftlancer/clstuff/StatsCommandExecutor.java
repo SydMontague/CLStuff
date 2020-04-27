@@ -14,6 +14,11 @@ public class StatsCommandExecutor implements CommandExecutor {
     
     private CLStuff plugin;
     
+    public StatsCommandExecutor(CLStuff plugin) {
+        this.plugin = plugin;
+    }
+    
+    @SuppressWarnings("deprecation")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         OfflinePlayer player = null;

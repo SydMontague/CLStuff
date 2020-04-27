@@ -74,7 +74,7 @@ public class CLStuff extends JavaPlugin implements Listener {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandLine);
             return true;
         });
-        getCommand("stats").setExecutor(new StatsCommandExecutor());
+        getCommand("stats").setExecutor(new StatsCommandExecutor(this));
         getCommand("map").setExecutor((a, b, c, d) -> {
             a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
                     + "https://craftlancer.de/livemap/");
