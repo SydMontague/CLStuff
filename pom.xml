@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.craftlancer</groupId>
   <artifactId>clstuff</artifactId>
-  <version>0.1.2</version>
+  <version>0.2.0-SNAPSHOT</version>
   <name>CLStuff</name>
 
   <repositories>
@@ -42,7 +42,7 @@
     <dependency>
       <groupId>de.craftlancer</groupId>
       <artifactId>clcore</artifactId>
-      <version>0.3.0</version>
+      <version>0.4.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>de.craftlancer</groupId>

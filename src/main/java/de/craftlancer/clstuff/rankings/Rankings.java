@@ -23,7 +23,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-import de.craftlancer.clclans.ClanUtils;
 import de.craftlancer.clfeatures.CLFeatures;
 import de.craftlancer.clfeatures.trophychest.TrophyChestFeature;
 import de.craftlancer.core.CLCore;
@@ -68,8 +67,8 @@ public class Rankings implements CommandExecutor {
             sender.sendMessage("That page doesn't exist.");
         else {
             new LambdaRunnable(() -> {
-                sender.sendMessage(ClanUtils.TEXT_COLOR_UNIMPORTANT + String.format("Craftlancer Player Ranking | Page %d/%d", finalPage + 1, numPages));
-                sender.sendMessage(ClanUtils.TEXT_COLOR_UNIMPORTANT + ClanUtils.INDENTATION + "Rank - Tag - Name - Score");
+                sender.sendMessage(Utils.TEXT_COLOR_UNIMPORTANT + String.format("Craftlancer Player Ranking | Page %d/%d", finalPage + 1, numPages));
+                sender.sendMessage(Utils.TEXT_COLOR_UNIMPORTANT + Utils.INDENTATION + "Rank - Tag - Name - Score");
                 
                 List<Tuple<UUID, Integer>> entries = Utils.paginate(updateScores().entrySet().stream()
                                                                                   .map(a -> new Tuple<UUID, Integer>(a.getKey(), a.getValue().getScore()))
@@ -78,7 +77,7 @@ public class Rankings implements CommandExecutor {
                 
                 int i = 1 + Utils.ELEMENTS_PER_PAGE * finalPage;
                 for (Tuple<UUID, Integer> entry : entries) {
-                    BaseComponent base = new TextComponent(ClanUtils.INDENTATION);
+                    BaseComponent base = new TextComponent(Utils.INDENTATION);
                     base.addExtra(String.format("#%d", i++));
                     base.addExtra(" - ");
                     base.addExtra(Bukkit.getOfflinePlayer(entry.getKey()).getName());
@@ -203,13 +202,13 @@ public class Rankings implements CommandExecutor {
             
             long lastSeen = lastSeenCache.getLastSeen(uuid);
             
-            long daysInactive = (System.currentTimeMillis() - lastSeen) / ClanUtils.MS_PER_DAY;
+            long daysInactive = (System.currentTimeMillis() - lastSeen) / Utils.MS_PER_DAY;
             double totalPoints = unspent + playtime + balance;
             totalPoints *= Math.max(0.1D, Math.min(1.0D, 1.03D - daysInactive / 100D));
             totalPoints += spent * 1.25D;
             totalPoints += trophyChest.getScore(uuid);
             
-            return (int) totalPoints;
+            return (int) totalPoints / 100;
         }
     }
 }
