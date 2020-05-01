@@ -3,6 +3,9 @@ package de.craftlancer.clstuff;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Entity;
@@ -13,11 +16,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
+
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class CLAntiCheat implements Listener {
     private Logger logger;
@@ -78,6 +84,21 @@ public class CLAntiCheat implements Listener {
                                         block.getZ(),
                                         block.getType().name()));
         event.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void onCommand(PlayerCommandPreprocessEvent e) {
+        if(!e.getMessage().startsWith("sethome"))
+            return;
+        
+        Player p = e.getPlayer();
+        Location loc = e.getPlayer().getLocation();
+        
+        if (GriefPrevention.instance.dataStore.getClaims().stream()
+                .noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
+            e.setCancelled(true);
+            p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
+        }
     }
     
     private static boolean isCheckedInventory(InventoryType type) {

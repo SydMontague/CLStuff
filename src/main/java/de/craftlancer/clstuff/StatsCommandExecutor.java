@@ -30,6 +30,24 @@ public class StatsCommandExecutor implements CommandExecutor {
         
         if (player == null)
             return false;
+
+        
+        /*
+            USERNAMEs Stats:
+            Money: X   available claimblocks x
+            Score: 
+            Playtime:     RANK
+            Clan - Clanrank
+         */
+        // TODO player profile
+        // balance
+        // available claimblocks, total claimblocks
+        // Clan
+        // playtime
+        // score
+        // rank
+        // description
+        // Wiki Link
         
         sender.sendMessage("Playtime: " + Utils.ticksToTimeString(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
         sender.sendMessage("Score: " + plugin.getRankings().getScore(player));
