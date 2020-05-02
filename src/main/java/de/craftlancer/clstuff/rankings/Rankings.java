@@ -28,6 +28,7 @@ import de.craftlancer.clfeatures.trophychest.TrophyChestFeature;
 import de.craftlancer.core.CLCore;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.LastSeenCache;
+import de.craftlancer.core.NMSUtils;
 import de.craftlancer.core.Utils;
 import de.craftlancer.core.util.Tuple;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
@@ -151,7 +152,7 @@ public class Rankings implements CommandExecutor {
         entry.lastUpdate = System.currentTimeMillis();
     }
     
-    private class RankingsEntry implements ConfigurationSerializable {
+    public class RankingsEntry implements ConfigurationSerializable {
         private final UUID uuid;
         
         long lastUpdate = -1;
