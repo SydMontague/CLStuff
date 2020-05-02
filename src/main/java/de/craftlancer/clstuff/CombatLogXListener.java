@@ -11,6 +11,7 @@ import com.SirBlobman.combatlogx.utility.CombatUtil;
 import de.craftlancer.clclans.CLClans;
 import de.craftlancer.clclans.Clan;
 import de.craftlancer.clfeatures.portal.event.PortalTeleportEvent;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class CombatLogXListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -28,6 +29,9 @@ public class CombatLogXListener implements Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPortal(PortalTeleportEvent event) {
         if(CombatUtil.isInCombat(event.getPlayer()))
+            event.setCancelled(true);
+        
+        if(GriefPrevention.instance.dataStore.getPlayerData(event.getPlayer().getUniqueId()).siegeData != null)
             event.setCancelled(true);
     }
 }

@@ -14,8 +14,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.BlockInventoryHolder;
@@ -88,7 +90,7 @@ public class CLAntiCheat implements Listener {
     
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent e) {
-        if(!e.getMessage().startsWith("sethome"))
+        if(!e.getMessage().startsWith("/sethome"))
             return;
         
         Player p = e.getPlayer();
@@ -97,6 +99,20 @@ public class CLAntiCheat implements Listener {
         if (GriefPrevention.instance.dataStore.getClaims().stream()
                 .noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
             e.setCancelled(true);
+            p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
+        }
+    }
+    
+    @EventHandler
+    public void onBedEnter(PlayerBedEnterEvent e) {
+        Player p = e.getPlayer();
+        Location loc = e.getPlayer().getLocation();
+        
+        
+        if (GriefPrevention.instance.dataStore.getClaims().stream()
+                .noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
+            e.setCancelled(true);
+            e.setUseBed(Result.DENY);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
         }
     }

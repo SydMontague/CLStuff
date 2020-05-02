@@ -75,6 +75,8 @@ public class LagFixes implements Listener {
         double[] recentTPS = NMSUtils.getRecentTPS();
         if (event.getSpawnReason() == SpawnReason.SPAWNER && (recentTPS[0] < 16D || recentTPS[1] < 17D || recentTPS[2] < 18D))
             event.setCancelled(true);
+        if (event.getEntityType() == EntityType.GUARDIAN && (recentTPS[0] < 16D || recentTPS[1] < 17D || recentTPS[2] < 18D))
+            event.setCancelled(true);
         
         // prevent chunks from being overcrowded
         switch (event.getSpawnReason()) {
