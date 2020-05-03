@@ -28,7 +28,6 @@ import de.craftlancer.clfeatures.trophychest.TrophyChestFeature;
 import de.craftlancer.core.CLCore;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.LastSeenCache;
-import de.craftlancer.core.NMSUtils;
 import de.craftlancer.core.Utils;
 import de.craftlancer.core.util.Tuple;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
@@ -169,12 +168,12 @@ public class Rankings implements CommandExecutor {
         
         public RankingsEntry(Map<?, ?> map) {
             this.uuid = UUID.fromString(map.get("uuid").toString());
-            this.unspent = (int) map.get("unspent");
-            this.spent = (int) map.get("spent");
-            this.balance = (double) map.get("balance");
-            this.playtime = (int) map.get("playtime");
-            this.isBanned = (boolean) map.get("isBanned");
-            this.lastUpdate = (long) map.get("lastUpdate");
+            this.unspent = ((Number) map.get("unspent")).intValue();
+            this.spent = ((Number) map.get("spent")).intValue();
+            this.balance = ((Number) map.get("balance")).doubleValue();
+            this.playtime = ((Number) map.get("playtime")).intValue();
+            this.isBanned = (Boolean) map.get("isBanned");
+            this.lastUpdate = ((Number) map.get("lastUpdate")).longValue();
         }
         
         @Override
