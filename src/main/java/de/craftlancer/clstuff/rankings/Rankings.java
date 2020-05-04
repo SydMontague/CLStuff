@@ -61,7 +61,7 @@ public class Rankings implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         int finalPage = args.length >= 1 ? Utils.parseIntegerOrDefault(args[0], 1) - 1 : 0;
-        int numPages = plugin.getServer().getOfflinePlayers().length / Utils.ELEMENTS_PER_PAGE;
+        int numPages = (plugin.getServer().getOfflinePlayers().length + Utils.ELEMENTS_PER_PAGE -1) / Utils.ELEMENTS_PER_PAGE;
         if (finalPage < 0 || finalPage >= numPages)
             sender.sendMessage("That page doesn't exist.");
         else {
