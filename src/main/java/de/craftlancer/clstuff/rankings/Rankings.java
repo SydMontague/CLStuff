@@ -122,6 +122,14 @@ public class Rankings implements CommandExecutor {
         isUpdating = false;
         return scoreMap;
     }
+
+    public RankingsEntry getRankingsEntry(OfflinePlayer player) {
+        return scoreMap.get(player.getUniqueId());
+    }
+    
+    public RankingsEntry getRankingsEntry(UUID uuid) {
+        return scoreMap.get(uuid);
+    }
     
     public int getScore(UUID uuid) {
         return scoreMap.containsKey(uuid) ? scoreMap.get(uuid).getScore() : 0;
@@ -208,6 +216,26 @@ public class Rankings implements CommandExecutor {
             totalPoints += trophyChest.getScore(uuid);
             
             return (int) totalPoints / 100;
+        }
+        
+        public double getBalance() {
+            return balance;
+        }
+        
+        public int getPlaytime() {
+            return playtime;
+        }
+        
+        public int getSpent() {
+            return spent;
+        }
+        
+        public int getUnspent() {
+            return unspent;
+        }
+        
+        public long getLastUpdate() {
+            return lastUpdate;
         }
     }
 }
