@@ -59,10 +59,21 @@ public class LagFixes implements Listener {
     
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntitySpawn(CreatureSpawnEvent event) {
-        // only every 4th Guardian should be spawned
-        if (event.getEntityType() == EntityType.GUARDIAN && event.getEntity().getEntityId() % 4 != 0) {
-            event.setCancelled(true);
-            return;
+        // only spawn ever 4th guardian, fish or bat
+        switch(event.getEntityType()) {
+            case GUARDIAN:
+            case COD:
+            case TROPICAL_FISH:
+            case PUFFERFISH:
+            case BAT:
+            case SALMON:
+                if(event.getEntity().getEntityId() % 4 != 0) {
+                    event.setCancelled(true);
+                    return;
+                }
+                break;
+            default:
+                break;
         }
         
         // disable underground pillager spawns
