@@ -67,7 +67,7 @@ public class LagFixes implements Listener {
             case PUFFERFISH:
             case BAT:
             case SALMON:
-                if(event.getEntity().getEntityId() % 4 != 0) {
+                if(event.getSpawnReason() == SpawnReason.NATURAL && event.getEntity().getEntityId() % 4 != 0) {
                     event.setCancelled(true);
                     return;
                 }
