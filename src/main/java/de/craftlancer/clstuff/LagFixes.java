@@ -21,7 +21,7 @@ public class LagFixes implements Listener {
     private static final String SPAWNER_MOB_META = "spawnerMob";
     private static final String PILLAGER_MOB_META = "pillagerMob";
     private static final int SPAWNER_MOB_TIMEOUT = 2400; // 2 minutes
-    private static final int PILLAGER_MOB_TIMEOUT = 6000; // 2 minutes
+    private static final int PILLAGER_MOB_TIMEOUT = 6000; // 5 minutes
     
     private List<LivingEntity> spawnerEntities = new LinkedList<>();
     private List<LivingEntity> pillagerEntities = new LinkedList<>();
@@ -87,6 +87,8 @@ public class LagFixes implements Listener {
         if (event.getSpawnReason() == SpawnReason.SPAWNER && (recentTPS[0] < 16D || recentTPS[1] < 17D || recentTPS[2] < 18D))
             event.setCancelled(true);
         if (event.getEntityType() == EntityType.GUARDIAN && (recentTPS[0] < 16D || recentTPS[1] < 17D || recentTPS[2] < 18D))
+            event.setCancelled(true);
+        if (event.getEntityType() == EntityType.PILLAGER && (recentTPS[0] < 17D || recentTPS[1] < 18D || recentTPS[2] < 19D))
             event.setCancelled(true);
         
         // prevent chunks from being overcrowded
