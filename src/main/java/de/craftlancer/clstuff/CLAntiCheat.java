@@ -41,6 +41,12 @@ public class CLAntiCheat implements Listener {
         
         if (vehicle instanceof InventoryHolder)
             new ArrayList<HumanEntity>((((InventoryHolder) vehicle).getInventory().getViewers())).forEach(HumanEntity::closeInventory);
+        
+        if (vehicle != null)
+            vehicle.getPassengers().forEach(a -> {
+                if (a instanceof InventoryHolder)
+                    new ArrayList<HumanEntity>((((InventoryHolder) a).getInventory().getViewers())).forEach(HumanEntity::closeInventory);
+            });
     }
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -90,14 +96,13 @@ public class CLAntiCheat implements Listener {
     
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent e) {
-        if(!e.getMessage().startsWith("/sethome"))
+        if (!e.getMessage().startsWith("/sethome"))
             return;
         
         Player p = e.getPlayer();
         Location loc = e.getPlayer().getLocation();
         
-        if (GriefPrevention.instance.dataStore.getClaims().stream()
-                .noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
+        if (GriefPrevention.instance.dataStore.getClaims().stream().noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
             e.setCancelled(true);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
         }
@@ -108,9 +113,7 @@ public class CLAntiCheat implements Listener {
         Player p = e.getPlayer();
         Location loc = e.getPlayer().getLocation();
         
-        
-        if (GriefPrevention.instance.dataStore.getClaims().stream()
-                .noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
+        if (GriefPrevention.instance.dataStore.getClaims().stream().noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
             e.setCancelled(true);
             e.setUseBed(Result.DENY);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
