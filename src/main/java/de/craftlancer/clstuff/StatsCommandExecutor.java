@@ -49,7 +49,7 @@ public class StatsCommandExecutor implements CommandExecutor {
         RankingsEntry entry = plugin.getRankings().getRankingsEntry(player);
         Clan clan = CLClans.getInstance().getClan(player);
         
-        sender.sendMessage("§f[§4Craft§fCitizen]" + ChatColor.DARK_RED + CLCore.getInstance().getPermissions().getPrimaryGroup(null, player) + " " + ChatColor.YELLOW + player.getName() + Utils.TEXT_COLOR_UNIMPORTANT + "'s Stats:");
+        sender.sendMessage("§f[§4Craft§fCitizen]" + ChatColor.DARK_RED + CLCore.getInstance().getPermissions().getPrimaryGroup(null, player) + " " + ChatColor.GOLD + player.getName() + ChatColor.YELLOW + "'s Stats:");
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "Playtime: " + Utils.TEXT_COLOR_IMPORTANT + Utils.ticksToTimeString(player.getStatistic(Statistic.PLAY_ONE_MINUTE)));
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "Money: " + Utils.TEXT_COLOR_IMPORTANT + MONEY_FORMAT.format(entry.getBalance()));
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + String.format("Claimblocks:%s %d/%d", Utils.TEXT_COLOR_IMPORTANT, entry.getSpent(), entry.getSpent() + entry.getUnspent()));
