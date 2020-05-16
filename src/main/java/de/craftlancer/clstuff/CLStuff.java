@@ -90,9 +90,20 @@ public class CLStuff extends JavaPlugin implements Listener {
             
             if (target == null)
                 a.sendMessage("No player found to check ping for.");
-            else
-                a.sendMessage(target.getName() + "'s Ping: " + NMSUtils.getPing(target) + " ms");
-            
+            else {
+                int ping = NMSUtils.getPing(target);
+                
+                ChatColor pingColor = ChatColor.GREEN;
+                if(ping < 100)
+                    pingColor = ChatColor.GREEN;
+                else if(ping < 250)
+                    pingColor = ChatColor.GOLD;
+                else
+                    pingColor = ChatColor.RED;
+                
+                a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + target.getDisplayName() + ChatColor.YELLOW + "'s Ping: " + pingColor + ping + ChatColor.YELLOW + " ms");
+                
+            }
             return true;
         });
         getCommand("cchelp").setExecutor(new CCHelpCommandHandler(this));
