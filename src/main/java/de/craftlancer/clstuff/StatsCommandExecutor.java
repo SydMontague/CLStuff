@@ -46,6 +46,7 @@ public class StatsCommandExecutor implements CommandExecutor {
         // description
         // Wiki Link
         
+        plugin.getRankings().updateScores();
         RankingsEntry entry = plugin.getRankings().getRankingsEntry(player);
         Clan clan = CLClans.getInstance().getClan(player);
         
