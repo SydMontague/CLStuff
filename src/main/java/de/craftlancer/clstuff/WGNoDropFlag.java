@@ -47,6 +47,10 @@ public class WGNoDropFlag implements Listener, TabExecutor {
         WorldGuard.getInstance().getFlagRegistry().register(NO_DROP_FLAG);
     }
     
+    public static StateFlag getNoDropFlag() {
+        return NO_DROP_FLAG;
+    }
+    
     @SuppressWarnings("unchecked")
     public WGNoDropFlag(CLStuff plugin) {
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") == null)

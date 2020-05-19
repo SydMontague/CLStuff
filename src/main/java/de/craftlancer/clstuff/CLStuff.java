@@ -30,10 +30,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
+import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import de.craftlancer.core.CancelableRunnable;
-import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.NMSUtils;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import net.md_5.bungee.api.ChatColor;
@@ -43,6 +43,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private WGNoDropFlag flag;
     private ServerQuests serverQuests;
     private Rankings rankings;
+    private ModelToken tokens;
     private boolean useDiscord = false;
     
     private boolean logMoveEvents = false;
@@ -151,14 +152,11 @@ public class CLStuff extends JavaPlugin implements Listener {
         rankings = new Rankings(this);
         getCommand("rankings").setExecutor(rankings);
         
-        new LambdaRunnable(
-                () -> Bukkit.getOnlinePlayers().stream().filter(Player::isOp).forEach(a -> a.setStatistic(Statistic.TIME_SINCE_REST, 0))).runTaskTimer(this,
-                                                                                                                                                       36000L,
-                                                                                                                                                       36000L);
-        
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
-        
+
+        tokens = new ModelToken(this);
+        Bukkit.getPluginManager().registerEvents(tokens, this);
         Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
         Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -185,6 +183,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     public void onDisable() {
         serverQuests.save();
         rankings.save();
+        tokens.save();
         Bukkit.getScheduler().cancelTasks(this);
     }
     
@@ -193,7 +192,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         if (!logMoveEvents)
             return;
         
-        getLogger().info("IMIE: " + event.getInitiator().getLocation().toString());
+        getLogger().info(() -> "IMIE: " + event.getInitiator().getLocation().toString());
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -277,5 +276,9 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     public WGNoDropFlag getNoDropFlag() {
         return flag;
+    }
+    
+    public ModelToken getModelToken() {
+        return tokens;
     }
 }

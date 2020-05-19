@@ -39,7 +39,7 @@ public class StatsCommandExecutor implements CommandExecutor {
         else if (sender instanceof Player)
             player = (Player) sender;
         
-        if (player == null || !player.hasPlayedBefore())
+        if (player == null || (!player.isOnline() && !player.hasPlayedBefore()))
             return false;
 
         // TODO player profile

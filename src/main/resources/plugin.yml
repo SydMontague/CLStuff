@@ -34,9 +34,12 @@ commands:
     description: Opens all voting sites at once.
   rankings:
     description: Player rankings.
+  modeltoken:
+    description: Model Tokens
 permissions:
   clstuff.nodrop.admin:
     default: op
+    
   clstuff.squest.admin:
     default: op
     children:
@@ -72,4 +75,23 @@ permissions:
   clstuff.squest.progress:
     default: false
   clstuff.squest.exempt:
+    default: false
+    
+  clstuff.squest.admin:
+    default: op
+    children:
+      clstuff.modeltoken.add: true
+      clstuff.modeltoken.list: true
+      clstuff.modeltoken.remove: true
+      clstuff.modeltoken.getitem: true
+      clstuff.modeltoken.gettoken: true
+  clstuff.modeltoken.add:
+    default: false
+  clstuff.modeltoken.list:
+    default: false
+  clstuff.modeltoken.remove:
+    default: false
+  clstuff.modeltoken.getitem:
+    default: false
+  clstuff.modeltoken.gettoken:
     default: false
