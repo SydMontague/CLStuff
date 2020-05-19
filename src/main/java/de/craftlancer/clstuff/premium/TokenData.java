@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.premium;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class TokenData implements ConfigurationSerializable {
     }
     
     @SuppressWarnings("unchecked")
-    public TokenData(Map<?,?> map) {
+    public TokenData(Map<?, ?> map) {
         this.targetItem = Material.getMaterial(map.get("targetItem").toString());
         this.lore = (List<String>) map.get("lore");
         this.itemName = (String) map.get("name");
@@ -36,7 +37,7 @@ public class TokenData implements ConfigurationSerializable {
     public Material getTargetItem() {
         return targetItem;
     }
-
+    
     @Override
     public @NotNull Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
@@ -46,31 +47,40 @@ public class TokenData implements ConfigurationSerializable {
         map.put("lore", lore);
         return map;
     }
-
     
     public ItemStack apply(@Nonnull ItemStack item) {
         ItemStack newItem = item.clone();
         ItemMeta meta = newItem.getItemMeta();
-        meta.setCustomModelData(itemModelData);
-        meta.setLore(lore);
-        meta.setDisplayName(itemName);
+        if (itemModelData != -1)
+            meta.setCustomModelData(itemModelData);
+        if (lore != null && !lore.isEmpty())
+            meta.setLore(lore);
+        if (itemName != null)
+            meta.setDisplayName(itemName);
         newItem.setItemMeta(meta);
         newItem.setAmount(1);
         return newItem;
     }
-
+    
     public ItemStack toItemStack() {
         ItemStack item = new ItemStack(targetItem);
         ItemMeta meta = item.getItemMeta();
-        meta.setLore(lore);
-        meta.setCustomModelData(itemModelData);
-        meta.setDisplayName(itemName);
+        if (itemModelData != -1)
+            meta.setCustomModelData(itemModelData);
+        if (lore != null && !lore.isEmpty())
+            meta.setLore(lore);
+        if (itemName != null)
+            meta.setDisplayName(itemName);
         item.setItemMeta(meta);
         return item;
     }
     
     public static TokenData fromItemStack(ItemStack item) {
         ItemMeta meta = item.getItemMeta();
-        return new TokenData(item.getType(), meta.getCustomModelData(), meta.getDisplayName(), meta.getLore());
+        int modelData = meta.hasCustomModelData() ? meta.getCustomModelData() : -1;
+        String name = meta.hasDisplayName() ? meta.getDisplayName() : null;
+        List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+        
+        return new TokenData(item.getType(), modelData, name, lore);
     }
 }

@@ -20,40 +20,36 @@ import de.craftlancer.core.NMSUtils;
 public class LagFixes implements Listener {
     private static final String SPAWNER_MOB_META = "spawnerMob";
     private static final String PILLAGER_MOB_META = "pillagerMob";
+    private static final String IRON_GOLEM_MOB_META = "ironGolemMob";
     private static final int SPAWNER_MOB_TIMEOUT = 2400; // 2 minutes
     private static final int PILLAGER_MOB_TIMEOUT = 6000; // 5 minutes
+    private static final int IRON_GOLEM_MOB_TIMEOUT = 12000; // 10 minutes
     
     private List<LivingEntity> spawnerEntities = new LinkedList<>();
     private List<LivingEntity> pillagerEntities = new LinkedList<>();
+    private List<LivingEntity> golemEntities = new LinkedList<>();
     
     private CLStuff plugin;
+    
+    private static boolean checkEntity(LivingEntity a, int timeout) {
+        if(!a.isValid())
+            return true;
+        
+        if(a.getCustomName() == null && a.getTicksLived() > timeout) {
+            a.remove();
+            return true;
+        }
+        
+        return false;
+    }
     
     public LagFixes(CLStuff plugin) {
         this.plugin = plugin;
         
         new LambdaRunnable(() -> {
-            spawnerEntities.removeIf(a -> {
-                if(!a.isValid())
-                    return true;
-                
-                if(a.getCustomName() == null && a.getTicksLived() > SPAWNER_MOB_TIMEOUT) {
-                    a.remove();
-                    return true;
-                }
-                
-                return false;
-            });
-            pillagerEntities.removeIf(a -> {
-                if(!a.isValid())
-                    return true;
-                
-                if(a.getCustomName() == null && a.getTicksLived() > PILLAGER_MOB_TIMEOUT) {
-                    a.remove();
-                    return true;
-                }
-
-                return false;
-            });
+            spawnerEntities.removeIf(a -> checkEntity(a, SPAWNER_MOB_TIMEOUT));
+            pillagerEntities.removeIf(a -> checkEntity(a, PILLAGER_MOB_TIMEOUT));
+            golemEntities.removeIf(a -> checkEntity(a, IRON_GOLEM_MOB_TIMEOUT));
         }).runTaskTimer(plugin, SPAWNER_MOB_TIMEOUT, 100);
     }
     
@@ -117,6 +113,10 @@ public class LagFixes implements Listener {
         }
         if (event.getSpawnReason() == SpawnReason.RAID || event.getEntityType() == EntityType.PILLAGER) {
             event.getEntity().setMetadata(PILLAGER_MOB_META, new FixedMetadataValue(plugin, 0));
+            pillagerEntities.add(event.getEntity());
+        }
+        if (event.getSpawnReason() != SpawnReason.BUILD_IRONGOLEM || event.getEntityType() == EntityType.IRON_GOLEM) {
+            event.getEntity().setMetadata(IRON_GOLEM_MOB_META, new FixedMetadataValue(plugin, 0));
             pillagerEntities.add(event.getEntity());
         }
     }
