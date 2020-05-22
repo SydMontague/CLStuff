@@ -34,6 +34,7 @@ import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import de.craftlancer.core.CancelableRunnable;
+import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.NMSUtils;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import net.md_5.bungee.api.ChatColor;
@@ -163,6 +164,8 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
+        
+        new LambdaRunnable(this::save).runTaskTimer(this, 18000L, 18000L);
     }
     
     class EntityEntry {
@@ -181,10 +184,14 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     @Override
     public void onDisable() {
+        save();
+        Bukkit.getScheduler().cancelTasks(this);
+    }
+    
+    private void save() {
         serverQuests.save();
         rankings.save();
         tokens.save();
-        Bukkit.getScheduler().cancelTasks(this);
     }
     
     @EventHandler(priority = EventPriority.MONITOR)

@@ -14,6 +14,7 @@ public class ModelTokenCommandHandler extends CommandHandler {
         registerSubCommand("list", new ModelTokenListCommand(plugin, token));
         registerSubCommand("getitem", new ModelTokenGetItemCommand(plugin, token));
         registerSubCommand("gettoken", new ModelTokenGetTokenCommand(plugin, token));
+        registerSubCommand("blist", new ModelTokenBlacklistCommandHandler(plugin, 1, token));
     }
     
 }

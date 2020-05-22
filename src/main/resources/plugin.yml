@@ -85,6 +85,10 @@ permissions:
       clstuff.modeltoken.remove: true
       clstuff.modeltoken.getitem: true
       clstuff.modeltoken.gettoken: true
+      clstuff.modeltoken.blacklist: true
+      clstuff.modeltoken.blacklist.add: true
+      clstuff.modeltoken.blacklist.list: true
+      clstuff.modeltoken.blacklist.remove: true
   clstuff.modeltoken.add:
     default: false
   clstuff.modeltoken.list:
@@ -94,4 +98,12 @@ permissions:
   clstuff.modeltoken.getitem:
     default: false
   clstuff.modeltoken.gettoken:
+    default: false
+  clstuff.modeltoken.blacklist:
+    default: false
+  clstuff.modeltoken.blacklist.add:
+    default: false
+  clstuff.modeltoken.blacklist.list:
+    default: false
+  clstuff.modeltoken.blacklist.remove:
     default: false
