@@ -36,6 +36,8 @@ commands:
     description: Player rankings.
   modeltoken:
     description: Model Tokens
+  explonerf:
+    description: Explosion based farms nerf
 permissions:
   clstuff.nodrop.admin:
     default: op
@@ -77,7 +79,7 @@ permissions:
   clstuff.squest.exempt:
     default: false
     
-  clstuff.squest.admin:
+  clstuff.modeltoken.admin:
     default: op
     children:
       clstuff.modeltoken.add: true
@@ -106,4 +108,29 @@ permissions:
   clstuff.modeltoken.blacklist.list:
     default: false
   clstuff.modeltoken.blacklist.remove:
+    default: false
+    
+  clstuff.explonerf.admin:
+    default: op
+    children:
+      clstuff.explonerf.removemat: true
+      clstuff.explonerf.addmat: true
+      clstuff.explonerf.create: true
+      clstuff.explonerf.setlimit: true
+      clstuff.explonerf.threshold: true
+      clstuff.explonerf.delete: true
+      clstuff.explonerf.info: true
+  clstuff.explonerf.removemat: 
+    default: false
+  clstuff.explonerf.addmat: 
+    default: false
+  clstuff.explonerf.create: 
+    default: false
+  clstuff.explonerf.setlimit: 
+    default: false
+  clstuff.explonerf.threshold: 
+    default: false
+  clstuff.explonerf.delete: 
+    default: false
+  clstuff.explonerf.info: 
     default: false

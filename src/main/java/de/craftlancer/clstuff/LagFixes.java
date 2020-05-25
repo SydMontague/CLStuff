@@ -115,9 +115,9 @@ public class LagFixes implements Listener {
             event.getEntity().setMetadata(PILLAGER_MOB_META, new FixedMetadataValue(plugin, 0));
             pillagerEntities.add(event.getEntity());
         }
-        if (event.getSpawnReason() != SpawnReason.BUILD_IRONGOLEM || event.getEntityType() == EntityType.IRON_GOLEM) {
+        if (event.getSpawnReason() != SpawnReason.BUILD_IRONGOLEM && event.getEntityType() == EntityType.IRON_GOLEM) {
             event.getEntity().setMetadata(IRON_GOLEM_MOB_META, new FixedMetadataValue(plugin, 0));
-            pillagerEntities.add(event.getEntity());
+            golemEntities.add(event.getEntity());
         }
     }
 }

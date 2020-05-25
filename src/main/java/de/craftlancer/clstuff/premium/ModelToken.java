@@ -106,7 +106,7 @@ public class ModelToken implements Listener {
                 config.save(tokenFile);
             }
             catch (IOException e) {
-                plugin.getLogger().log(Level.SEVERE, "Error while saving Trophies: ", e);
+                plugin.getLogger().log(Level.SEVERE, "Error while saving Token: ", e);
             }
         });
         
