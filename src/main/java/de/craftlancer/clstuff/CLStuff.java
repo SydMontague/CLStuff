@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.rankings.Rankings;
@@ -45,6 +46,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private ServerQuests serverQuests;
     private Rankings rankings;
     private ModelToken tokens;
+    private ExplosionRegulator exploNerf;
     private boolean useDiscord = false;
     
     private boolean logMoveEvents = false;
@@ -157,6 +159,8 @@ public class CLStuff extends JavaPlugin implements Listener {
         serverQuests = new ServerQuests(this);
 
         tokens = new ModelToken(this);
+        exploNerf = new ExplosionRegulator(this);
+        Bukkit.getPluginManager().registerEvents(exploNerf, this);
         Bukkit.getPluginManager().registerEvents(tokens, this);
         Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
         Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
@@ -192,6 +196,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         serverQuests.save();
         rankings.save();
         tokens.save();
+        exploNerf.save();
     }
     
     @EventHandler(priority = EventPriority.MONITOR)

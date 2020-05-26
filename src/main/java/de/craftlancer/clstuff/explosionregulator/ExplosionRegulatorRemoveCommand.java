@@ -28,7 +28,7 @@ public class ExplosionRegulatorRemoveCommand extends ExplosionRegulatorSubComman
             return "Not enough arguments. <id> <limit>";
         
         String id = args[1];
-        Set<Material> matList = Arrays.stream(args, 2, args.length).map(Material::getMaterial).filter(Objects::nonNull).collect(Collectors.toSet());
+        Set<Material> matList = Arrays.stream(args, 2, args.length).map(Material::matchMaterial).filter(Objects::nonNull).collect(Collectors.toSet());
 
         if(!getRegulator().hasItemGroup(id))
             return "This ID isn't taken.";

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -34,6 +35,10 @@ public class ExplosionRegulator implements Listener {
     private final CLStuff plugin;
     private Map<String, ItemGroup> itemGroups = new HashMap<>();
     
+    static {
+        ConfigurationSerialization.registerClass(ItemGroup.class);
+    }
+    
     public ExplosionRegulator(CLStuff plugin) {
         this.plugin = plugin;
         
@@ -47,7 +52,7 @@ public class ExplosionRegulator implements Listener {
     public void save() {
         File configFile = new File(plugin.getDataFolder(), "explosionRegulator.yml");
         YamlConfiguration config = new YamlConfiguration();
-        config.set("itemGroups", itemGroups);
+        itemGroups.forEach(config::set);
         
         BukkitRunnable saveTask = new LambdaRunnable(() -> {
             try {

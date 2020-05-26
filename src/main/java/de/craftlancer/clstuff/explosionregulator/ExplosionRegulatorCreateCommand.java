@@ -1,6 +1,7 @@
 package de.craftlancer.clstuff.explosionregulator;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,13 +25,13 @@ public class ExplosionRegulatorCreateCommand extends ExplosionRegulatorSubComman
             return "You can't run this command.";
         
         if(args.length < 5)
-            return "Not enough arguments. <id> <limit> <freeLimit> <materials...>";
+            return "Not enough arguments. <id> <limit> <freeLimit> <minimalYield> <materials...>";
         
         String id = args[1];
         int limit = Utils.parseIntegerOrDefault(args[2], 0);
         int freeLimit = Utils.parseIntegerOrDefault(args[3], 0);
         float minimalYield = Utils.parseFloatOrDefault(args[4], 0f);
-        Set<Material> matList = Arrays.stream(args, 5, args.length).map(Material::getMaterial).filter(Objects::nonNull).collect(Collectors.toSet());
+        Set<Material> matList = Arrays.stream(args, 5, args.length).map(Material::matchMaterial).filter(Objects::nonNull).collect(Collectors.toSet());
         
         if(getRegulator().hasItemGroup(id))
             return "This ID is already taken.";
@@ -44,5 +45,12 @@ public class ExplosionRegulatorCreateCommand extends ExplosionRegulatorSubComman
         // TODO Auto-generated method stub
         
     }
-    
+
+    @Override
+    protected List<String> onTabComplete(CommandSender sender, String[] args) {
+        if(args.length > 5)
+            return Utils.getMatches(args[args.length-1], Utils.toString(Material.values()));
+        
+        return super.onTabComplete(sender, args);
+    }
 }

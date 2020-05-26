@@ -25,7 +25,7 @@ public class ModelTokenBlacklistRemoveCommand extends ModelTokenSubCommand {
         if(args.length < 4)
             return "Not enough arguments.";
         
-        Material mat = Material.getMaterial(args[2]);
+        Material mat = Material.matchMaterial(args[2]);
         List<Integer> cmdList = Arrays.stream(args, 3, args.length).map(a -> Utils.parseIntegerOrDefault(a, -1)).filter(a -> a != -1).collect(Collectors.toList());
         
         if (getToken().removeBlacklist(mat, cmdList))

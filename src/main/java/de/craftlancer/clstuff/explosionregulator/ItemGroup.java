@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import de.craftlancer.core.IntRingBuffer;
 import de.craftlancer.core.Utils;
 
-class ItemGroup implements ConfigurationSerializable {
+public class ItemGroup implements ConfigurationSerializable {
     // settings
     private Set<Material> groupMaterials = new HashSet<>();
     private float minimalYield;
@@ -38,15 +38,15 @@ class ItemGroup implements ConfigurationSerializable {
     }
     
     @SuppressWarnings("unchecked")
-    public ItemGroup(Map<?,?> map) {
+    public ItemGroup(Map<?, ?> map) {
         this.groupMaterials = ((List<String>) map.get("groupMaterials")).stream().map(Material::getMaterial).collect(Collectors.toSet());
         this.minimalYield = ((Number) map.get("minimalYield")).floatValue();
         this.threshold = ((Number) map.get("threshold")).intValue();
         this.limit = ((Number) map.get("limit")).intValue();
-
-        this.currentMinute = ((Number) map.get("currentMinute")).intValue();
+        
+        this.currentMinute = 0;
         this.currentTotal = ((Number) map.get("currentTotal")).intValue();
-        this.buffer = new IntRingBuffer(1440, (int[]) map.get("buffer"));
+        this.buffer = new IntRingBuffer(1440, ((List<Integer>) map.get("buffer")));
         this.currentYield = 1.0f - Utils.clamp(((float) (currentTotal - threshold) / limit), 0.0f, 1.0f - minimalYield);
     }
     
@@ -54,20 +54,20 @@ class ItemGroup implements ConfigurationSerializable {
         currentTotal += currentMinute;
         currentTotal -= buffer.get(0);
         buffer.push(currentMinute);
+        currentMinute = 0;
         this.currentYield = 1.0f - Utils.clamp(((float) (currentTotal - threshold) / limit), 0.0f, 1.0f - minimalYield);
     }
     
     public boolean addCount(List<Block> blocks) {
         long count = blocks.stream().map(Block::getType).filter(groupMaterials::contains).count();
-        currentMinute += count;
-        
+        currentMinute += count * getCurrentYield();
         return count != 0;
     }
     
     public float getCurrentYield() {
         return limit > 0 ? currentYield : 1.0f;
     }
-
+    
     @Override
     public @NotNull Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
@@ -75,13 +75,11 @@ class ItemGroup implements ConfigurationSerializable {
         map.put("minimalYield", minimalYield);
         map.put("threshold", threshold);
         map.put("limit", limit);
-
-        map.put("currentMinute", currentMinute);
-        map.put("currentTotal", currentTotal);
+        map.put("currentTotal", currentTotal + currentMinute);
         map.put("buffer", buffer.stream().toArray());
         return map;
     }
-
+    
     public void setLimit(int limit) {
         this.limit = limit;
     }
@@ -101,7 +99,7 @@ class ItemGroup implements ConfigurationSerializable {
     public boolean removeMaterials(Collection<Material> materials) {
         return groupMaterials.removeAll(materials);
     }
-
+    
     public int getThreshold() {
         return threshold;
     }
