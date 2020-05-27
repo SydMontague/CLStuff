@@ -38,6 +38,8 @@ commands:
     description: Model Tokens
   explonerf:
     description: Explosion based farms nerf
+  recolor:
+    description: Recolors blocks
 permissions:
   clstuff.nodrop.admin:
     default: op

@@ -32,6 +32,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.premium.ModelToken;
+import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import de.craftlancer.core.CancelableRunnable;
@@ -154,6 +155,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         rankings = new Rankings(this);
         getCommand("rankings").setExecutor(rankings);
+        getCommand("recolor").setExecutor(new RecolorCommand());
         
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
