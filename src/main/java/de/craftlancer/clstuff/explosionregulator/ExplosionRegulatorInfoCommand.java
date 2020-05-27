@@ -29,9 +29,10 @@ public class ExplosionRegulatorInfoCommand extends ExplosionRegulatorSubCommand 
 
         ItemGroup group = getRegulator().getItemGroup(id);
         
-        sender.sendMessage(id);
-        sender.sendMessage(String.format("Limit: %d/%d+%d", group.getCurrentTotal(), group.getLimit(), group.getThreshold()));
-        sender.sendMessage(String.format("Yield: %f | Min: %f", group.getCurrentYield(), group.getMinimalYield()));
+        sender.sendMessage("§f[§4Craft§fCitizen]§e Explosion Regulator Status");
+        sender.sendMessage(String.format("  §eID: %s", id));
+        sender.sendMessage(String.format("  §eLimit: %d/%d+%d", group.getCurrentTotal(), group.getLimit(), group.getThreshold()));
+        sender.sendMessage(String.format("  §eYield: %f | Min: %f", group.getCurrentYield(), group.getMinimalYield()));
         return null;
     }
     

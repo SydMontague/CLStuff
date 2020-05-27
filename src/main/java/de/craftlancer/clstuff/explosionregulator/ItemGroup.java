@@ -47,7 +47,8 @@ public class ItemGroup implements ConfigurationSerializable {
         this.currentMinute = 0;
         this.currentTotal = ((Number) map.get("currentTotal")).intValue();
         this.buffer = new IntRingBuffer(1440, ((List<Integer>) map.get("buffer")));
-        this.currentYield = 1.0f - Utils.clamp(((float) (currentTotal - threshold) / limit), 0.0f, 1.0f - minimalYield);
+        
+        this.currentYield = 1.0f - Utils.clamp(((float) (currentTotal - threshold) / limit) * (1.0f - minimalYield), 0.0f, 1.0f);
     }
     
     public void tick() {
@@ -55,7 +56,7 @@ public class ItemGroup implements ConfigurationSerializable {
         currentTotal -= buffer.get(0);
         buffer.push(currentMinute);
         currentMinute = 0;
-        this.currentYield = 1.0f - Utils.clamp(((float) (currentTotal - threshold) / limit), 0.0f, 1.0f - minimalYield);
+        this.currentYield = 1.0f - Utils.clamp(((float) (currentTotal - threshold) / limit) * (1.0f - minimalYield), 0.0f, 1.0f);
     }
     
     public boolean addCount(List<Block> blocks) {
