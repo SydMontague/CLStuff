@@ -47,6 +47,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private ServerQuests serverQuests;
     private Rankings rankings;
     private ModelToken tokens;
+    private RecolorCommand recolor;
     private ExplosionRegulator exploNerf;
     private boolean useDiscord = false;
     
@@ -154,14 +155,16 @@ public class CLStuff extends JavaPlugin implements Listener {
         });
         
         rankings = new Rankings(this);
+        recolor = new RecolorCommand();
         getCommand("rankings").setExecutor(rankings);
-        getCommand("recolor").setExecutor(new RecolorCommand());
+        getCommand("recolor").setExecutor(recolor);
         
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
 
         tokens = new ModelToken(this);
         exploNerf = new ExplosionRegulator(this);
+        Bukkit.getPluginManager().registerEvents(recolor, this);
         Bukkit.getPluginManager().registerEvents(exploNerf, this);
         Bukkit.getPluginManager().registerEvents(tokens, this);
         Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
