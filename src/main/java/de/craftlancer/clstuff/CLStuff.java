@@ -120,6 +120,12 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("wild").setExecutor(new WildCommand(this));
         
+        getCommand("store").setExecutor((a, b, c, d) -> {
+            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
+                    + "https://craftcitizen.tebex.io/");
+            return true;
+        });
+        
         getCommand("logIMIE").setExecutor((a, b, c, d) -> {
             if (a.isOp()) {
                 logMoveEvents = !logMoveEvents;

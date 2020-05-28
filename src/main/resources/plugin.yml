@@ -40,6 +40,9 @@ commands:
     description: Explosion based farms nerf
   recolor:
     description: Recolors blocks
+  store:
+    description: Link to the store
+    aliases: buy
 permissions:
   clstuff.nodrop.admin:
     default: op

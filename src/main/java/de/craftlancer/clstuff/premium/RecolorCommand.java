@@ -1,15 +1,8 @@
 package de.craftlancer.clstuff.premium;
-import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
-import de.craftlancer.core.Utils;
-import me.ryanhamshire.GriefPrevention.Claim;
-import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -25,10 +18,18 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
- 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+
+import de.craftlancer.core.Utils;
+import me.ryanhamshire.GriefPrevention.Claim;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
  
 public class RecolorCommand implements TabExecutor, Listener {
    
@@ -36,12 +37,6 @@ public class RecolorCommand implements TabExecutor, Listener {
     private final List<String> dyeNames = Arrays.asList("Black", "Yellow", "Orange", "Green", "Blue", "Lime",
             "Gray", "Light_Gray", "White", "Red", "Magenta", "Purple", "Brown",
             "Pink", "Cyan", "Light_Blue");
-   
-    private RegionContainer container;
-   
-    public RecolorCommand() {
-        this.container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-    }
    
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
@@ -108,23 +103,28 @@ public class RecolorCommand implements TabExecutor, Listener {
    
     @EventHandler(ignoreCancelled = true)
     public void onDyeApply(PlayerInteractEvent event) {
+        System.out.println(1);
         Player player = event.getPlayer();
        
         if ((event.getAction() != Action.RIGHT_CLICK_BLOCK && event.getAction() != Action.LEFT_CLICK_BLOCK) || !player.isSneaking())
             return;
-       
+
+        System.out.println(2);
         Block block = event.getClickedBlock();
        
         if (block == null)
             return;
-       
+
+        System.out.println(3);
         if (!player.hasPermission("clstuff.recolor"))
             return;
-       
+
+        System.out.println(4);
         ItemStack item = player.getInventory().getItemInMainHand().clone();
        
         if (!item.getType().name().contains("DYE"))
             return;
+        System.out.println(5);
        
         //If there is a claim, can the player build in it?
         if (GriefPrevention.instance.isEnabled()) {
@@ -190,7 +190,7 @@ public class RecolorCommand implements TabExecutor, Listener {
         if (player.isOp())
             return true;
        
-        RegionManager regions = container.get(new BukkitWorld(loc.getWorld()));
+        RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(loc.getWorld()));
         if (WorldGuard.getInstance() == null || regions == null)
             return true;
         BlockVector3 position = BlockVector3.at(loc.getX(), loc.getY(), loc.getZ());
