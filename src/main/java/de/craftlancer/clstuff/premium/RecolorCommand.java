@@ -185,6 +185,8 @@ public class RecolorCommand implements TabExecutor, Listener {
             materialString = color + "_TERRACOTTA";
         else if (type.contains("WOOL"))
             materialString = color + "_WOOL";
+        else if (type.contains("SHULKER_BOX"))
+            materialString = color + "_SHULKER_BOX";
         
         if (materialString == null)
             return null;
