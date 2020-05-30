@@ -2,7 +2,11 @@ package de.craftlancer.clstuff;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.SignStyle;
+import java.time.temporal.ChronoField;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -29,6 +33,8 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import de.craftlancer.clstuff.afk.AFKListener;
+import de.craftlancer.clstuff.commands.CraftCommand;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.premium.ModelToken;
@@ -42,6 +48,55 @@ import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import net.md_5.bungee.api.ChatColor;
 
 public class CLStuff extends JavaPlugin implements Listener {
+    
+    private static final DateTimeFormatter DATE_FORMAT;
+    static {
+        Map<Long, String> dow = new HashMap<>();
+        dow.put(1L, "Mon");
+        dow.put(2L, "Tue");
+        dow.put(3L, "Wed");
+        dow.put(4L, "Thu");
+        dow.put(5L, "Fri");
+        dow.put(6L, "Sat");
+        dow.put(7L, "Sun");
+        Map<Long, String> moy = new HashMap<>();
+        moy.put(1L, "Jan");
+        moy.put(2L, "Feb");
+        moy.put(3L, "Mar");
+        moy.put(4L, "Apr");
+        moy.put(5L, "May");
+        moy.put(6L, "Jun");
+        moy.put(7L, "Jul");
+        moy.put(8L, "Aug");
+        moy.put(9L, "Sep");
+        moy.put(10L, "Oct");
+        moy.put(11L, "Nov");
+        moy.put(12L, "Dec");
+        
+        DATE_FORMAT = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .parseLenient()
+            .optionalStart()
+            .appendText(ChronoField.DAY_OF_WEEK, dow)
+            .appendLiteral(", ")
+            .optionalEnd()
+            .appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+            .appendLiteral(' ')
+            .appendText(ChronoField.MONTH_OF_YEAR, moy)
+            .appendLiteral(' ')
+            .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
+            .appendLiteral(" §e")
+            .appendValue(ChronoField.HOUR_OF_DAY, 2)
+            .appendLiteral(':')
+            .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+            .optionalStart()
+            .appendLiteral(':')
+            .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+            .optionalEnd()
+            .appendLiteral(" §7")
+            .appendOffset("+HHMM", "GMT")  // should handle UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
+            .toFormatter();
+    }
     
     private WGNoDropFlag flag;
     private ServerQuests serverQuests;
@@ -114,7 +169,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         });
         getCommand("cchelp").setExecutor(new CCHelpCommandHandler(this));
         getCommand("time").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
+            a.sendMessage("§f[§4Craft§fCitizen]§7 " + ZonedDateTime.now().format(DATE_FORMAT));
             return true;
         });
         
@@ -165,6 +220,8 @@ public class CLStuff extends JavaPlugin implements Listener {
         getCommand("rankings").setExecutor(rankings);
         getCommand("recolor").setExecutor(recolor);
         
+        getCommand("craft").setExecutor(new CraftCommand());
+        
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
 
@@ -175,6 +232,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(tokens, this);
         Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
         Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
+        Bukkit.getPluginManager().registerEvents(new AFKListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
