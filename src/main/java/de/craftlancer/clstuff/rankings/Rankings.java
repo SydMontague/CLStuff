@@ -140,7 +140,7 @@ public class Rankings implements CommandExecutor {
     }
     
     private void updatePlayer(OfflinePlayer player, boolean isBanned) {
-        if (!player.hasPlayedBefore())
+        if (!player.isOnline() && !player.hasPlayedBefore())
             return;
         
         long lastSeen = lastSeenCache.getLastSeen(player);
