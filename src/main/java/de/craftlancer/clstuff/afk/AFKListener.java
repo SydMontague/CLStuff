@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.Prompt;
@@ -49,8 +50,11 @@ public class AFKListener implements Listener {
                 return null;
             }
         }).addConversationAbandonedListener(event -> {
-            if (!event.gracefulExit())
-                ((Player) event.getContext().getForWhom()).kickPlayer("You've been kicked for inactivity.");
+            Player p = (Player) event.getContext().getForWhom();
+            long timeDiff = System.currentTimeMillis() - players.get(p.getUniqueId());
+            
+            if (!event.gracefulExit() && timeDiff > AFK_TIME)
+                p.kickPlayer("You've been kicked for inactivity.");
             
         });
         
@@ -63,8 +67,10 @@ public class AFKListener implements Listener {
                 
                 long timeDiff = time - players.get(a.getUniqueId());
                 
-                if (timeDiff > AFK_TIME && !a.isConversing())
+                if (timeDiff > AFK_TIME && !a.isConversing()) {
+                    a.playSound(a.getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 1f, 1f);
                     convo.buildConversation(a).begin();
+                }
             });
         }).runTaskTimer(plugin, CHECK_INTERVAL, CHECK_INTERVAL);
     }

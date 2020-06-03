@@ -39,9 +39,11 @@ public class StatsCommandExecutor implements CommandExecutor {
         else if (sender instanceof Player)
             player = (Player) sender;
         
-        if (player == null || (!player.isOnline() && !player.hasPlayedBefore()))
+        if (player == null || (!player.isOnline() && !player.hasPlayedBefore())) {
+            sender.sendMessage("§f[§4Craft§fCitizen]§e Player not found.");
             return false;
-
+        }
+        
         // TODO player profile
         // description
         // Wiki Link
