@@ -45,7 +45,7 @@ commands:
     aliases: buy
   craft:
     description: Opens a crafting table when you have one on your inventory.
-    usage: You need to have a Crafting Table in your inventory.
+    usage: §f[§4Craft§fCitizen]§e You need to have a Crafting Table in your inventory.
 permissions:
   clstuff.craft:
     default: true;

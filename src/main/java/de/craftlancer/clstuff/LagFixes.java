@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -32,10 +33,16 @@ public class LagFixes implements Listener {
     private CLStuff plugin;
     
     private static boolean checkEntity(LivingEntity a, int timeout) {
+        if(a.getType() == EntityType.VILLAGER) {
+            Bukkit.getLogger().severe("Tried to removed Villager at " + a.getLocation());
+            return true;
+        }
+        
         if(!a.isValid())
             return true;
         
         if(a.getCustomName() == null && a.getTicksLived() > timeout) {
+            Bukkit.getLogger().info("Removed " + a.getType() + " at " + a.getLocation());
             a.remove();
             return true;
         }
@@ -51,6 +58,21 @@ public class LagFixes implements Listener {
             pillagerEntities.removeIf(a -> checkEntity(a, PILLAGER_MOB_TIMEOUT));
             golemEntities.removeIf(a -> checkEntity(a, IRON_GOLEM_MOB_TIMEOUT));
         }).runTaskTimer(plugin, SPAWNER_MOB_TIMEOUT, 100);
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onVilliager(CreatureSpawnEvent event) {
+        if(event.getEntityType() != EntityType.VILLAGER)
+            return;
+        
+        if(event.isCancelled())
+            plugin.getLogger().info("Cancelled Villager spawn at: " + event.getLocation());
+        
+        if(!event.getEntity().isPersistent())
+            plugin.getLogger().info("Villager not persistent, for some reason at: " + event.getLocation());
+        
+        if(event.getEntity().getRemoveWhenFarAway())
+            plugin.getLogger().info("Villager set to despawn on distance, for some reason at: " + event.getLocation());
     }
     
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -107,7 +129,7 @@ public class LagFixes implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSpawnerSpawn(CreatureSpawnEvent event) {
-        if (event.getSpawnReason() == SpawnReason.SPAWNER || event.getSpawnReason() == SpawnReason.NETHER_PORTAL) {
+        if (event.getSpawnReason() == SpawnReason.SPAWNER || (event.getEntityType() == EntityType.PIG_ZOMBIE && event.getSpawnReason() == SpawnReason.NETHER_PORTAL)) {
             event.getEntity().setMetadata(SPAWNER_MOB_META, new FixedMetadataValue(plugin, 0));
             spawnerEntities.add(event.getEntity());
         }
