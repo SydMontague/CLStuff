@@ -12,6 +12,7 @@ commands:
     description: Displays your total playtime.
   map:
     description: Displays the link to dynmap.
+    aliases: livemap
   wiki:
     description: Displays the link to the wiki.
   ping:
@@ -20,6 +21,7 @@ commands:
     description: Add | List | Remove items excluded in the nodropflag.
   cchelp:
     description: CraftCititzen help commands.
+    aliases: chelp
   squest:
     description: Server quests
   time:
@@ -34,6 +36,7 @@ commands:
     description: Opens all voting sites at once.
   rankings:
     description: Player rankings.
+    aliases: ranking
   modeltoken:
     description: Model Tokens
   explonerf:
