@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -184,7 +185,10 @@ public class ModelToken implements Listener {
             token.setAmount(token.getAmount() - 1);
         
         // set item to cursor, play sound
-        player.setItemOnCursor(result);
+        ModelTokenApplyEvent applyEvent = new ModelTokenApplyEvent(player, item, token, result);
+        Bukkit.getPluginManager().callEvent(applyEvent);
+        
+        player.setItemOnCursor(applyEvent.getResult());
         inventory.setItem(RESULT_SLOT, null);
         player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, SoundCategory.BLOCKS, 1f, 1f);
     }
