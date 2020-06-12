@@ -119,12 +119,12 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("wiki").setExecutor((a, b, c, d) -> {
             a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftlancer.de/wiki/");
+                    + "https://craftcitizen.net/wiki/");
             return true;
         });
         getCommand("voteall").setExecutor((a, b, c, d) -> {
             a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftlancer.de/voteAll.html");
+                    + "https://craftcitizen.net/voteAll.html");
             return true;
         });
         getCommand("howtoplay").setExecutor((a, b, c, d) -> {
@@ -138,7 +138,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         getCommand("stats").setExecutor(new StatsCommandExecutor(this));
         getCommand("map").setExecutor((a, b, c, d) -> {
             a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftlancer.de/livemap/");
+                    + "https://craftcitizen.net/livemap/");
             return true;
         });
         getCommand("ping").setExecutor((a, b, c, d) -> {
