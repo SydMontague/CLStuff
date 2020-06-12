@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -31,7 +32,7 @@ public class BroadcastReward implements QuestReward {
     
     @Override
     public void questCompleted(Quest quest) {
-        Bukkit.broadcastMessage(message);
+        Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
 
     @Override
