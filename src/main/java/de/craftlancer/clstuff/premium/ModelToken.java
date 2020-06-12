@@ -173,6 +173,13 @@ public class ModelToken implements Listener {
             return;
         }
         
+
+        ModelTokenApplyEvent applyEvent = new ModelTokenApplyEvent(player, item, token, result);
+        Bukkit.getPluginManager().callEvent(applyEvent);
+        
+        if(applyEvent.isCancelled())
+            return;
+        
         // reduce item amounts
         if (item.getAmount() == 1)
             inventory.setItem(ITEM_SLOT, null);
@@ -185,8 +192,6 @@ public class ModelToken implements Listener {
             token.setAmount(token.getAmount() - 1);
         
         // set item to cursor, play sound
-        ModelTokenApplyEvent applyEvent = new ModelTokenApplyEvent(player, item, token, result);
-        Bukkit.getPluginManager().callEvent(applyEvent);
         
         player.setItemOnCursor(applyEvent.getResult());
         inventory.setItem(RESULT_SLOT, null);
