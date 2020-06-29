@@ -18,17 +18,21 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class WildCommand implements CommandExecutor, Listener {
     private static final int CLAIM_DISTANCE = 100;
+    private static final String COOLDOWN_KEY = "clstuff.lastWild";
     
+    private CLStuff plugin;
     private final Random rng = new Random();
     private final int minRadius;
     private final int maxRadius;
     
     public WildCommand(CLStuff plugin) {
+        this.plugin = plugin;
         this.minRadius = plugin.getConfig().getInt("wild.minRadius", 1000);
         this.maxRadius = plugin.getConfig().getInt("wild.maxRadius", 5000);
         
@@ -65,6 +69,11 @@ public class WildCommand implements CommandExecutor, Listener {
         else {
             Player player = (Player) sender;
             
+            if(player.hasMetadata(COOLDOWN_KEY) && player.getMetadata(COOLDOWN_KEY).get(0).asLong() + 60000 > System.currentTimeMillis()) {
+                sender.sendMessage(ChatColor.RED + "Please wait a moment until you run this command again.");
+                return true;
+            }
+            
             World world = Bukkit.getWorlds().get(0);
             Location loc;
             
@@ -79,6 +88,7 @@ public class WildCommand implements CommandExecutor, Listener {
             } while (!isValidLocation(loc));
             
             player.teleport(loc);
+            player.setMetadata(COOLDOWN_KEY, new FixedMetadataValue(plugin, System.currentTimeMillis()));
         }
         return true;
     }

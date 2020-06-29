@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.HumanEntity;
@@ -81,8 +82,11 @@ public class ModelToken implements Listener {
         
         tokenMap = config.getMapList("modelTokens").stream()
                          .collect(Collectors.toMap(a -> (ItemStack) a.get("tokenItem"), a -> (TokenData) a.get("tokenData")));
-        cmdBlacklist = config.getConfigurationSection("blacklist").getValues(false).entrySet().stream()
-                             .collect(Collectors.toMap(a -> Material.getMaterial(a.getKey()), a -> (List<Integer>) a.getValue()));
+        
+        ConfigurationSection blacklist = config.getConfigurationSection("blacklist");
+        if (blacklist != null)
+            cmdBlacklist = blacklist.getValues(false).entrySet().stream()
+                                    .collect(Collectors.toMap(a -> Material.getMaterial(a.getKey()), a -> (List<Integer>) a.getValue()));
     }
     
     public void save() {
@@ -173,11 +177,10 @@ public class ModelToken implements Listener {
             return;
         }
         
-
         ModelTokenApplyEvent applyEvent = new ModelTokenApplyEvent(player, item, token, result);
         Bukkit.getPluginManager().callEvent(applyEvent);
         
-        if(applyEvent.isCancelled())
+        if (applyEvent.isCancelled())
             return;
         
         // reduce item amounts

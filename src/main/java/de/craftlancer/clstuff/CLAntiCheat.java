@@ -1,39 +1,55 @@
 package de.craftlancer.clstuff;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.Event.Result;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 
+import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.logging.PluginFileLogger;
+import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class CLAntiCheat implements Listener {
     private Logger logger;
+    private Plugin plugin;
     
     public CLAntiCheat(Plugin plugin) {
-        this.logger = plugin.getLogger();
+        this.plugin = plugin;
+        this.logger = new PluginFileLogger(CLAntiCheat.class.getCanonicalName(), plugin, "anticheat.log");
     }
     
+    /*
+     * Prevent Donkey dupe
+     */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerLogout(PlayerQuitEvent event) {
         Player p = event.getPlayer();
@@ -49,6 +65,9 @@ public class CLAntiCheat implements Listener {
             });
     }
     
+    /*
+     * Prevent block glitching to open inventories
+     */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onInventoryOpen(InventoryOpenEvent event) {
         Inventory inventory = event.getInventory();
@@ -94,6 +113,48 @@ public class CLAntiCheat implements Listener {
         event.setCancelled(true);
     }
     
+    private static boolean isCheckedInventory(InventoryType type) {
+        switch (type) {
+            case BARREL:
+            case BEACON:
+            case BLAST_FURNACE:
+            case BREWING:
+            case CHEST:
+            case DISPENSER:
+            case DROPPER:
+            case FURNACE:
+            case HOPPER:
+            case LECTERN:
+            case SHULKER_BOX:
+            case SMOKER:
+                return true;
+            default:
+                return false;
+        }
+    }
+    
+    /*
+     * Log logging out in enemy claims
+     */
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        Location loc = e.getPlayer().getLocation();
+        
+        Optional<Claim> claim = GriefPrevention.instance.dataStore.getClaims().stream().filter(a -> a.contains(loc, true, false)).findFirst();
+        
+        if (claim.isPresent() && claim.get().allowAccess(p) == null)
+            logger.info(() -> String.format("%s has logged out inside a claim of %s at: %d %d %d",
+                                            p.getName(),
+                                            claim.get().getOwnerName(),
+                                            loc.getBlockX(),
+                                            loc.getBlockY(),
+                                            loc.getBlockZ()));
+    }
+    
+    /*
+     * Prevent settings home in enemy claims
+     */
     @EventHandler
     public void onCommand(PlayerCommandPreprocessEvent e) {
         if (!e.getMessage().startsWith("/sethome"))
@@ -120,23 +181,58 @@ public class CLAntiCheat implements Listener {
         }
     }
     
-    private static boolean isCheckedInventory(InventoryType type) {
-        switch (type) {
-            case BARREL:
-            case BEACON:
-            case BLAST_FURNACE:
-            case BREWING:
-            case CHEST:
-            case DISPENSER:
-            case DROPPER:
-            case FURNACE:
-            case HOPPER:
-            case LECTERN:
-            case SHULKER_BOX:
-            case SMOKER:
-                return true;
-            default:
-                return false;
+    /*
+     * Prevent boat glitching and block glitching into vehicles
+     */
+    //@EventHandler
+    public void onVehicleLeave(VehicleExitEvent event) {
+        Vehicle vehicle = event.getVehicle();
+        LivingEntity passenger = event.getExited();
+        new LambdaRunnable(() -> {
+            Location start = passenger.getLocation();
+            Vector direction = vehicle.getLocation().clone().subtract(start).toVector().normalize();
+            double maxDistance = vehicle.getLocation().distance(start);
+            
+            if (!Double.isFinite(direction.length()))
+                return;
+            
+            RayTraceResult result = passenger.getWorld().rayTraceBlocks(start, direction, maxDistance, FluidCollisionMode.NEVER, true);
+            if (result != null) {
+                passenger.teleport(vehicle);
+                
+                logger.info(() -> String.format("%s may have tried to vehicle glitch at: %d %d %d | %s",
+                                                passenger.getName(),
+                                                start.getBlockX(),
+                                                start.getBlockY(),
+                                                start.getBlockZ(),
+                                                vehicle.getType().name()));
+            }
+        }).runTask(plugin);
+    }
+    
+    //@EventHandler(ignoreCancelled = true)
+    public void onEntityInteract(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        Entity entity = event.getRightClicked();
+        
+        if (player.getVehicle() == entity)
+            return;
+        
+        Location start = player.getEyeLocation();
+        double maxDistance = entity.getLocation().distance(start);
+        
+        RayTraceResult result = player.getWorld().rayTrace(start, start.getDirection(), maxDistance, FluidCollisionMode.NEVER, true, 0.0D, a -> a != player);
+        
+        if (result == null || result.getHitBlock() != null) {
+            event.setCancelled(true);
+            
+            logger.info(() -> String.format("%s may have tried to block glitch at: %d %d %d | %s | %s",
+                                            player.getName(),
+                                            start.getBlockX(),
+                                            start.getBlockY(),
+                                            start.getBlockZ(),
+                                            entity.getType().name(),
+                                            event.getHand().name()));
         }
     }
 }

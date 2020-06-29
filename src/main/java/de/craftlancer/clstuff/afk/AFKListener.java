@@ -51,6 +51,10 @@ public class AFKListener implements Listener {
             }
         }).addConversationAbandonedListener(event -> {
             Player p = (Player) event.getContext().getForWhom();
+            
+            if (p == null || !p.isOnline())
+                return;
+            
             long timeDiff = System.currentTimeMillis() - players.get(p.getUniqueId());
             
             if (!event.gracefulExit() && timeDiff > AFK_TIME)
@@ -58,11 +62,10 @@ public class AFKListener implements Listener {
             
         });
         
-        
         new LambdaRunnable(() -> {
             long time = System.currentTimeMillis();
             Bukkit.getOnlinePlayers().forEach(a -> {
-                if(a.isOp())
+                if (a.isOp())
                     return;
                 
                 long timeDiff = time - players.get(a.getUniqueId());
@@ -97,7 +100,7 @@ public class AFKListener implements Listener {
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         players.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
     }
-
+    
     @EventHandler
     public void onEnchant(EnchantItemEvent event) {
         players.put(event.getEnchanter().getUniqueId(), System.currentTimeMillis());
@@ -107,12 +110,12 @@ public class AFKListener implements Listener {
     public void onCraft(CraftItemEvent event) {
         players.put(event.getWhoClicked().getUniqueId(), System.currentTimeMillis());
     }
-
+    
     @EventHandler
     public void onTakeBook(PlayerTakeLecternBookEvent event) {
         players.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());
     }
-
+    
     @EventHandler
     public void onTakeBook(PlayerRespawnEvent event) {
         players.put(event.getPlayer().getUniqueId(), System.currentTimeMillis());

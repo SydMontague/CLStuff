@@ -2,7 +2,7 @@ name: CLStuff
 main: de.craftlancer.clstuff.CLStuff
 version: ${project.version}
 api-version: 1.14
-depend: [CLCore]
+depend: [CLCore, CLFeatures]
 softdepend: [DiscordSRV, CombatLogX]
 loadbefore: [WorldGuard]
 commands:
@@ -49,6 +49,8 @@ commands:
   craft:
     description: Opens a crafting table when you have one on your inventory.
     usage: §f[§4Craft§fCitizen]§e You need to have a Crafting Table in your inventory.
+  dungeons:
+    description: Gives you a dungeons tutorial book.
 permissions:
   clstuff.craft:
     default: true;
