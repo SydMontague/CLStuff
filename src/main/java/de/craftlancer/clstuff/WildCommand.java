@@ -78,11 +78,11 @@ public class WildCommand implements CommandExecutor, Listener {
             Location loc;
             
             do {
-                int distance = minRadius + rng.nextInt(maxRadius - minRadius);
-                float rotation = rng.nextFloat() * 2 - 1;
-                
-                int locX = (int) (distance * rotation);
-                int locZ = (int) Math.sqrt((double) distance * distance - locX * locX) * (rng.nextBoolean() ? 1 : -1);
+                double rotation = 2 * Math.PI * rng.nextDouble();
+                int distance =  minRadius + rng.nextInt(maxRadius - minRadius);
+
+                int locX = (int) (distance * Math.cos(rotation));
+                int locZ = (int) (distance * Math.sin(rotation));
                 
                 loc = new Location(world, locX + 0.5D, world.getHighestBlockYAt(locX, locZ) + 1D, locZ + 0.5D);
             } while (!isValidLocation(loc));
