@@ -95,7 +95,7 @@ public class LagFixes implements Listener {
         }
         
         // disable underground pillager spawns
-        if (event.getEntityType() == EntityType.PILLAGER && event.getLocation().getBlockY() < 62) {
+        if (event.getSpawnReason() != SpawnReason.CUSTOM && event.getEntityType() == EntityType.PILLAGER && event.getLocation().getBlockY() < 62) {
             event.setCancelled(true);
             return;
         }
