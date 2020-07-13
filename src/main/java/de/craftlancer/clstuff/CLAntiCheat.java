@@ -24,6 +24,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.BlockInventoryHolder;
@@ -181,10 +182,27 @@ public class CLAntiCheat implements Listener {
         }
     }
     
+    @EventHandler
+    public void onSpawnerInteract(PlayerInteractEvent event) {
+        if (!event.hasBlock() || !event.hasItem())
+            return;
+        
+        if (event.getPlayer().isOp())
+            return;
+        
+        if (event.getClickedBlock().getType() != Material.SPAWNER)
+            return;
+        
+        if (event.getItem().getType().name().endsWith("SPAWN_EGG")) {
+            event.setCancelled(true);
+            logger.info(() -> String.format("%s may have tried to change a spawner to %s", event.getPlayer().getName(), event.getItem().getType().name()));
+        }
+    }
+    
     /*
      * Prevent boat glitching and block glitching into vehicles
      */
-    //@EventHandler
+    // @EventHandler
     public void onVehicleLeave(VehicleExitEvent event) {
         Vehicle vehicle = event.getVehicle();
         LivingEntity passenger = event.getExited();
@@ -210,7 +228,7 @@ public class CLAntiCheat implements Listener {
         }).runTask(plugin);
     }
     
-    //@EventHandler(ignoreCancelled = true)
+    // @EventHandler(ignoreCancelled = true)
     public void onEntityInteract(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
