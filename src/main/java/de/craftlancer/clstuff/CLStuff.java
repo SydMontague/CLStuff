@@ -28,12 +28,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.afk.AFKListener;
+import de.craftlancer.clstuff.arena.ArenaGUI;
 import de.craftlancer.clstuff.commands.CraftCommand;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
@@ -92,8 +92,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private RecolorCommand recolor;
     private ExplosionRegulator exploNerf;
     private boolean useDiscord = false;
-    
-    private boolean logMoveEvents = false;
+    private ArenaGUI arenaGUI;
     
     @Override
     public void onLoad() {
@@ -177,13 +176,6 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
-        getCommand("logIMIE").setExecutor((a, b, c, d) -> {
-            if (a.isOp()) {
-                logMoveEvents = !logMoveEvents;
-                a.sendMessage("logMoveEvents is now " + logMoveEvents);
-            }
-            return true;
-        });
         getCommand("countEntities").setExecutor((a, b, c, d) -> {
             if (!a.isOp())
                 return true;
@@ -235,6 +227,14 @@ public class CLStuff extends JavaPlugin implements Listener {
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
         
         new LambdaRunnable(this::save).runTaskTimer(this, 18000L, 18000L);
+        
+        try {
+            arenaGUI = new ArenaGUI(this);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            // we don't want things to crash just because someone messed up something
+        }
     }
     
     class EntityEntry {
@@ -262,14 +262,6 @@ public class CLStuff extends JavaPlugin implements Listener {
         rankings.save();
         tokens.save();
         exploNerf.save();
-    }
-    
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onItemMove(InventoryMoveItemEvent event) {
-        if (!logMoveEvents)
-            return;
-        
-        getLogger().info(() -> "IMIE: " + event.getInitiator().getLocation().toString());
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)

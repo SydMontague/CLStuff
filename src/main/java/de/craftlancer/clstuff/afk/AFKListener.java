@@ -55,7 +55,7 @@ public class AFKListener implements Listener {
             if (p == null || !p.isOnline())
                 return;
             
-            long timeDiff = System.currentTimeMillis() - players.get(p.getUniqueId());
+            long timeDiff = System.currentTimeMillis() - players.getOrDefault(p.getUniqueId(), System.currentTimeMillis());
             
             if (!event.gracefulExit() && timeDiff > AFK_TIME)
                 p.kickPlayer("You've been kicked for inactivity.");

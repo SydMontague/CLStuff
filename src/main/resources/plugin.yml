@@ -3,7 +3,7 @@ main: de.craftlancer.clstuff.CLStuff
 version: ${project.version}
 api-version: 1.14
 depend: [CLCore, CLFeatures]
-softdepend: [DiscordSRV, CombatLogX]
+softdepend: [DiscordSRV, CombatLogX, MythicMobs]
 loadbefore: [WorldGuard]
 commands:
   howtoplay:
@@ -28,8 +28,6 @@ commands:
     description: Shows server time
   wild:
     description: Teleports to a random location
-  logIMIE:
-    description: Debug command
   countEntities:
     description: Debug command
   voteall:
@@ -51,6 +49,8 @@ commands:
     usage: §f[§4Craft§fCitizen]§e You need to have a Crafting Table in your inventory.
   dungeons:
     description: Gives you a dungeons tutorial book.
+  arenagui:
+    description: Create Arena GUIs
 permissions:
   clstuff.craft:
     default: true;

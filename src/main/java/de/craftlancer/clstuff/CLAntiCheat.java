@@ -144,7 +144,7 @@ public class CLAntiCheat implements Listener {
         
         Optional<Claim> claim = GriefPrevention.instance.dataStore.getClaims().stream().filter(a -> a.contains(loc, true, false)).findFirst();
         
-        if (claim.isPresent() && claim.get().allowAccess(p) == null)
+        if (claim.isPresent() && claim.get().allowAccess(p) != null)
             logger.info(() -> String.format("%s has logged out inside a claim of %s at: %d %d %d",
                                             p.getName(),
                                             claim.get().getOwnerName(),

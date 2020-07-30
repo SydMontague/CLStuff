@@ -34,6 +34,12 @@
       <id>Scarsz-Nexus</id>
       <url>https://nexus.scarsz.me/content/groups/public/</url>
     </repository>
+
+    <repository>
+      <id>nexus</id>
+      <name>Lumine Releases</name>
+      <url>https://mvn.lumine.io/repository/maven-public/</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -97,6 +103,13 @@
       <groupId>com.discordsrv</groupId>
       <artifactId>discordsrv</artifactId>
       <version>1.18.4</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.lumine.xikage</groupId>
+      <artifactId>MythicMobs</artifactId>
+      <version>4.9.1</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
