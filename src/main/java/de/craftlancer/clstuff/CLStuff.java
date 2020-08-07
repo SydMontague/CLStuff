@@ -272,10 +272,13 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     @EventHandler
     public void onElytraCraft(CraftItemEvent event) {
-        ItemStack result = event.getRecipe().getResult();
+        ItemStack result = event.getInventory().getResult();
         Player player = (Player) event.getWhoClicked();
         
-        if (result.getType() == Material.ELYTRA) {
+        //is there a curse of vanishing elytra in the recipe?
+        boolean isCursedElytra = Arrays.stream(event.getInventory().getMatrix()).anyMatch(item -> item != null && item.getType() == Material.ELYTRA && item.getEnchantmentLevel(Enchantment.VANISHING_CURSE) > 0);
+        
+        if (result.getType() == Material.ELYTRA && isCursedElytra) {
             event.setResult(Result.DENY);
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1F, 1F);
             player.sendMessage(ChatColor.RED + "You cannot use elytras in crafting tables!");
