@@ -24,7 +24,7 @@ import de.craftlancer.clstuff.CLStuff;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class WildCommand implements CommandExecutor, Listener {
-    private static final int CLAIM_DISTANCE = 100;
+    private static final int CLAIM_DISTANCE = 200;
     private static final String COOLDOWN_KEY = "clstuff.lastWild";
     
     private CLStuff plugin;
