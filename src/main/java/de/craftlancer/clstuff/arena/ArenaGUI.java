@@ -6,7 +6,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -73,11 +77,15 @@ public class ArenaGUI implements Listener {
         return String.format("%s,%d,%d,%d.yml", loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
     }
     
-    private static Location getSimpleLocation(ConfigurationSection section) {
+    @Nonnull
+    private static Location getSimpleLocation(@Nullable ConfigurationSection section) {
+        if(section == null)
+            return new Location(Bukkit.getWorlds().get(0), 0, 128, 0);
+        
         return new Location(Bukkit.getWorld(section.getString("world")), section.getInt("x"), section.getInt("y"), section.getInt("z"));
     }
     
-    private static void setSimpleLocation(ConfigurationSection section, Location loc) {
+    private static void setSimpleLocation(@Nonnull ConfigurationSection section, @Nonnull Location loc) {
         section.set("world", loc.getWorld().getName());
         section.set("x", loc.getBlockX());
         section.set("y", loc.getBlockY());
@@ -105,20 +113,23 @@ public class ArenaGUI implements Listener {
             
             Location loc = getSimpleLocation(config.getConfigurationSection("location"));
             Location spawnLoc = getSimpleLocation(config.getConfigurationSection("spawnLocation"));
+            Location playerLoc = getSimpleLocation(config.getConfigurationSection("playerLoc"));
+            
             String name = config.getString("name", "");
             
             List<ArenaMob> mob = config.getMapList("mobs").stream().map(a -> {
                 String mobName = (String) a.get("name");
+                boolean teleportPlayer = Optional.ofNullable((Boolean) a.get("teleportPlayer")).orElse(false);
                 List<String> lore = (List<String>) a.get("lore");
                 String head = (String) a.get("head");
                 List<String> spawns = (List<String>) a.get("spawns");
                 List<ArenaCost> cost = ((List<Map<?, ?>>) a.get("cost")).stream().map(b -> new ArenaCost((String) b.get("type"), (Integer) b.get("amount")))
                                                                         .collect(Collectors.toList());
                 
-                return new ArenaMob(mobName, lore, head, spawns, cost);
+                return new ArenaMob(mobName, lore, head, spawns, cost, teleportPlayer);
             }).collect(Collectors.toList());
             
-            entry.put(loc, new ArenaEntry(plugin, loc, spawnLoc, name, mob));
+            entry.put(loc, new ArenaEntry(plugin, loc, spawnLoc, playerLoc, name, mob));
         }
     }
 

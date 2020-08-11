@@ -43,8 +43,7 @@ public class QuestRequirementRemoveCommand extends QuestCommand {
     
     @Override
     public void help(CommandSender arg0) {
-        // TODO Auto-generated method stub
-        
+        // not implemented
     }
 
     

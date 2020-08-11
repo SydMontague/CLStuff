@@ -67,8 +67,7 @@ public class QuestInfoCommand extends QuestCommand {
     
     @Override
     public void help(CommandSender arg0) {
-        // TODO Auto-generated method stub
-        
+        // not implemented
     }
     
     @Override

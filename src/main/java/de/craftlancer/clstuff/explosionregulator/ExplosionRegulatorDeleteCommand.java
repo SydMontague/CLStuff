@@ -35,8 +35,7 @@ public class ExplosionRegulatorDeleteCommand extends ExplosionRegulatorSubComman
     
     @Override
     public void help(CommandSender sender) {
-        // TODO Auto-generated method stub
-        
+        // not implemented
     }
     
     @Override

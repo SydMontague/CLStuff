@@ -12,13 +12,11 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -30,24 +28,32 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.afk.AFKListener;
 import de.craftlancer.clstuff.arena.ArenaGUI;
 import de.craftlancer.clstuff.commands.CraftCommand;
+import de.craftlancer.clstuff.commands.StatsCommand;
+import de.craftlancer.clstuff.commands.WildCommand;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.squest.ServerQuests;
-import de.craftlancer.core.CancelableRunnable;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.NMSUtils;
+import de.craftlancer.core.Utils;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import me.ryanhamshire.GriefPrevention.PlayerData;
 import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CLStuff extends JavaPlugin implements Listener {
     
@@ -103,6 +109,10 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     @Override
     public void onEnable() {
+        BaseComponent prefix = new TextComponent(new ComponentBuilder("[").color(ChatColor.WHITE).append("Craft").color(ChatColor.DARK_RED).append("Citizen")
+                                                                          .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
+        MessageUtil.registerPlugin(this, prefix, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA);
+        
         useDiscord = Bukkit.getPluginManager().getPlugin("DiscordSRV") != null;
         
         getCommand("wiki").setExecutor((a, b, c, d) -> {
@@ -131,7 +141,7 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
-        getCommand("stats").setExecutor(new StatsCommandExecutor(this));
+        getCommand("stats").setExecutor(new StatsCommand(this));
         getCommand("map").setExecutor((a, b, c, d) -> {
             a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
                     + "https://craftcitizen.net/livemap/");
@@ -205,6 +215,48 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
+        getCommand("giveclaimblocks").setExecutor((a, b, c, args) -> {
+            if (args.length < 2)
+                return false;
+            
+            if (!(a instanceof Player))
+                return false;
+            
+            @SuppressWarnings("deprecation")
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+            Player sender = (Player) a;
+            int amount = Utils.parseIntegerOrDefault(args[1], 0);
+            
+            if (amount <= 0) {
+                MessageUtil.sendMessage(this, sender, MessageLevel.WARNING, "You must specify a positive amount of claimblocks.");
+                return true;
+            }
+            if (!target.isOnline() && !target.hasPlayedBefore()) {
+                MessageUtil.sendMessage(this, sender, MessageLevel.WARNING, "Target player not found.");
+                return true;
+            }
+            
+            PlayerData senderData = GriefPrevention.instance.dataStore.getPlayerData(sender.getUniqueId());
+            PlayerData targetData = GriefPrevention.instance.dataStore.getPlayerData(target.getUniqueId());
+            
+            if (senderData.getRemainingClaimBlocks() < amount) {
+                MessageUtil.sendMessage(this, sender, MessageLevel.WARNING, "You don't have enough claimblocks to send.");
+                return true;
+            }
+            
+            senderData.setBonusClaimBlocks(senderData.getBonusClaimBlocks() - amount);
+            targetData.setBonusClaimBlocks(targetData.getBonusClaimBlocks() + amount);
+            
+            
+            MessageUtil.sendMessage(this, sender, MessageLevel.INFO, String.format("You sent %d claimblocks to %s.", amount, target.getName()));
+            if (target.isOnline())
+                MessageUtil.sendMessage(this, target.getPlayer(), MessageLevel.INFO, String.format("%s sent you %d claimblocks.", target.getName(), amount));
+            else
+                GriefPrevention.instance.dataStore.savePlayerData(target.getUniqueId(), targetData);
+            
+            return true;
+        });
+        
         rankings = new Rankings(this);
         recolor = new RecolorCommand();
         getCommand("rankings").setExecutor(rankings);
@@ -237,6 +289,18 @@ public class CLStuff extends JavaPlugin implements Listener {
             e.printStackTrace();
             // we don't want things to crash just because someone messed up something
         }
+    }
+    
+    public boolean isUsingDiscord() {
+        return useDiscord;
+    }
+    
+    public WGNoDropFlag getNoDropFlag() {
+        return flag;
+    }
+    
+    public ModelToken getModelToken() {
+        return tokens;
     }
     
     class EntityEntry {
@@ -272,13 +336,17 @@ public class CLStuff extends JavaPlugin implements Listener {
             event.setCancelled(false);
     }
     
+    /*
+     * Prevent merging vanishing elytra
+     */
     @EventHandler
     public void onElytraCraft(CraftItemEvent event) {
         ItemStack result = event.getInventory().getResult();
         Player player = (Player) event.getWhoClicked();
         
-        //is there a curse of vanishing elytra in the recipe?
-        boolean isCursedElytra = Arrays.stream(event.getInventory().getMatrix()).anyMatch(item -> item != null && item.getType() == Material.ELYTRA && item.getEnchantmentLevel(Enchantment.VANISHING_CURSE) > 0);
+        // is there a curse of vanishing elytra in the recipe?
+        boolean isCursedElytra = Arrays.stream(event.getInventory().getMatrix()).anyMatch(item -> item != null && item.getType() == Material.ELYTRA
+                && item.getEnchantmentLevel(Enchantment.VANISHING_CURSE) > 0);
         
         if (result.getType() == Material.ELYTRA && isCursedElytra) {
             event.setResult(Result.DENY);
@@ -287,6 +355,9 @@ public class CLStuff extends JavaPlugin implements Listener {
         }
     }
     
+    /*
+     * Sethome on first chest placement
+     */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onChestPlace(BlockPlaceEvent event) {
         if (event.getBlock().getType() != Material.CHEST)
@@ -301,27 +372,9 @@ public class CLStuff extends JavaPlugin implements Listener {
         p.sendMessage(ChatColor.GOLD + "You can change your spawnpoint at any time using /sethome.");
     }
     
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void onRespawn(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
-        
-        player.setPortalCooldown(600);
-        
-        BossBar bar = Bukkit.createBossBar("Portal Cooldown", BarColor.PURPLE, BarStyle.SOLID);
-        
-        bar.addPlayer(event.getPlayer());
-        new CancelableRunnable(() -> {
-            bar.setProgress(player.getPortalCooldown() / 600D);
-            bar.setTitle(ChatColor.YELLOW + "Portal Cooldown " + ChatColor.GRAY + " - " + ChatColor.GOLD + " " + player.getPortalCooldown() / 20 + " "
-                    + ChatColor.YELLOW + "seconds");
-            if (player.getPortalCooldown() <= 0) {
-                bar.removeAll();
-                return true;
-            }
-            return false;
-        }).runTaskTimer(this, 0, 20);
-    }
-    
+    /*
+     * Warn about nether claims
+     */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void claimWarnNether(ClaimCreatedEvent event) {
         World world = event.getClaim().getLesserBoundaryCorner().getWorld();
@@ -336,23 +389,14 @@ public class CLStuff extends JavaPlugin implements Listener {
         }
     }
     
+    /*
+     * Prevent custom helmets to be placed
+     */
     @EventHandler
     public void onPumpkinPlace(BlockPlaceEvent event) {
         ItemStack item = event.getItemInHand();
         
         if (item.getType() == Material.CARVED_PUMPKIN && item.getItemMeta().hasCustomModelData())
             event.setCancelled(true);
-    }
-    
-    public boolean isUsingDiscord() {
-        return useDiscord;
-    }
-    
-    public WGNoDropFlag getNoDropFlag() {
-        return flag;
-    }
-    
-    public ModelToken getModelToken() {
-        return tokens;
     }
 }

@@ -1,4 +1,4 @@
-package de.craftlancer.clstuff;
+package de.craftlancer.clstuff.commands;
 
 import java.util.Random;
 
@@ -20,6 +20,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import de.craftlancer.clstuff.CLStuff;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class WildCommand implements CommandExecutor, Listener {
@@ -100,7 +101,7 @@ public class WildCommand implements CommandExecutor, Listener {
         if (!loc.getWorld().getHighestBlockAt(loc).getType().isSolid())
             return false;
         
-        switch (loc.getWorld().getBiome(loc.getBlockX(), loc.getBlockZ())) {
+        switch (loc.getWorld().getBiome(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
             case DESERT:
             case DESERT_HILLS:
             case DESERT_LAKES:

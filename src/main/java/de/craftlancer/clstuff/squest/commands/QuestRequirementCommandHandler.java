@@ -18,8 +18,7 @@ public class QuestRequirementCommandHandler extends SubCommandHandler {
 
     @Override
     public void help(CommandSender arg0) {
-        // TODO Auto-generated method stub
-        
+        // not implemented
     }
     
 }

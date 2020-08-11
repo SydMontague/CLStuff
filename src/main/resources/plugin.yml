@@ -51,6 +51,9 @@ commands:
     description: Gives you a dungeons tutorial book.
   arenagui:
     description: Create Arena GUIs
+  giveclaimblocks:
+    description: Sends claimblocks to another player.
+    usage: /giveclaimblocks <target> <amount>
 permissions:
   clstuff.craft:
     default: true;

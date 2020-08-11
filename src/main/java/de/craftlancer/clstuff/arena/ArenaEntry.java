@@ -2,6 +2,7 @@ package de.craftlancer.clstuff.arena;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.bukkit.Location;
@@ -24,6 +25,7 @@ class ArenaEntry {
     
     private final Location location;
     private final Location spawnLocation;
+    private final Location playerLocation;
     private final String name;
     private final List<ArenaMob> mobs;
     
@@ -34,13 +36,14 @@ class ArenaEntry {
         return gui;
     }
     
-    public ArenaEntry(Plugin plugin, Location loc, Location spawnLoc, String name2, List<ArenaMob> mob) {
+    public ArenaEntry(Plugin plugin, Location loc, Location spawnLoc, Location playerLocation, String name2, List<ArenaMob> mob) {
         this.plugin = plugin;
         this.location = loc;
         this.spawnLocation = spawnLoc;
+        this.playerLocation = playerLocation;
         this.name = name2;
         this.mobs = mob;
-        this.mobNames = mob.stream().filter(a -> a != null).flatMap(a -> a.getDescription().stream()).collect(Collectors.toList());
+        this.mobNames = mob.stream().filter(Objects::nonNull).flatMap(a -> a.getDescription().stream()).collect(Collectors.toList());
         
         buildInventory();
     }
@@ -100,7 +103,7 @@ class ArenaEntry {
         }
         
         if (!canPay) {
-            MessageUtil.sendMessage(plugin, p, MessageLevel.WARNING, "You can't affort to spawn this mob.");
+            MessageUtil.sendMessage(plugin, p, MessageLevel.WARNING, "You can't afford to spawn this mob.");
             return;
         }
         
@@ -124,6 +127,9 @@ class ArenaEntry {
         catch (InvalidMobTypeException e) {
             e.printStackTrace();
         }
+        
+        if(mob.isTeleportPlayer())
+            p.teleport(playerLocation);
         
         p.closeInventory();
         MessageUtil.sendMessage(plugin, p, MessageLevel.NORMAL, "Boss Mob spawned.");

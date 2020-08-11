@@ -16,8 +16,7 @@ public class ModelTokenBlacklistCommandHandler extends SubCommandHandler {
 
     @Override
     public void help(CommandSender sender) {
-        // TODO Auto-generated method stub
-        
+        // not implemented
     }
 
 }

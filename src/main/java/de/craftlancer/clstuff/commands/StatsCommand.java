@@ -1,4 +1,4 @@
-package de.craftlancer.clstuff;
+package de.craftlancer.clstuff.commands;
 
 import java.text.DecimalFormat;
 
@@ -14,18 +14,19 @@ import org.bukkit.entity.Player;
 import de.craftlancer.clclans.CLClans;
 import de.craftlancer.clclans.Clan;
 import de.craftlancer.clclans.ClanUtils;
+import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.rankings.Rankings.RankingsEntry;
 import de.craftlancer.core.CLCore;
 import de.craftlancer.core.Utils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
-public class StatsCommandExecutor implements CommandExecutor {
+public class StatsCommand implements CommandExecutor {
     private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("0.00");
     
     private CLStuff plugin;
     
-    public StatsCommandExecutor(CLStuff plugin) {
+    public StatsCommand(CLStuff plugin) {
         this.plugin = plugin;
     }
     
