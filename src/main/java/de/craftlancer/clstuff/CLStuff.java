@@ -250,7 +250,7 @@ public class CLStuff extends JavaPlugin implements Listener {
             
             MessageUtil.sendMessage(this, sender, MessageLevel.INFO, String.format("You sent %d claimblocks to %s.", amount, target.getName()));
             if (target.isOnline())
-                MessageUtil.sendMessage(this, target.getPlayer(), MessageLevel.INFO, String.format("%s sent you %d claimblocks.", target.getName(), amount));
+                MessageUtil.sendMessage(this, target.getPlayer(), MessageLevel.INFO, String.format("%s sent you %d claimblocks.", sender.getName(), amount));
             else
                 GriefPrevention.instance.dataStore.savePlayerData(target.getUniqueId(), targetData);
             
