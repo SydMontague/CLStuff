@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import de.craftlancer.core.CLCore;
+import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.gui.GUIInventory;
 import de.craftlancer.core.items.CustomItemRegistry;
 import de.craftlancer.core.util.MessageLevel;
@@ -26,6 +27,7 @@ class ArenaEntry {
     private final Location location;
     private final Location spawnLocation;
     private final Location playerLocation;
+    private final long teleportDelay;
     private final String name;
     private final List<ArenaMob> mobs;
     
@@ -36,18 +38,19 @@ class ArenaEntry {
         return gui;
     }
     
-    public ArenaEntry(Plugin plugin, Location loc, Location spawnLoc, Location playerLocation, String name2, List<ArenaMob> mob) {
+    public ArenaEntry(Plugin plugin, Location loc, Location spawnLoc, Location playerLocation, String name, long teleportDelay, List<ArenaMob> mob) {
         this.plugin = plugin;
         this.location = loc;
         this.spawnLocation = spawnLoc;
         this.playerLocation = playerLocation;
-        this.name = name2;
+        this.name = name;
         this.mobs = mob;
+        this.teleportDelay = teleportDelay;
         this.mobNames = mob.stream().filter(Objects::nonNull).flatMap(a -> a.getDescription().stream()).collect(Collectors.toList());
         
         buildInventory();
     }
-
+    
     private void buildInventory() {
         gui = new GUIInventory(plugin, name, 1 + mobs.size() / 9);
         
@@ -128,8 +131,14 @@ class ArenaEntry {
             e.printStackTrace();
         }
         
-        if(mob.isTeleportPlayer())
-            p.teleport(playerLocation);
+        if (mob.isTeleportPlayer()) {
+            if (teleportDelay <= 0)
+                p.teleport(playerLocation);
+            else {
+                new LambdaRunnable(() -> p.teleport(playerLocation)).runTaskLater(plugin, teleportDelay);
+                MessageUtil.sendMessage(plugin, p, MessageLevel.INFO, "You'll be teleported shortly.");
+            }
+        }
         
         p.closeInventory();
         MessageUtil.sendMessage(plugin, p, MessageLevel.NORMAL, "Boss Mob spawned.");

@@ -114,6 +114,7 @@ public class ArenaGUI implements Listener {
             Location loc = getSimpleLocation(config.getConfigurationSection("location"));
             Location spawnLoc = getSimpleLocation(config.getConfigurationSection("spawnLocation"));
             Location playerLoc = getSimpleLocation(config.getConfigurationSection("playerLoc"));
+            long teleportDelay = config.getLong("teleportDelay", 0L);
             
             String name = config.getString("name", "");
             
@@ -129,7 +130,7 @@ public class ArenaGUI implements Listener {
                 return new ArenaMob(mobName, lore, head, spawns, cost, teleportPlayer);
             }).collect(Collectors.toList());
             
-            entry.put(loc, new ArenaEntry(plugin, loc, spawnLoc, playerLoc, name, mob));
+            entry.put(loc, new ArenaEntry(plugin, loc, spawnLoc, playerLoc, name, teleportDelay, mob));
         }
     }
 
