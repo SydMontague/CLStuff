@@ -33,6 +33,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.afk.AFKListener;
 import de.craftlancer.clstuff.arena.ArenaGUI;
+import de.craftlancer.clstuff.commands.CenterMapCommand;
 import de.craftlancer.clstuff.commands.CraftCommand;
 import de.craftlancer.clstuff.commands.StatsCommand;
 import de.craftlancer.clstuff.commands.WildCommand;
@@ -263,6 +264,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         getCommand("recolor").setExecutor(recolor);
         
         getCommand("craft").setExecutor(new CraftCommand());
+        getCommand("centermap").setExecutor(new CenterMapCommand(this));
         
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);

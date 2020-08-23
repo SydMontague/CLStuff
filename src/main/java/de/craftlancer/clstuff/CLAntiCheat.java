@@ -1,7 +1,6 @@
 package de.craftlancer.clstuff;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
@@ -37,6 +36,7 @@ import org.bukkit.util.Vector;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.logging.PluginFileLogger;
 import me.ryanhamshire.GriefPrevention.Claim;
+import me.ryanhamshire.GriefPrevention.ClaimPermission;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class CLAntiCheat implements Listener {
@@ -142,12 +142,12 @@ public class CLAntiCheat implements Listener {
         Player p = e.getPlayer();
         Location loc = e.getPlayer().getLocation();
         
-        Optional<Claim> claim = GriefPrevention.instance.dataStore.getClaims().stream().filter(a -> a.contains(loc, true, false)).findFirst();
+        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
-        if (claim.isPresent() && claim.get().allowAccess(p) != null)
+        if (claim != null && !claim.hasExplicitPermission(p, ClaimPermission.Access))
             logger.info(() -> String.format("%s has logged out inside a claim of %s at: %d %d %d",
                                             p.getName(),
-                                            claim.get().getOwnerName(),
+                                            claim.getOwnerName(),
                                             loc.getBlockX(),
                                             loc.getBlockY(),
                                             loc.getBlockZ()));
@@ -163,8 +163,9 @@ public class CLAntiCheat implements Listener {
         
         Player p = e.getPlayer();
         Location loc = e.getPlayer().getLocation();
+        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
-        if (GriefPrevention.instance.dataStore.getClaims().stream().noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
+        if (claim == null || !claim.hasExplicitPermission(p, ClaimPermission.Access)) {
             e.setCancelled(true);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
         }
@@ -174,8 +175,9 @@ public class CLAntiCheat implements Listener {
     public void onBedEnter(PlayerBedEnterEvent e) {
         Player p = e.getPlayer();
         Location loc = e.getPlayer().getLocation();
+        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
-        if (GriefPrevention.instance.dataStore.getClaims().stream().noneMatch(a -> a.contains(loc, true, false) && a.allowBuild(p, Material.STONE) == null)) {
+        if (claim == null || !claim.hasExplicitPermission(p, ClaimPermission.Access)) {
             e.setCancelled(true);
             e.setUseBed(Result.DENY);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
@@ -202,7 +204,7 @@ public class CLAntiCheat implements Listener {
     /*
      * Prevent boat glitching and block glitching into vehicles
      */
-    // @EventHandler
+    @EventHandler
     public void onVehicleLeave(VehicleExitEvent event) {
         Vehicle vehicle = event.getVehicle();
         LivingEntity passenger = event.getExited();
@@ -228,7 +230,7 @@ public class CLAntiCheat implements Listener {
         }).runTask(plugin);
     }
     
-    // @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void onEntityInteract(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();

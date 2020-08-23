@@ -129,7 +129,7 @@ public class LagFixes implements Listener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onSpawnerSpawn(CreatureSpawnEvent event) {
-        if (event.getSpawnReason() == SpawnReason.SPAWNER || (event.getEntityType() == EntityType.PIG_ZOMBIE && event.getSpawnReason() == SpawnReason.NETHER_PORTAL)) {
+        if (event.getSpawnReason() == SpawnReason.SPAWNER || (event.getEntityType() == EntityType.ZOMBIFIED_PIGLIN && event.getSpawnReason() == SpawnReason.NETHER_PORTAL)) {
             event.getEntity().setMetadata(SPAWNER_MOB_META, new FixedMetadataValue(plugin, 0));
             spawnerEntities.add(event.getEntity());
         }

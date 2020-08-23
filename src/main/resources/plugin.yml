@@ -54,9 +54,15 @@ commands:
   giveclaimblocks:
     description: Sends claimblocks to another player.
     usage: /giveclaimblocks <target> <amount>
+  centermap:
+    description: Centers map
+    usage: Run /centermap while holding a map, centers to where you stand
 permissions:
+  clstuff.centermap:
+    default: false
+
   clstuff.craft:
-    default: true;
+    default: true
 
   clstuff.nodrop.admin:
     default: op

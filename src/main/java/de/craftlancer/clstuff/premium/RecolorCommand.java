@@ -30,6 +30,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import de.craftlancer.core.Utils;
 import me.ryanhamshire.GriefPrevention.Claim;
+import me.ryanhamshire.GriefPrevention.ClaimPermission;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class RecolorCommand implements TabExecutor, Listener {
@@ -137,15 +138,13 @@ public class RecolorCommand implements TabExecutor, Listener {
         
         // If there is a claim, can the player build in it?
         if (GriefPrevention.instance.isEnabled()) {
-            Claim claim = null;
-            for (Claim c : GriefPrevention.instance.dataStore.getClaims())
-                if (c.contains(block.getLocation(), true, false))
-                    claim = c;
+            Claim claim = GriefPrevention.instance.dataStore.getClaimAt(block.getLocation(), true, null);
+
             if (claim == null)
                 return;
             if (!claim.getOwnerName().equals(player.getName()))
                 return;
-            if (claim.allowBuild(player, block.getType()) != null)
+            if (!claim.hasExplicitPermission(player, ClaimPermission.Build))
                 return;
         }
         
