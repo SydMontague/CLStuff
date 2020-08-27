@@ -57,6 +57,8 @@ commands:
   centermap:
     description: Centers map
     usage: Run /centermap while holding a map, centers to where you stand
+  heroes:
+    description: Commands for heroes
 permissions:
   clstuff.centermap:
     default: false
@@ -66,7 +68,7 @@ permissions:
 
   clstuff.nodrop.admin:
     default: op
-    
+
   clstuff.squest.admin:
     default: op
     children:
@@ -103,7 +105,7 @@ permissions:
     default: false
   clstuff.squest.exempt:
     default: false
-    
+
   clstuff.modeltoken.admin:
     default: op
     children:
@@ -134,7 +136,7 @@ permissions:
     default: false
   clstuff.modeltoken.blacklist.remove:
     default: false
-    
+
   clstuff.explonerf.admin:
     default: op
     children:
@@ -145,17 +147,19 @@ permissions:
       clstuff.explonerf.threshold: true
       clstuff.explonerf.delete: true
       clstuff.explonerf.info: true
-  clstuff.explonerf.removemat: 
+  clstuff.explonerf.removemat:
     default: false
-  clstuff.explonerf.addmat: 
+  clstuff.explonerf.addmat:
     default: false
-  clstuff.explonerf.create: 
+  clstuff.explonerf.create:
     default: false
-  clstuff.explonerf.setlimit: 
+  clstuff.explonerf.setlimit:
     default: false
-  clstuff.explonerf.threshold: 
+  clstuff.explonerf.threshold:
     default: false
-  clstuff.explonerf.delete: 
+  clstuff.explonerf.delete:
     default: false
-  clstuff.explonerf.info: 
+  clstuff.explonerf.info:
     default: false
+  clstuff.heroes.admin:
+    default: op
