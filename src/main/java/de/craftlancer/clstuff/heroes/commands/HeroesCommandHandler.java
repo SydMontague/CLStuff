@@ -1,5 +1,6 @@
-package de.craftlancer.clstuff.heroes;
+package de.craftlancer.clstuff.heroes.commands;
 
+import de.craftlancer.clstuff.heroes.Heroes;
 import de.craftlancer.core.command.CommandHandler;
 import org.bukkit.plugin.Plugin;
 

@@ -9,8 +9,7 @@ import de.craftlancer.clstuff.commands.WildCommand;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.heroes.Heroes;
-import de.craftlancer.clstuff.heroes.HeroesCommandHandler;
-import de.craftlancer.clstuff.heroes.HeroesLocation;
+import de.craftlancer.clstuff.heroes.commands.HeroesCommandHandler;
 import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
@@ -35,7 +34,6 @@ import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -87,15 +85,15 @@ public class CLStuff extends JavaPlugin implements Listener {
         moy.put(12L, "Dec");
         
         DATE_FORMAT = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().optionalStart().appendText(ChronoField.DAY_OF_WEEK, dow)
-                .appendLiteral(", ").optionalEnd().appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
-                .appendLiteral(' ').appendText(ChronoField.MONTH_OF_YEAR, moy).appendLiteral(' ')
-                .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
-                .appendLiteral(" §e").appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral(':')
-                .appendValue(ChronoField.MINUTE_OF_HOUR, 2).optionalStart().appendLiteral(':')
-                .appendValue(ChronoField.SECOND_OF_MINUTE, 2).optionalEnd().appendLiteral(" §7")
-                .appendOffset("+HHMM", "GMT")  // should handle
-                // UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
-                .toFormatter();
+                                                    .appendLiteral(", ").optionalEnd().appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                                                    .appendLiteral(' ').appendText(ChronoField.MONTH_OF_YEAR, moy).appendLiteral(' ')
+                                                    .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
+                                                    .appendLiteral(" §e").appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral(':')
+                                                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2).optionalStart().appendLiteral(':')
+                                                    .appendValue(ChronoField.SECOND_OF_MINUTE, 2).optionalEnd().appendLiteral(" §7")
+                                                    .appendOffset("+HHMM", "GMT")  // should handle
+                                                                                   // UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
+                                                    .toFormatter();
     }
     
     private WGNoDropFlag flag;
@@ -115,10 +113,8 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     @Override
     public void onEnable() {
-        ConfigurationSerialization.registerClass(HeroesLocation.class);
-        
         BaseComponent prefix = new TextComponent(new ComponentBuilder("[").color(ChatColor.WHITE).append("Craft").color(ChatColor.DARK_RED).append("Citizen")
-                .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
+                                                                          .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
         MessageUtil.registerPlugin(this, prefix, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA);
         
         useDiscord = Bukkit.getPluginManager().getPlugin("DiscordSRV") != null;
@@ -230,6 +226,7 @@ public class CLStuff extends JavaPlugin implements Listener {
             if (!(a instanceof Player))
                 return false;
             
+            @SuppressWarnings("deprecation")
             OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
             Player sender = (Player) a;
             int amount = Utils.parseIntegerOrDefault(args[1], 0);
@@ -253,7 +250,6 @@ public class CLStuff extends JavaPlugin implements Listener {
             
             senderData.setBonusClaimBlocks(senderData.getBonusClaimBlocks() - amount);
             targetData.setBonusClaimBlocks(targetData.getBonusClaimBlocks() + amount);
-            
             
             MessageUtil.sendMessage(this, sender, MessageLevel.INFO, String.format("You sent %d claimblocks to %s.", amount, target.getName()));
             if (target.isOnline())
@@ -296,7 +292,8 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         try {
             arenaGUI = new ArenaGUI(this);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             // we don't want things to crash just because someone messed up something
         }

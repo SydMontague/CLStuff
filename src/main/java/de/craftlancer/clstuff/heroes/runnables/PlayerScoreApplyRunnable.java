@@ -1,19 +1,21 @@
-package de.craftlancer.clstuff.heroes;
-
-import de.craftlancer.core.util.Tuple;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.scheduler.BukkitRunnable;
+package de.craftlancer.clstuff.heroes.runnables;
 
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import de.craftlancer.clstuff.heroes.Heroes;
+import de.craftlancer.clstuff.heroes.HeroesLocation;
+import de.craftlancer.clstuff.heroes.MaterialUtil;
+import de.craftlancer.core.util.Tuple;
+
 public class PlayerScoreApplyRunnable extends BukkitRunnable {
     
     private List<Tuple<UUID, Integer>> top3;
-    private YamlConfiguration config = new YamlConfiguration();
     private Heroes heroes;
     
     PlayerScoreApplyRunnable(List<Tuple<UUID, Integer>> top3, Heroes heroes) {
@@ -25,7 +27,6 @@ public class PlayerScoreApplyRunnable extends BukkitRunnable {
     public void run() {
         int counter = 1;
         for (Tuple<UUID, Integer> entry : top3) {
-            UUID uuid = entry.getKey();
             HeroesLocation heroesLocation = heroes.getHeroLocation("playertop", String.valueOf(counter));
             
             List<Location> signLocationList = heroesLocation.getSignLocations();
@@ -33,11 +34,8 @@ public class PlayerScoreApplyRunnable extends BukkitRunnable {
             
             signLocationList.forEach(signLocation -> setSign(signLocation, entry.getValue(), entry.getKey()));
             
-            int i = 0;
-            for (Location location : headLocationList) {
-                new ApplyHeadRunnable(location, uuid).runTaskLater(heroes.getPlugin(), counter * 80 * (i + 1));
-                i++;
-            }
+            for (Location location : headLocationList)
+                heroes.addHeadUpdate(entry.getKey(), location);
             
             counter++;
         }

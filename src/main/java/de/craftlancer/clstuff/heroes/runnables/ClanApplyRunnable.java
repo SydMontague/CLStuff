@@ -1,6 +1,7 @@
-package de.craftlancer.clstuff.heroes;
+package de.craftlancer.clstuff.heroes.runnables;
 
-import de.craftlancer.clclans.Clan;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -8,15 +9,15 @@ import org.bukkit.block.Banner;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Rotatable;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.List;
+import de.craftlancer.clclans.Clan;
+import de.craftlancer.clstuff.heroes.Heroes;
+import de.craftlancer.clstuff.heroes.HeroesLocation;
+import de.craftlancer.clstuff.heroes.MaterialUtil;
 
 public class ClanApplyRunnable extends BukkitRunnable {
-    
-    private YamlConfiguration config = new YamlConfiguration();
     private List<Clan> topClans;
     private Heroes heroes;
     

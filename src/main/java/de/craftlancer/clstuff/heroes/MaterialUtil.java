@@ -3,6 +3,9 @@ package de.craftlancer.clstuff.heroes;
 import org.bukkit.Material;
 
 public class MaterialUtil {
+    private MaterialUtil() {
+    }
+    
     public static boolean isSign(Material material) {
         switch (material) {
             case ACACIA_SIGN:

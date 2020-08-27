@@ -1,10 +1,13 @@
-package de.craftlancer.clstuff.heroes;
+package de.craftlancer.clstuff.heroes.runnables;
 
 import de.craftlancer.clclans.CLClans;
 import de.craftlancer.clclans.Clan;
+import de.craftlancer.clstuff.heroes.Heroes;
+
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ClanCalculateRunnable extends BukkitRunnable {
@@ -16,6 +19,8 @@ public class ClanCalculateRunnable extends BukkitRunnable {
     
     @Override
     public void run() {
-        new ClanApplyRunnable(CLClans.getInstance().getClans().stream().sorted(Comparator.comparingDouble(Clan::calculateClanScore).reversed()).limit(3).collect(Collectors.toList()), heroes).runTask(heroes.getPlugin());
+        List<Clan> list = CLClans.getInstance().getClans().stream().sorted(Comparator.comparingDouble(Clan::calculateClanScore).reversed()).limit(3)
+                                 .collect(Collectors.toList());
+        new ClanApplyRunnable(list, heroes).runTask(heroes.getPlugin());
     }
 }

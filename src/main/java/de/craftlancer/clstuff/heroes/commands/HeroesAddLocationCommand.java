@@ -1,8 +1,10 @@
-package de.craftlancer.clstuff.heroes;
+package de.craftlancer.clstuff.heroes.commands;
 
-import de.craftlancer.core.Utils;
-import de.craftlancer.core.command.SubCommand;
-import org.bukkit.ChatColor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -10,10 +12,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import de.craftlancer.clstuff.heroes.Heroes;
+import de.craftlancer.clstuff.heroes.HeroesLocation;
+import de.craftlancer.clstuff.heroes.MaterialUtil;
+import de.craftlancer.core.Utils;
+import de.craftlancer.core.command.SubCommand;
 
 public class HeroesAddLocationCommand extends SubCommand {
     private Heroes heroes;
@@ -53,7 +56,7 @@ public class HeroesAddLocationCommand extends SubCommand {
         Material material = blockLocation.getBlock().getType();
         
         if (args.length < 3)
-            return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&cYou must enter 3 arguments!");
+            return heroes.getPrefix() + "§cYou must enter 3 arguments!";
         
         String type = args[1];
         String category = args[2];
@@ -61,25 +64,25 @@ public class HeroesAddLocationCommand extends SubCommand {
         
         if (type.equalsIgnoreCase("sign")) {
             if (!MaterialUtil.isSign(material))
-                return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&cYou are not looking at a sign!");
+                return heroes.getPrefix() + "§cYou are not looking at a sign!";
         } else if (type.equalsIgnoreCase("head")) {
             if (!MaterialUtil.isHead(material))
-                return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&cYou are not looking at a head!");
+                return heroes.getPrefix() + "§cYou are not looking at a head!";
         } else if (type.equalsIgnoreCase("banner")) {
             if (!MaterialUtil.isBanner(material))
-                return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&cYou are not looking at a banner!");
+                return heroes.getPrefix() + "§cYou are not looking at a banner!";
         } else
-            return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&cYou must enter &e'banner'&c, &e'sign'&c, or &e'head'&c in the first argument!");
+            return heroes.getPrefix() + "§cYou must enter §e'banner'§c, §e'sign'§c, or §e'head'§c in the first argument!";
         
         if (!category.equalsIgnoreCase("baltop") && !category.equalsIgnoreCase("clantop") && !category.equalsIgnoreCase("playertop"))
-            return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&cYou must specify baltop/clantop/playertop!");
+            return heroes.getPrefix() + "§cYou must specify baltop/clantop/playertop!";
         
         if (!ranking.equals("1") && !ranking.equals("2") && !ranking.equals("3"))
-            return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&cYou must specify 1/2/3!");
+            return heroes.getPrefix() + "§cYou must specify 1/2/3!";
         
         setLocation(category, ranking, type, blockLocation);
         
-        return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&aLocation has been set.");
+        return heroes.getPrefix() + "§aLocation has been set.";
     }
     
     @Override

@@ -17,13 +17,18 @@ public class HeroesLocation implements ConfigurationSerializable {
     //Location of either a head or a banner
     private List<Location> displayLocations;
     
-    public HeroesLocation(String category, String ranking) {
+    public HeroesLocation(String category, String ranking, List<Location> signLocations, List<Location> displayLocations) {
         this.category = category;
         this.ranking = ranking;
-        this.signLocations = new ArrayList<>();
-        this.displayLocations = new ArrayList<>();
+        this.signLocations = new ArrayList<>(signLocations);
+        this.displayLocations = new ArrayList<>(displayLocations);
     }
     
+    public HeroesLocation(String category, String ranking) {
+        this(category, ranking, new ArrayList<>(), new ArrayList<>());
+    }
+    
+    @SuppressWarnings("unchecked")
     public HeroesLocation(Map<String, Object> map) {
         this.category = (String) map.get("category");
         this.ranking = (String) map.get("ranking");
@@ -60,11 +65,11 @@ public class HeroesLocation implements ConfigurationSerializable {
     }
     
     public void setDisplayLocations(List<Location> displayLocations) {
-        this.displayLocations = displayLocations;
+        this.displayLocations = new ArrayList<>(displayLocations);
     }
     
     public void setSignLocations(List<Location> signLocations) {
-        this.signLocations = signLocations;
+        this.signLocations = new ArrayList<>(signLocations);
     }
     
     public void addSignLocation(Location location) {

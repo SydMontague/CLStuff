@@ -1,10 +1,12 @@
-package de.craftlancer.clstuff.heroes;
+package de.craftlancer.clstuff.heroes.commands;
 
-import de.craftlancer.core.command.SubCommand;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
+
+import de.craftlancer.clstuff.heroes.Heroes;
+import de.craftlancer.clstuff.heroes.runnables.BaltopCalculateRunnable;
+import de.craftlancer.core.command.SubCommand;
 
 public class HeroesRefreshDisplaysCommand extends SubCommand {
     
@@ -19,7 +21,7 @@ public class HeroesRefreshDisplaysCommand extends SubCommand {
     @Override
     protected String execute(CommandSender commandSender, Command command, String s, String[] strings) {
         new BaltopCalculateRunnable(heroes).runTaskAsynchronously(heroes.getPlugin());
-        return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&aRefreshing displays... please wait.");
+        return heroes.getPrefix() + "§aRefreshing displays... please wait.";
     }
     
     @Override

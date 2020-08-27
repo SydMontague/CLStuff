@@ -29,6 +29,7 @@ public class StatsCommand implements CommandExecutor {
         this.plugin = plugin;
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         OfflinePlayer player = null;

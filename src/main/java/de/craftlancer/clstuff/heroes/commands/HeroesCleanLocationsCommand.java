@@ -1,10 +1,12 @@
-package de.craftlancer.clstuff.heroes;
+package de.craftlancer.clstuff.heroes.commands;
 
-import de.craftlancer.core.command.SubCommand;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
+
+import de.craftlancer.clstuff.heroes.Heroes;
+import de.craftlancer.clstuff.heroes.MaterialUtil;
+import de.craftlancer.core.command.SubCommand;
 
 public class HeroesCleanLocationsCommand extends SubCommand {
     
@@ -23,7 +25,7 @@ public class HeroesCleanLocationsCommand extends SubCommand {
             heroLocation.getDisplayLocations().removeIf(displayLocation -> !MaterialUtil.isBanner(displayLocation.getBlock().getType()) && !MaterialUtil.isHead(displayLocation.getBlock().getType()));
         });
         
-        return ChatColor.translateAlternateColorCodes('&', Heroes.Config.PREFIX + "&aSuccessfully cleaned locations.");
+        return heroes.getPrefix() + "§aSuccessfully cleaned locations.";
     }
     
     @Override
