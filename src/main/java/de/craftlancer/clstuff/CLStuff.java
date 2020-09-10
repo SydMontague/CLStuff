@@ -142,6 +142,9 @@ public class CLStuff extends JavaPlugin implements Listener {
             String commandLine = "minecraft:give " + a.getName()
                     + " written_book{pages:['[\"\",{\"text\":\"The Dungeon Guide\",\"bold\":true},{\"text\":\"\\\\n\\\\nTo get a taste of dungeons you should start by challenging the \",\"color\":\"reset\"},{\"text\":\"Hoolis brothers\",\"bold\":true},{\"text\":\" at the \",\"color\":\"reset\"},{\"text\":\"spawn\",\"bold\":true},{\"text\":\"!\\\\n\\\\nUse \",\"color\":\"reset\"},{\"text\":\"/spawn\",\"bold\":true,\"color\":\"dark_green\"},{\"text\":\" or use portal: \",\"color\":\"reset\"},{\"text\":\"stockades\",\"color\":\"dark_purple\"},{\"text\":\"\\\\n\\\\nThis is an entry level dungeon and keep inventory is on.\",\"color\":\"reset\"}]','[\"\",{\"text\":\"Finding Dungeons\",\"bold\":true},{\"text\":\"\\\\n\\\\nAll Dungeons are marked on the \",\"color\":\"reset\"},{\"text\":\"/map\",\"bold\":true,\"color\":\"dark_green\"},{\"text\":\" with their portal adresses!\\\\n\\\\nMost Dungeons can be entered at the \",\"color\":\"reset\"},{\"text\":\"valgard hub\",\"bold\":true},{\"text\":\".\\\\n\\\\nPortal: \",\"color\":\"reset\"},{\"text\":\"valgard\",\"color\":\"dark_purple\"}]','[\"\",{\"text\":\"Dungeon Progress\",\"bold\":true},{\"text\":\"\\\\n\\\\nDefeat the entry level bosses to loot keys, inorder to challenge the stronger bosses!\\\\n\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u26a0 Citizens should not wander into dungeons without good gear! \\\\u26a0\",\"bold\":true}]','[\"\",{\"text\":\"Tips and Tricks\",\"bold\":true},{\"text\":\"\\\\n\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Rightclick a boss to taunt it.\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Heroes might help you in a dungeon.\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Dungeons have Keep Inventory \",\"color\":\"reset\"},{\"text\":\"enabled\",\"color\":\"dark_green\"},{\"text\":\".\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_red\"},{\"text\":\" Raids have Keep Inventory \",\"color\":\"reset\"},{\"text\":\"disabled\",\"color\":\"dark_red\"},{\"text\":\".\",\"color\":\"reset\"}]','[\"\",{\"text\":\"Loot and Treasure\",\"bold\":true},{\"text\":\"\\\\n\\\\nMany a Citizen has made his fortune in a dungeon.\\\\n\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Custom 3D Items\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6 \",\"color\":\"dark_green\"},{\"text\":\"Colored Items\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Many Collectables\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Custom Potions\\\\n \",\"color\":\"reset\"}]'],title:\"§6Dungeons and Raids\",author:Bjorn,display:{Lore:[\"Bjorn's Survival Guide to Dungeons\"]}}";
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandLine);
+            
+            // TODO give portal book
+            
             return true;
         });
         
@@ -379,23 +382,6 @@ public class CLStuff extends JavaPlugin implements Listener {
         event.getPlayer().performCommand("sethome");
         p.sendMessage(ChatColor.GOLD + "This happened because you placed down your first chest.");
         p.sendMessage(ChatColor.GOLD + "You can change your spawnpoint at any time using /sethome.");
-    }
-    
-    /*
-     * Warn about nether claims
-     */
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void claimWarnNether(ClaimCreatedEvent event) {
-        World world = event.getClaim().getLesserBoundaryCorner().getWorld();
-        
-        if (world.getEnvironment() == Environment.NETHER) {
-            CommandSender sender = event.getCreator();
-            sender.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "**WARNING**\n " + ChatColor.RED
-                    + "\nThe nether is going to be reset with 1.16! You may lose your build!\n " + ChatColor.DARK_RED + "" + ChatColor.BOLD + "\n**WARNING**");
-            
-            if (sender instanceof Player)
-                ((Player) sender).playSound(((Player) sender).getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 2F, 0.5F);
-        }
     }
     
     /*
