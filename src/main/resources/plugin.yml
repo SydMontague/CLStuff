@@ -59,6 +59,11 @@ commands:
     usage: Run /centermap while holding a map, centers to where you stand
   heroes:
     description: Commands for heroes
+  adminshop:
+    description: Adminshop commands
+    usage: Run /adminshop [create|remove] and right click the block
+  cmdupgrade:
+    description: Reloads custom model data upgrade preventer config
 permissions:
   clstuff.centermap:
     default: false

@@ -1,5 +1,34 @@
 package de.craftlancer.clstuff;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.SignStyle;
+import java.time.temporal.ChronoField;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
+import org.bukkit.Statistic;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import de.craftlancer.clstuff.adminshop.AdminShopManager;
 import de.craftlancer.clstuff.afk.AFKListener;
 import de.craftlancer.clstuff.arena.ArenaGUI;
 import de.craftlancer.clstuff.commands.CenterMapCommand;
@@ -21,41 +50,10 @@ import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.PlayerData;
-import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
-import org.bukkit.Statistic;
-import org.bukkit.World;
-import org.bukkit.World.Environment;
-import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.SignStyle;
-import java.time.temporal.ChronoField;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 
 public class CLStuff extends JavaPlugin implements Listener {
     
@@ -105,6 +103,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private boolean useDiscord = false;
     private ArenaGUI arenaGUI;
     private Heroes heroes;
+    private AdminShopManager adminShop;
     
     @Override
     public void onLoad() {
@@ -287,6 +286,9 @@ public class CLStuff extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
         Bukkit.getPluginManager().registerEvents(new AFKListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
+        Bukkit.getPluginManager().registerEvents(new PreventCMDUpgrade(this), this);
+        adminShop = new AdminShopManager(this);
+        Bukkit.getPluginManager().registerEvents(adminShop, this);
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
@@ -340,6 +342,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         tokens.save();
         exploNerf.save();
         heroes.save();
+        adminShop.save();
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
