@@ -108,7 +108,7 @@ public class AdminShopManager implements Listener {
             saveTask.run();
     }
     
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onAdminInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         
