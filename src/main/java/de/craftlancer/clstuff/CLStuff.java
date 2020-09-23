@@ -1,26 +1,18 @@
 package de.craftlancer.clstuff;
 
 import java.io.StringReader;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.SignStyle;
-import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -33,12 +25,12 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.adminshop.AdminShopManager;
 import de.craftlancer.clstuff.afk.AFKListener;
 import de.craftlancer.clstuff.arena.ArenaGUI;
+import de.craftlancer.clstuff.commands.CLStuffCommands;
 import de.craftlancer.clstuff.commands.CenterMapCommand;
 import de.craftlancer.clstuff.commands.CraftCommand;
 import de.craftlancer.clstuff.commands.StatsCommand;
@@ -51,7 +43,6 @@ import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.squest.ServerQuests;
-import de.craftlancer.core.CLCore;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.NMSUtils;
 import de.craftlancer.core.Utils;
@@ -66,42 +57,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class CLStuff extends JavaPlugin implements Listener {
     
-    private static final DateTimeFormatter DATE_FORMAT;
-    
-    static {
-        Map<Long, String> dow = new HashMap<>();
-        dow.put(1L, "Mon");
-        dow.put(2L, "Tue");
-        dow.put(3L, "Wed");
-        dow.put(4L, "Thu");
-        dow.put(5L, "Fri");
-        dow.put(6L, "Sat");
-        dow.put(7L, "Sun");
-        Map<Long, String> moy = new HashMap<>();
-        moy.put(1L, "Jan");
-        moy.put(2L, "Feb");
-        moy.put(3L, "Mar");
-        moy.put(4L, "Apr");
-        moy.put(5L, "May");
-        moy.put(6L, "Jun");
-        moy.put(7L, "Jul");
-        moy.put(8L, "Aug");
-        moy.put(9L, "Sep");
-        moy.put(10L, "Oct");
-        moy.put(11L, "Nov");
-        moy.put(12L, "Dec");
-        
-        DATE_FORMAT = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().optionalStart().appendText(ChronoField.DAY_OF_WEEK, dow)
-                                                    .appendLiteral(", ").optionalEnd().appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
-                                                    .appendLiteral(' ').appendText(ChronoField.MONTH_OF_YEAR, moy).appendLiteral(' ')
-                                                    .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
-                                                    .appendLiteral(" §e").appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral(':')
-                                                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2).optionalStart().appendLiteral(':')
-                                                    .appendValue(ChronoField.SECOND_OF_MINUTE, 2).optionalEnd().appendLiteral(" §7")
-                                                    .appendOffset("+HHMM", "GMT")  // should handle
-                                                                                   // UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
-                                                    .toFormatter();
-    }
+    private static CLStuff instance;
     
     private WGNoDropFlag flag;
     private ServerQuests serverQuests;
@@ -119,24 +75,25 @@ public class CLStuff extends JavaPlugin implements Listener {
         WGNoDropFlag.registerFlag();
     }
     
+    public static CLStuff getInstance() {
+        return instance;
+    }
+    
     @Override
     public void onEnable() {
+        instance = this;
         BaseComponent prefix = new TextComponent(new ComponentBuilder("[").color(ChatColor.WHITE).append("Craft").color(ChatColor.DARK_RED).append("Citizen")
                                                                           .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
         MessageUtil.registerPlugin(this, prefix, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA);
         
         useDiscord = Bukkit.getPluginManager().getPlugin("DiscordSRV") != null;
         
-        getCommand("wiki").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftcitizen.net/wiki/");
-            return true;
-        });
-        getCommand("voteall").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftcitizen.net/voteAll.html");
-            return true;
-        });
+        getCommand("wiki").setExecutor(CLStuffCommands::wikiCommand);
+        getCommand("voteall").setExecutor(CLStuffCommands::voteallCommand);
+        getCommand("map").setExecutor(CLStuffCommands::mapCommand);
+        getCommand("time").setExecutor(CLStuffCommands::timeCommand);
+        getCommand("store").setExecutor(CLStuffCommands::storeCommand);
+        
         getCommand("howtoplay").setExecutor((a, b, c, d) -> {
             String commandLine = "minecraft:give " + a.getName()
                     + " written_book{pages:[\"[\\\"\\\",{\\\"text\\\":\\\" \\\\u0020 \\\\u0020 \\\\u263d\\\\u25ba\\\",\\\"color\\\":\\\"gold\\\"},{\\\"text\\\":\\\"Craft\\\",\\\"bold\\\":true,\\\"color\\\":\\\"dark_red\\\"},{\\\"text\\\":\\\"Citizen\\\",\\\"bold\\\":true,\\\"color\\\":\\\"gray\\\"},{\\\"text\\\":\\\"\\\\n\\\\nWelcome \\\",\\\"color\\\":\\\"reset\\\"},{\\\"text\\\":\\\"Peasant "
@@ -157,11 +114,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         });
         
         getCommand("stats").setExecutor(new StatsCommand(this));
-        getCommand("map").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftcitizen.net/livemap/");
-            return true;
-        });
+        
         getCommand("ping").setExecutor((a, b, c, d) -> {
             Player target = null;
             
@@ -190,18 +143,7 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         getCommand("cchelp").setExecutor(new CCHelpCommandHandler(this));
-        getCommand("time").setExecutor((a, b, c, d) -> {
-            a.sendMessage("§f[§4Craft§fCitizen]§7 " + ZonedDateTime.now().format(DATE_FORMAT));
-            return true;
-        });
-        
         getCommand("wild").setExecutor(new WildCommand(this));
-        
-        getCommand("store").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftcitizen.tebex.io/");
-            return true;
-        });
         
         getCommand("countEntities").setExecutor((a, b, c, d) -> {
             if (!a.isOp())
@@ -271,37 +213,7 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
-        getCommand("fixitems").setExecutor((a, b, c, d) -> {
-            if (!(a instanceof Player))
-                return true;
-            
-            Player p = (Player) a;
-            PlayerInventory inv = p.getInventory();
-            
-            for (int i = 0; i < inv.getSize(); i++) {
-                ItemStack item = inv.getItem(i);
-                
-                Material type = item != null ? item.getType() : Material.AIR;
-                
-                switch (type) {
-                    case INK_SAC:
-                    case MUSIC_DISC_CHIRP:
-                    case MUSIC_DISC_WAIT:
-                        break;
-                    default:
-                        continue;
-                }
-                
-                YamlConfiguration config = new YamlConfiguration();
-                config.set("item", item);
-                YamlConfiguration config2 = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
-                ItemStack newItem = config2.getItemStack("item");
-                
-                inv.setItem(i, newItem);
-            }
-            
-            return true;
-        });
+        getCommand("fixitems").setExecutor(CLStuff::fixItem);
         
         rankings = new Rankings(this);
         recolor = new RecolorCommand();
@@ -343,6 +255,36 @@ public class CLStuff extends JavaPlugin implements Listener {
             e.printStackTrace();
             // we don't want things to crash just because someone messed up something
         }
+    }
+    
+    private static final boolean fixItem(CommandSender a, Command b, String c, String[] d) {
+        if (!(a instanceof Player))
+            return true;
+        
+        Player p = (Player) a;
+        PlayerInventory inv = p.getInventory();
+        
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            Material type = item != null ? item.getType() : Material.AIR;
+            
+            switch (type) {
+                case INK_SAC:
+                case MUSIC_DISC_CHIRP:
+                case MUSIC_DISC_WAIT:
+                    break;
+                default:
+                    continue;
+            }
+            
+            YamlConfiguration config = new YamlConfiguration();
+            config.set("item", item);
+            YamlConfiguration config2 = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
+            ItemStack newItem = config2.getItemStack("item");
+            
+            inv.setItem(i, newItem);
+        }
+        return true;
     }
     
     public boolean isUsingDiscord() {
