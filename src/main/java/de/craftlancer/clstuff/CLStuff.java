@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff;
 
+import java.io.StringReader;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -9,12 +10,17 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.Statistic;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -26,6 +32,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.craftlancer.clstuff.adminshop.AdminShopManager;
@@ -43,6 +51,7 @@ import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.squest.ServerQuests;
+import de.craftlancer.core.CLCore;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.NMSUtils;
 import de.craftlancer.core.Utils;
@@ -258,6 +267,38 @@ public class CLStuff extends JavaPlugin implements Listener {
                 MessageUtil.sendMessage(this, target.getPlayer(), MessageLevel.INFO, String.format("%s sent you %d claimblocks.", sender.getName(), amount));
             else
                 GriefPrevention.instance.dataStore.savePlayerData(target.getUniqueId(), targetData);
+            
+            return true;
+        });
+        
+        getCommand("fixitems").setExecutor((a, b, c, d) -> {
+            if (!(a instanceof Player))
+                return true;
+            
+            Player p = (Player) a;
+            PlayerInventory inv = p.getInventory();
+            
+            for (int i = 0; i < inv.getSize(); i++) {
+                ItemStack item = inv.getItem(i);
+                
+                Material type = item != null ? item.getType() : Material.AIR;
+                
+                switch (type) {
+                    case INK_SAC:
+                    case MUSIC_DISC_CHIRP:
+                    case MUSIC_DISC_WAIT:
+                        break;
+                    default:
+                        continue;
+                }
+                
+                YamlConfiguration config = new YamlConfiguration();
+                config.set("item", item);
+                YamlConfiguration config2 = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
+                ItemStack newItem = config2.getItemStack("item");
+                
+                inv.setItem(i, newItem);
+            }
             
             return true;
         });

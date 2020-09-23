@@ -64,6 +64,8 @@ commands:
     usage: Run /adminshop [create|remove] and right click the block
   cmdupgrade:
     description: Reloads custom model data upgrade preventer config
+  fixitems:
+    description: Fixes your broken items
 permissions:
   clstuff.centermap:
     default: false
