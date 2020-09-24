@@ -134,6 +134,19 @@ public class CLAntiCheat implements Listener {
         }
     }
     
+    private static boolean hasClaimPermission(Player player, Claim claim, ClaimPermission permission) {
+        if(claim == null)
+            return true;
+        
+        if(claim.isAdminClaim())
+            return permission.isGrantedBy(ClaimPermission.Access);
+        
+        if(player.getUniqueId().equals(claim.ownerID))
+            return true;
+        
+        return claim.hasExplicitPermission(player, permission);
+    }
+    
     /*
      * Log logging out in enemy claims
      */
@@ -144,7 +157,7 @@ public class CLAntiCheat implements Listener {
         
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
-        if (claim != null && !claim.hasExplicitPermission(p, ClaimPermission.Access))
+        if (!hasClaimPermission(p, claim, ClaimPermission.Access))
             logger.info(() -> String.format("%s has logged out inside a claim of %s at: %d %d %d",
                                             p.getName(),
                                             claim.getOwnerName(),
@@ -165,7 +178,7 @@ public class CLAntiCheat implements Listener {
         Location loc = e.getPlayer().getLocation();
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
-        if (claim == null || !claim.hasExplicitPermission(p, ClaimPermission.Access)) {
+        if (!hasClaimPermission(p, claim, ClaimPermission.Access)) {
             e.setCancelled(true);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
         }
@@ -176,8 +189,8 @@ public class CLAntiCheat implements Listener {
         Player p = e.getPlayer();
         Location loc = e.getPlayer().getLocation();
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
-        
-        if (claim == null || !claim.hasExplicitPermission(p, ClaimPermission.Access)) {
+
+        if (!hasClaimPermission(p, claim, ClaimPermission.Access)) {
             e.setCancelled(true);
             e.setUseBed(Result.DENY);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
