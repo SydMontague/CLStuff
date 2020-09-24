@@ -263,6 +263,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         Player p = (Player) a;
         PlayerInventory inv = p.getInventory();
+        int fixed = 0;
         
         for (int i = 0; i < inv.getSize(); i++) {
             ItemStack item = inv.getItem(i);
@@ -282,8 +283,13 @@ public class CLStuff extends JavaPlugin implements Listener {
             YamlConfiguration config2 = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
             ItemStack newItem = config2.getItemStack("item");
             
-            inv.setItem(i, newItem);
+            if (newItem != null && item != null && !item.isSimilar(newItem)) {
+                fixed++;
+                inv.setItem(i, newItem);
+            }
         }
+        
+        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.INFO, String.format("Fixed %d items in your Inventory.", fixed));
         return true;
     }
     
