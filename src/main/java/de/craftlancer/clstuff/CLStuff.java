@@ -273,6 +273,8 @@ public class CLStuff extends JavaPlugin implements Listener {
                 case INK_SAC:
                 case MUSIC_DISC_CHIRP:
                 case MUSIC_DISC_WAIT:
+                case TRIPWIRE_HOOK:
+                case COMPASS:
                     break;
                 default:
                     continue;
