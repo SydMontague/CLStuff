@@ -15,6 +15,10 @@ import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CLStuffCommands {
     private static final DateTimeFormatter DATE_FORMAT;
@@ -54,26 +58,41 @@ public class CLStuffCommands {
                                                     .toFormatter();
     }
     
+    
+    
     public CLStuffCommands() {
     }
     
+    private static final BaseComponent wiki = simpleLink("https://craftcitizen.net/wiki/");
+    private static final BaseComponent map = simpleLink("https://craftcitizen.net/livemap/");
+    private static final BaseComponent store = simpleLink("https://craftcitizen.tebex.io/");
+    private static final BaseComponent voteall = simpleLink("https://craftcitizen.net/voteall.html");
+    
+    private static BaseComponent simpleLink(String link) {
+        BaseComponent component = new TextComponent(link);
+        component.setColor(ChatColor.DARK_GREEN);
+        component.setClickEvent(new ClickEvent(Action.OPEN_URL, link));
+        
+        return component;
+    }
+    
     public static boolean wikiCommand(CommandSender a, Command b, String c, String[] d) {
-        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.NORMAL, ChatColor.DARK_GREEN + "https://craftcitizen.net/wiki/");
+        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.NORMAL, wiki);
         return true;
     }
     
     public static boolean mapCommand(CommandSender a, Command b, String c, String[] d) {
-        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.NORMAL, ChatColor.DARK_GREEN + "https://craftcitizen.net/livemap/");
+        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.NORMAL, map);
         return true;
     }
     
     public static boolean voteallCommand(CommandSender a, Command b, String c, String[] d) {
-        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.NORMAL, ChatColor.DARK_GREEN + "https://craftcitizen.net/voteAll.html");
+        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.NORMAL, voteall);
         return true;
     }
     
     public static boolean storeCommand(CommandSender a, Command b, String c, String[] d) {
-        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.NORMAL, ChatColor.DARK_GREEN + "https://craftcitizen.tebex.io/");
+        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.NORMAL, store);
         return true;
     }
     

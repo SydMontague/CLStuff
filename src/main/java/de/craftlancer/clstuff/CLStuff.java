@@ -23,6 +23,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -275,6 +278,8 @@ public class CLStuff extends JavaPlugin implements Listener {
                 case MUSIC_DISC_WAIT:
                 case TRIPWIRE_HOOK:
                 case COMPASS:
+                case STONE:
+                case LILY_PAD:
                     break;
                 default:
                     continue;
@@ -293,6 +298,46 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.INFO, String.format("Fixed %d items in your Inventory.", fixed));
         return true;
+    }
+    
+    /* Temporary conversion of items */
+    @EventHandler
+    public void onInvClose(InventoryCloseEvent event) {
+        fixInventory(event.getPlayer().getInventory());
+    }
+
+    @EventHandler
+    public void onInvClose(PlayerJoinEvent event) {
+        fixInventory(event.getPlayer().getInventory());
+    }
+    
+    public static void fixInventory(Inventory inv) {
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            Material type = item != null ? item.getType() : Material.AIR;
+            
+            switch (type) {
+                case INK_SAC:
+                case MUSIC_DISC_CHIRP:
+                case MUSIC_DISC_WAIT:
+                case TRIPWIRE_HOOK:
+                case COMPASS:
+                case STONE:
+                case LILY_PAD:
+                    break;
+                default:
+                    continue;
+            }
+            
+            YamlConfiguration config = new YamlConfiguration();
+            config.set("item", item);
+            YamlConfiguration config2 = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
+            ItemStack newItem = config2.getItemStack("item");
+            
+            if (newItem != null && item != null && !item.isSimilar(newItem)) {
+                inv.setItem(i, newItem);
+            }
+        }
     }
     
     public boolean isUsingDiscord() {
