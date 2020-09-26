@@ -280,6 +280,7 @@ public class CLStuff extends JavaPlugin implements Listener {
                 case COMPASS:
                 case STONE:
                 case LILY_PAD:
+                case CHEST:
                     break;
                 default:
                     continue;
@@ -324,6 +325,7 @@ public class CLStuff extends JavaPlugin implements Listener {
                 case COMPASS:
                 case STONE:
                 case LILY_PAD:
+                case CHEST:
                     break;
                 default:
                     continue;
