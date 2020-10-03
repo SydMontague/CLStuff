@@ -281,6 +281,7 @@ public class CLStuff extends JavaPlugin implements Listener {
                 case STONE:
                 case LILY_PAD:
                 case CHEST:
+                case PLAYER_HEAD:
                     break;
                 default:
                     continue;
@@ -326,6 +327,7 @@ public class CLStuff extends JavaPlugin implements Listener {
                 case STONE:
                 case LILY_PAD:
                 case CHEST:
+                case PLAYER_HEAD:
                     break;
                 default:
                     continue;

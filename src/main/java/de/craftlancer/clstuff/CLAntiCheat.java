@@ -138,9 +138,6 @@ public class CLAntiCheat implements Listener {
         if(claim == null)
             return true;
         
-        if(claim.isAdminClaim())
-            return permission.isGrantedBy(ClaimPermission.Access);
-        
         if(player.getUniqueId().equals(claim.ownerID))
             return true;
         
@@ -157,7 +154,7 @@ public class CLAntiCheat implements Listener {
         
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
-        if (!hasClaimPermission(p, claim, ClaimPermission.Access))
+        if (!claim.isAdminClaim() && !hasClaimPermission(p, claim, ClaimPermission.Access))
             logger.info(() -> String.format("%s has logged out inside a claim of %s at: %d %d %d",
                                             p.getName(),
                                             claim.getOwnerName(),
@@ -178,9 +175,10 @@ public class CLAntiCheat implements Listener {
         Location loc = e.getPlayer().getLocation();
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
-        if (!hasClaimPermission(p, claim, ClaimPermission.Access)) {
+        if (claim == null || claim.isAdminClaim() || !hasClaimPermission(p, claim, ClaimPermission.Access)) {
             e.setCancelled(true);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
+            logger.info(() -> String.format("%s tried setting a home at %d %d %d.", p.getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
         }
     }
     
@@ -190,10 +188,27 @@ public class CLAntiCheat implements Listener {
         Location loc = e.getPlayer().getLocation();
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
 
-        if (!hasClaimPermission(p, claim, ClaimPermission.Access)) {
+        if (claim == null || claim.isAdminClaim() || !hasClaimPermission(p, claim, ClaimPermission.Access)) {
             e.setCancelled(true);
             e.setUseBed(Result.DENY);
             p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
+            logger.info(() -> String.format("%s tried setting a home at %d %d %d.", p.getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+        }
+    }
+    
+    @EventHandler
+    public void onClaimExplosionCommand(PlayerCommandPreprocessEvent e) {
+        if (!(e.getMessage().startsWith("/claimexplosion")))
+            return;
+        
+        Player p = e.getPlayer();
+        Location loc = e.getPlayer().getLocation();
+        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
+        
+        if (claim.isAdminClaim()) {
+            e.setCancelled(true);
+            p.sendMessage(ChatColor.RED + "You can't use /claimexplosions in an admin claim. Don't try it again!");
+            logger.info(() -> String.format("%s tried running /claimexplosions in an admin claim.", p.getName()));
         }
     }
     
