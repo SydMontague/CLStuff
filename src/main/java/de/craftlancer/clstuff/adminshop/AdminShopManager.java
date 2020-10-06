@@ -50,7 +50,12 @@ public class AdminShopManager implements Listener {
         File configFile = new File(plugin.getDataFolder(), "adminShops.yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
         
+        defaultBroadcast = config.getString("defaultBroadcast");
+        
         config.getKeys(false).forEach(a -> {
+            if(a.equalsIgnoreCase("defaultBroadcast"))
+                return;
+            
             Location loc = fromConfigKey(a);
             AdminShopTrade[] trades = new AdminShopTrade[4];
             ConfigurationSection section = config.getConfigurationSection(a);
@@ -85,6 +90,7 @@ public class AdminShopManager implements Listener {
         File configFile = new File(plugin.getDataFolder(), "adminShops.yml");
         YamlConfiguration config = new YamlConfiguration();
         
+        config.set("defaultBroadcast", defaultBroadcast);
         shops.forEach((a, b) -> {
             ConfigurationSection section = config.createSection(toConfigKey(a));
             section.set("trade1", b.getTrade(0));
