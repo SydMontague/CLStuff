@@ -19,9 +19,12 @@ public class ModelTokenGetItemCommand extends ModelTokenSubCommand {
         if(!checkSender(sender))
             return "You're not allowed to use this command.";
         
-        int hash = Utils.parseIntegerOrDefault(args[1], -1);
+        if(args.length < 2)
+            return "Not enough arguments.";
         
-        ItemStack item = getToken().getItemByHash(hash);
+        int id = Utils.parseIntegerOrDefault(args[1], -1);
+        
+        ItemStack item = getToken().getItemById(id);
         return ((Player) sender).getInventory().addItem(item).isEmpty() ? "Item given." : "Not enough space for item.";
     }
     

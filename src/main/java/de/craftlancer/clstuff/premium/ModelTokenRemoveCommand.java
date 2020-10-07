@@ -16,10 +16,13 @@ public class ModelTokenRemoveCommand extends ModelTokenSubCommand {
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if(!checkSender(sender))
             return "You're not allowed to use this command.";
+
+        if(args.length < 2)
+            return "Not enough arguments.";
         
-        int hash = Utils.parseIntegerOrDefault(args[1], -1);
+        int id = Utils.parseIntegerOrDefault(args[1], -1);
         
-        return getToken().removeTokenByHash(hash) ? "Item removed" : "No item with given hash found.";
+        return getToken().removeTokenById(id) ? "Item removed" : "No item with given hash found.";
     }
     
     @Override

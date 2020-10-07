@@ -1,9 +1,41 @@
 package de.craftlancer.clstuff;
 
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
+import org.bukkit.Statistic;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import de.craftlancer.clstuff.adminshop.AdminShopManager;
 import de.craftlancer.clstuff.afk.AFKListener;
 import de.craftlancer.clstuff.arena.ArenaGUI;
 import de.craftlancer.clstuff.citizensets.CitizenSetsListener;
 import de.craftlancer.clstuff.citizensets.commands.CitizenSetCommandHandler;
+import de.craftlancer.clstuff.commands.CLStuffCommands;
 import de.craftlancer.clstuff.commands.CenterMapCommand;
 import de.craftlancer.clstuff.commands.CraftCommand;
 import de.craftlancer.clstuff.commands.ItemBuilderCommand;
@@ -26,41 +58,10 @@ import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.PlayerData;
-import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
-import org.bukkit.Statistic;
-import org.bukkit.World;
-import org.bukkit.World.Environment;
-import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.SignStyle;
-import java.time.temporal.ChronoField;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 
 public class CLStuff extends JavaPlugin implements Listener {
     
@@ -100,6 +101,7 @@ public class CLStuff extends JavaPlugin implements Listener {
                 // UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
                 .toFormatter();
     }
+    private static CLStuff instance;
     
     private WGNoDropFlag flag;
     private ServerQuests serverQuests;
@@ -112,30 +114,32 @@ public class CLStuff extends JavaPlugin implements Listener {
     private Heroes heroes;
     private CitizenSetsListener citizenSets;
     private EmoteManager emotes;
+    private AdminShopManager adminShop;
     
     @Override
     public void onLoad() {
         WGNoDropFlag.registerFlag();
     }
     
+    public static CLStuff getInstance() {
+        return instance;
+    }
+    
     @Override
     public void onEnable() {
+        instance = this;
         BaseComponent prefix = new TextComponent(new ComponentBuilder("[").color(ChatColor.WHITE).append("Craft").color(ChatColor.DARK_RED).append("Citizen")
                 .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
         MessageUtil.registerPlugin(this, prefix, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA);
         
         useDiscord = Bukkit.getPluginManager().getPlugin("DiscordSRV") != null;
         
-        getCommand("wiki").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftcitizen.net/wiki/");
-            return true;
-        });
-        getCommand("voteall").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftcitizen.net/voteAll.html");
-            return true;
-        });
+        getCommand("wiki").setExecutor(CLStuffCommands::wikiCommand);
+        getCommand("voteall").setExecutor(CLStuffCommands::voteallCommand);
+        getCommand("map").setExecutor(CLStuffCommands::mapCommand);
+        getCommand("time").setExecutor(CLStuffCommands::timeCommand);
+        getCommand("store").setExecutor(CLStuffCommands::storeCommand);
+        
         getCommand("howtoplay").setExecutor((a, b, c, d) -> {
             String commandLine = "minecraft:give " + a.getName()
                     + " written_book{pages:[\"[\\\"\\\",{\\\"text\\\":\\\" \\\\u0020 \\\\u0020 \\\\u263d\\\\u25ba\\\",\\\"color\\\":\\\"gold\\\"},{\\\"text\\\":\\\"Craft\\\",\\\"bold\\\":true,\\\"color\\\":\\\"dark_red\\\"},{\\\"text\\\":\\\"Citizen\\\",\\\"bold\\\":true,\\\"color\\\":\\\"gray\\\"},{\\\"text\\\":\\\"\\\\n\\\\nWelcome \\\",\\\"color\\\":\\\"reset\\\"},{\\\"text\\\":\\\"Peasant "
@@ -149,15 +153,14 @@ public class CLStuff extends JavaPlugin implements Listener {
             String commandLine = "minecraft:give " + a.getName()
                     + " written_book{pages:['[\"\",{\"text\":\"The Dungeon Guide\",\"bold\":true},{\"text\":\"\\\\n\\\\nTo get a taste of dungeons you should start by challenging the \",\"color\":\"reset\"},{\"text\":\"Hoolis brothers\",\"bold\":true},{\"text\":\" at the \",\"color\":\"reset\"},{\"text\":\"spawn\",\"bold\":true},{\"text\":\"!\\\\n\\\\nUse \",\"color\":\"reset\"},{\"text\":\"/spawn\",\"bold\":true,\"color\":\"dark_green\"},{\"text\":\" or use portal: \",\"color\":\"reset\"},{\"text\":\"stockades\",\"color\":\"dark_purple\"},{\"text\":\"\\\\n\\\\nThis is an entry level dungeon and keep inventory is on.\",\"color\":\"reset\"}]','[\"\",{\"text\":\"Finding Dungeons\",\"bold\":true},{\"text\":\"\\\\n\\\\nAll Dungeons are marked on the \",\"color\":\"reset\"},{\"text\":\"/map\",\"bold\":true,\"color\":\"dark_green\"},{\"text\":\" with their portal adresses!\\\\n\\\\nMost Dungeons can be entered at the \",\"color\":\"reset\"},{\"text\":\"valgard hub\",\"bold\":true},{\"text\":\".\\\\n\\\\nPortal: \",\"color\":\"reset\"},{\"text\":\"valgard\",\"color\":\"dark_purple\"}]','[\"\",{\"text\":\"Dungeon Progress\",\"bold\":true},{\"text\":\"\\\\n\\\\nDefeat the entry level bosses to loot keys, inorder to challenge the stronger bosses!\\\\n\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u26a0 Citizens should not wander into dungeons without good gear! \\\\u26a0\",\"bold\":true}]','[\"\",{\"text\":\"Tips and Tricks\",\"bold\":true},{\"text\":\"\\\\n\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Rightclick a boss to taunt it.\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Heroes might help you in a dungeon.\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Dungeons have Keep Inventory \",\"color\":\"reset\"},{\"text\":\"enabled\",\"color\":\"dark_green\"},{\"text\":\".\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_red\"},{\"text\":\" Raids have Keep Inventory \",\"color\":\"reset\"},{\"text\":\"disabled\",\"color\":\"dark_red\"},{\"text\":\".\",\"color\":\"reset\"}]','[\"\",{\"text\":\"Loot and Treasure\",\"bold\":true},{\"text\":\"\\\\n\\\\nMany a Citizen has made his fortune in a dungeon.\\\\n\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Custom 3D Items\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6 \",\"color\":\"dark_green\"},{\"text\":\"Colored Items\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Many Collectables\\\\n\",\"color\":\"reset\"},{\"text\":\"\\\\u25b6\",\"color\":\"dark_green\"},{\"text\":\" Custom Potions\\\\n \",\"color\":\"reset\"}]'],title:\"§6Dungeons and Raids\",author:Bjorn,display:{Lore:[\"Bjorn's Survival Guide to Dungeons\"]}}";
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandLine);
+            
+            // TODO give portal book
+            
             return true;
         });
         
         getCommand("stats").setExecutor(new StatsCommand(this));
-        getCommand("map").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftcitizen.net/livemap/");
-            return true;
-        });
+        
         getCommand("ping").setExecutor((a, b, c, d) -> {
             Player target = null;
             
@@ -186,11 +189,6 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         getCommand("cchelp").setExecutor(new CCHelpCommandHandler(this));
-        getCommand("time").setExecutor((a, b, c, d) -> {
-            a.sendMessage("§f[§4Craft§fCitizen]§7 " + ZonedDateTime.now().format(DATE_FORMAT));
-            return true;
-        });
-        
         getCommand("wild").setExecutor(new WildCommand(this));
         
         getCommand("citizensets").setExecutor(new CitizenSetCommandHandler(this));
@@ -200,7 +198,7 @@ public class CLStuff extends JavaPlugin implements Listener {
                     + "https://craftcitizen.tebex.io/");
             return true;
         });
-        
+       
         getCommand("countEntities").setExecutor((a, b, c, d) -> {
             if (!a.isOp())
                 return true;
@@ -268,6 +266,8 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
+        getCommand("fixitems").setExecutor(CLStuff::fixItem);
+        
         rankings = new Rankings(this);
         recolor = new RecolorCommand();
         getCommand("rankings").setExecutor(rankings);
@@ -299,6 +299,9 @@ public class CLStuff extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
         Bukkit.getPluginManager().registerEvents(new AFKListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
+        Bukkit.getPluginManager().registerEvents(new PreventCMDUpgrade(this), this);
+        adminShop = new AdminShopManager(this);
+        Bukkit.getPluginManager().registerEvents(adminShop, this);
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
@@ -310,6 +313,90 @@ public class CLStuff extends JavaPlugin implements Listener {
         } catch (Exception e) {
             e.printStackTrace();
             // we don't want things to crash just because someone messed up something
+        }
+    }
+    
+    private static final boolean fixItem(CommandSender a, Command b, String c, String[] d) {
+        if (!(a instanceof Player))
+            return true;
+        
+        Player p = (Player) a;
+        PlayerInventory inv = p.getInventory();
+        int fixed = 0;
+        
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            Material type = item != null ? item.getType() : Material.AIR;
+            
+            switch (type) {
+                case INK_SAC:
+                case MUSIC_DISC_CHIRP:
+                case MUSIC_DISC_WAIT:
+                case TRIPWIRE_HOOK:
+                case COMPASS:
+                case STONE:
+                case LILY_PAD:
+                case CHEST:
+                case PLAYER_HEAD:
+                    break;
+                default:
+                    continue;
+            }
+            
+            YamlConfiguration config = new YamlConfiguration();
+            config.set("item", item);
+            YamlConfiguration config2 = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
+            ItemStack newItem = config2.getItemStack("item");
+            
+            if (newItem != null && item != null && !item.isSimilar(newItem)) {
+                fixed++;
+                inv.setItem(i, newItem);
+            }
+        }
+        
+        MessageUtil.sendMessage(CLStuff.getInstance(), a, MessageLevel.INFO, String.format("Fixed %d items in your Inventory.", fixed));
+        return true;
+    }
+    
+    /* Temporary conversion of items */
+    @EventHandler
+    public void onInvClose(InventoryCloseEvent event) {
+        fixInventory(event.getPlayer().getInventory());
+    }
+
+    @EventHandler
+    public void onInvClose(PlayerJoinEvent event) {
+        fixInventory(event.getPlayer().getInventory());
+    }
+    
+    public static void fixInventory(Inventory inv) {
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            Material type = item != null ? item.getType() : Material.AIR;
+            
+            switch (type) {
+                case INK_SAC:
+                case MUSIC_DISC_CHIRP:
+                case MUSIC_DISC_WAIT:
+                case TRIPWIRE_HOOK:
+                case COMPASS:
+                case STONE:
+                case LILY_PAD:
+                case CHEST:
+                case PLAYER_HEAD:
+                    break;
+                default:
+                    continue;
+            }
+            
+            YamlConfiguration config = new YamlConfiguration();
+            config.set("item", item);
+            YamlConfiguration config2 = YamlConfiguration.loadConfiguration(new StringReader(config.saveToString()));
+            ItemStack newItem = config2.getItemStack("item");
+            
+            if (newItem != null && item != null && !item.isSimilar(newItem)) {
+                inv.setItem(i, newItem);
+            }
         }
     }
     
@@ -353,6 +440,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         heroes.save();
         citizenSets.save();
         emotes.save();
+        adminShop.save();
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -395,23 +483,6 @@ public class CLStuff extends JavaPlugin implements Listener {
         event.getPlayer().performCommand("sethome");
         p.sendMessage(ChatColor.GOLD + "This happened because you placed down your first chest.");
         p.sendMessage(ChatColor.GOLD + "You can change your spawnpoint at any time using /sethome.");
-    }
-    
-    /*
-     * Warn about nether claims
-     */
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void claimWarnNether(ClaimCreatedEvent event) {
-        World world = event.getClaim().getLesserBoundaryCorner().getWorld();
-        
-        if (world.getEnvironment() == Environment.NETHER) {
-            CommandSender sender = event.getCreator();
-            sender.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + "**WARNING**\n " + ChatColor.RED
-                    + "\nThe nether is going to be reset with 1.16! You may lose your build!\n " + ChatColor.DARK_RED + "" + ChatColor.BOLD + "\n**WARNING**");
-            
-            if (sender instanceof Player)
-                ((Player) sender).playSound(((Player) sender).getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 2F, 0.5F);
-        }
     }
     
     /*

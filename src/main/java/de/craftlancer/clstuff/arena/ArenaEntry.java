@@ -38,7 +38,7 @@ class ArenaEntry {
         return gui;
     }
     
-    public ArenaEntry(Plugin plugin, Location loc, Location spawnLoc, Location playerLocation, String name, long teleportDelay, List<ArenaMob> mob) {
+    public ArenaEntry(Plugin plugin, Location loc, Location spawnLoc, Location playerLocation, String name, long teleportDelay, List<ArenaMob> mob, List<String> globalBlockList) {
         this.plugin = plugin;
         this.location = loc;
         this.spawnLocation = spawnLoc;
@@ -46,7 +46,8 @@ class ArenaEntry {
         this.name = name;
         this.mobs = mob;
         this.teleportDelay = teleportDelay;
-        this.mobNames = mob.stream().filter(Objects::nonNull).flatMap(a -> a.getDescription().stream()).collect(Collectors.toList());
+        this.mobNames = mob.stream().filter(Objects::nonNull).flatMap(a -> a.getMobs().stream()).collect(Collectors.toList());
+        mobNames.addAll(globalBlockList);
         
         buildInventory();
     }
