@@ -2,10 +2,15 @@ package de.craftlancer.clstuff;
 
 import de.craftlancer.clstuff.afk.AFKListener;
 import de.craftlancer.clstuff.arena.ArenaGUI;
+import de.craftlancer.clstuff.citizensets.CitizenSetsListener;
+import de.craftlancer.clstuff.citizensets.commands.CitizenSetCommandHandler;
 import de.craftlancer.clstuff.commands.CenterMapCommand;
 import de.craftlancer.clstuff.commands.CraftCommand;
+import de.craftlancer.clstuff.commands.ItemBuilderCommand;
 import de.craftlancer.clstuff.commands.StatsCommand;
 import de.craftlancer.clstuff.commands.WildCommand;
+import de.craftlancer.clstuff.emotes.EmoteCommand;
+import de.craftlancer.clstuff.emotes.EmoteManager;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.heroes.Heroes;
@@ -85,15 +90,15 @@ public class CLStuff extends JavaPlugin implements Listener {
         moy.put(12L, "Dec");
         
         DATE_FORMAT = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().optionalStart().appendText(ChronoField.DAY_OF_WEEK, dow)
-                                                    .appendLiteral(", ").optionalEnd().appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
-                                                    .appendLiteral(' ').appendText(ChronoField.MONTH_OF_YEAR, moy).appendLiteral(' ')
-                                                    .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
-                                                    .appendLiteral(" §e").appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral(':')
-                                                    .appendValue(ChronoField.MINUTE_OF_HOUR, 2).optionalStart().appendLiteral(':')
-                                                    .appendValue(ChronoField.SECOND_OF_MINUTE, 2).optionalEnd().appendLiteral(" §7")
-                                                    .appendOffset("+HHMM", "GMT")  // should handle
-                                                                                   // UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
-                                                    .toFormatter();
+                .appendLiteral(", ").optionalEnd().appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+                .appendLiteral(' ').appendText(ChronoField.MONTH_OF_YEAR, moy).appendLiteral(' ')
+                .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
+                .appendLiteral(" §e").appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral(':')
+                .appendValue(ChronoField.MINUTE_OF_HOUR, 2).optionalStart().appendLiteral(':')
+                .appendValue(ChronoField.SECOND_OF_MINUTE, 2).optionalEnd().appendLiteral(" §7")
+                .appendOffset("+HHMM", "GMT")  // should handle
+                // UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
+                .toFormatter();
     }
     
     private WGNoDropFlag flag;
@@ -105,6 +110,8 @@ public class CLStuff extends JavaPlugin implements Listener {
     private boolean useDiscord = false;
     private ArenaGUI arenaGUI;
     private Heroes heroes;
+    private CitizenSetsListener citizenSets;
+    private EmoteManager emotes;
     
     @Override
     public void onLoad() {
@@ -114,7 +121,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         BaseComponent prefix = new TextComponent(new ComponentBuilder("[").color(ChatColor.WHITE).append("Craft").color(ChatColor.DARK_RED).append("Citizen")
-                                                                          .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
+                .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
         MessageUtil.registerPlugin(this, prefix, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA);
         
         useDiscord = Bukkit.getPluginManager().getPlugin("DiscordSRV") != null;
@@ -186,6 +193,8 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("wild").setExecutor(new WildCommand(this));
         
+        getCommand("citizensets").setExecutor(new CitizenSetCommandHandler(this));
+        
         getCommand("store").setExecutor((a, b, c, d) -> {
             a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
                     + "https://craftcitizen.tebex.io/");
@@ -226,7 +235,6 @@ public class CLStuff extends JavaPlugin implements Listener {
             if (!(a instanceof Player))
                 return false;
             
-            @SuppressWarnings("deprecation")
             OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
             Player sender = (Player) a;
             int amount = Utils.parseIntegerOrDefault(args[1], 0);
@@ -267,16 +275,23 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("craft").setExecutor(new CraftCommand());
         getCommand("centermap").setExecutor(new CenterMapCommand(this));
+        getCommand("itembuilder").setExecutor(new ItemBuilderCommand(this));
         
         heroes = new Heroes(this);
         
         getCommand("heroes").setExecutor(new HeroesCommandHandler(this, heroes));
+        
+        emotes = new EmoteManager(this);
+        
+        getCommand("emote").setExecutor(new EmoteCommand(emotes));
         
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
         
         tokens = new ModelToken(this);
         exploNerf = new ExplosionRegulator(this);
+        citizenSets = new CitizenSetsListener(this);
+        Bukkit.getPluginManager().registerEvents(citizenSets, this);
         Bukkit.getPluginManager().registerEvents(recolor, this);
         Bukkit.getPluginManager().registerEvents(exploNerf, this);
         Bukkit.getPluginManager().registerEvents(tokens, this);
@@ -292,8 +307,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         try {
             arenaGUI = new ArenaGUI(this);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             // we don't want things to crash just because someone messed up something
         }
@@ -337,6 +351,8 @@ public class CLStuff extends JavaPlugin implements Listener {
         tokens.save();
         exploNerf.save();
         heroes.save();
+        citizenSets.save();
+        emotes.save();
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
