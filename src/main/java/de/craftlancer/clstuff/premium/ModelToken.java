@@ -66,7 +66,6 @@ public class ModelToken implements Listener {
     
     private CLStuff plugin;
     private Map<ItemStack, TokenData> tokenMap = new HashMap<>();
-    private List<ItemStack> idList = new ArrayList<>();
     private Map<Material, List<Integer>> cmdBlacklist = new EnumMap<>(Material.class);
     
     static {
@@ -83,8 +82,6 @@ public class ModelToken implements Listener {
         
         tokenMap = config.getMapList("modelTokens").stream()
                          .collect(Collectors.toMap(a -> (ItemStack) a.get("tokenItem"), a -> (TokenData) a.get("tokenData")));
-        
-        idList.addAll(tokenMap.keySet());
         
         ConfigurationSection blacklist = config.getConfigurationSection("blacklist");
         if (blacklist != null)
@@ -242,24 +239,23 @@ public class ModelToken implements Listener {
     }
     
     public Object addItem(ItemStack token, ItemStack item) {
-        idList.add(token);
         return tokenMap.put(token, TokenData.fromItemStack(item));
     }
     
-    public boolean removeTokenById(int id) {
-        return tokenMap.remove(idList.remove(id)) != null;
+    public boolean removeTokenByHash(int hash) {
+        return tokenMap.entrySet().removeIf(a -> a.getKey().hashCode() == hash);
     }
     
     public Map<ItemStack, TokenData> getTokens() {
         return Collections.unmodifiableMap(tokenMap);
     }
     
-    public ItemStack getTokenById(int id) {
-        return idList.get(id);
+    public ItemStack getTokenByHash(int hash) {
+        return tokenMap.keySet().stream().filter(a -> a.hashCode() == hash).findFirst().orElse(null);
     }
     
-    public ItemStack getItemById(int id) {
-        return tokenMap.get(idList.get(id)).toItemStack();
+    public ItemStack getItemByHash(int hash) {
+        return tokenMap.entrySet().stream().filter(a -> a.getKey().hashCode() == hash).findFirst().map(a -> a.getValue().toItemStack()).orElse(null);
     }
     
     public boolean addBlacklist(Material mat, List<Integer> cmdList) {
@@ -274,9 +270,5 @@ public class ModelToken implements Listener {
     
     public Map<Material, List<Integer>> getBlacklist() {
         return Collections.unmodifiableMap(cmdBlacklist);
-    }
-
-    public int getIndex(ItemStack key) {
-        return idList.indexOf(key);
     }
 }

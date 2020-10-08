@@ -116,8 +116,6 @@ public class ArenaGUI implements Listener {
             Location playerLoc = getSimpleLocation(config.getConfigurationSection("playerLoc"));
             long teleportDelay = config.getLong("teleportDelay", 0L);
             
-            List<String> globalBlockList = config.getStringList("blockedMobs");
-            
             String name = config.getString("name", "");
             
             List<ArenaMob> mob = config.getMapList("mobs").stream().map(a -> {
@@ -132,7 +130,7 @@ public class ArenaGUI implements Listener {
                 return new ArenaMob(mobName, lore, head, spawns, cost, teleportPlayer);
             }).collect(Collectors.toList());
             
-            entry.put(loc, new ArenaEntry(plugin, loc, spawnLoc, playerLoc, name, teleportDelay, mob, globalBlockList));
+            entry.put(loc, new ArenaEntry(plugin, loc, spawnLoc, playerLoc, name, teleportDelay, mob));
         }
     }
 

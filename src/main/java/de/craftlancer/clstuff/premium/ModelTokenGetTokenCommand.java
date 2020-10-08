@@ -18,13 +18,10 @@ public class ModelTokenGetTokenCommand extends ModelTokenSubCommand {
     protected String execute(CommandSender sender, Command cmd, String label, String[] args) {
         if(!checkSender(sender))
             return "You're not allowed to use this command.";
-
-        if(args.length < 2)
-            return "Not enough arguments.";
         
-        int id = Utils.parseIntegerOrDefault(args[1], -1);
+        int hash = Utils.parseIntegerOrDefault(args[1], -1);
         
-        ItemStack item = getToken().getTokenById(id);
+        ItemStack item = getToken().getTokenByHash(hash);
         return ((Player) sender).getInventory().addItem(item).isEmpty() ? "Token given." : "Not enough space for token.";
     }
     
