@@ -30,13 +30,15 @@ public class ModelTokenListCommand extends ModelTokenSubCommand {
         int id = 0;
         for(Entry<ItemStack, TokenData> a : getToken().getTokens().entrySet()) {
             BaseComponent delAction = new TextComponent("[Delete]");
-            delAction.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/modeltoken remove " + a.getKey().hashCode()));
+            int index = getToken().getIndex(a.getKey());
+            
+            delAction.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/modeltoken remove " + index));
             delAction.setColor(ChatColor.RED);
             
             BaseComponent token = Utils.getItemComponent(a.getKey());
-            token.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/modeltoken gettoken " + a.getKey().hashCode()));
+            token.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/modeltoken gettoken " + index));
             BaseComponent item = Utils.getItemComponent(a.getValue().toItemStack());
-            item.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/modeltoken getitem " + a.getKey().hashCode()));
+            item.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/modeltoken getitem " + index));
             
             BaseComponent base = new TextComponent(Integer.toString(id));
             base.addExtra(" - ");
