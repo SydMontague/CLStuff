@@ -36,7 +36,7 @@ public class EmoteManager {
         File file = new File(plugin.getDataFolder(), "emotes.yml");
         
         if (!file.exists())
-            CLStuff.getInstance().getResource(file.getName());
+            CLStuff.getInstance().saveResource(file.getName(), false);
         
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         

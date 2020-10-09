@@ -70,7 +70,7 @@ public class CitizenSetsManager implements Listener {
     
     public void load() {
         if (!file.exists())
-            CLStuff.getInstance().getResource(file.getName());
+            CLStuff.getInstance().saveResource(file.getName(), false);
         
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         
