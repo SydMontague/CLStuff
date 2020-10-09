@@ -69,6 +69,9 @@ public class CitizenSetsManager implements Listener {
     }
     
     public void load() {
+        if (!file.exists())
+            CLStuff.getInstance().saveResource(file.getName(), false);
+        
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         
         citizenSets = (List<CitizenSet>) config.getList("citizenSets", new ArrayList<>());
