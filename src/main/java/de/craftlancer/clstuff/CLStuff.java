@@ -1,10 +1,37 @@
 package de.craftlancer.clstuff;
 
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
-
+import de.craftlancer.clstuff.adminshop.AdminShopManager;
+import de.craftlancer.clstuff.afk.AFKListener;
+import de.craftlancer.clstuff.arena.ArenaGUI;
+import de.craftlancer.clstuff.citizensets.CitizenSetsManager;
+import de.craftlancer.clstuff.citizensets.commands.CitizenSetCommandHandler;
+import de.craftlancer.clstuff.commands.CLStuffCommands;
+import de.craftlancer.clstuff.commands.CenterMapCommand;
+import de.craftlancer.clstuff.commands.CraftCommand;
+import de.craftlancer.clstuff.commands.ItemBuilderCommand;
+import de.craftlancer.clstuff.commands.StatsCommand;
+import de.craftlancer.clstuff.commands.WildCommand;
+import de.craftlancer.clstuff.emotes.EmoteCommand;
+import de.craftlancer.clstuff.emotes.EmoteManager;
+import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
+import de.craftlancer.clstuff.help.CCHelpCommandHandler;
+import de.craftlancer.clstuff.heroes.Heroes;
+import de.craftlancer.clstuff.heroes.commands.HeroesCommandHandler;
+import de.craftlancer.clstuff.premium.ModelToken;
+import de.craftlancer.clstuff.premium.RecolorCommand;
+import de.craftlancer.clstuff.rankings.Rankings;
+import de.craftlancer.clstuff.squest.ServerQuests;
+import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.NMSUtils;
+import de.craftlancer.core.Utils;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import me.ryanhamshire.GriefPrevention.PlayerData;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -30,33 +57,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import de.craftlancer.clstuff.adminshop.AdminShopManager;
-import de.craftlancer.clstuff.afk.AFKListener;
-import de.craftlancer.clstuff.arena.ArenaGUI;
-import de.craftlancer.clstuff.commands.CLStuffCommands;
-import de.craftlancer.clstuff.commands.CenterMapCommand;
-import de.craftlancer.clstuff.commands.CraftCommand;
-import de.craftlancer.clstuff.commands.StatsCommand;
-import de.craftlancer.clstuff.commands.WildCommand;
-import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
-import de.craftlancer.clstuff.help.CCHelpCommandHandler;
-import de.craftlancer.clstuff.heroes.Heroes;
-import de.craftlancer.clstuff.heroes.commands.HeroesCommandHandler;
-import de.craftlancer.clstuff.premium.ModelToken;
-import de.craftlancer.clstuff.premium.RecolorCommand;
-import de.craftlancer.clstuff.rankings.Rankings;
-import de.craftlancer.clstuff.squest.ServerQuests;
-import de.craftlancer.core.LambdaRunnable;
-import de.craftlancer.core.NMSUtils;
-import de.craftlancer.core.Utils;
-import de.craftlancer.core.util.MessageLevel;
-import de.craftlancer.core.util.MessageUtil;
-import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import me.ryanhamshire.GriefPrevention.PlayerData;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class CLStuff extends JavaPlugin implements Listener {
     
@@ -72,6 +76,8 @@ public class CLStuff extends JavaPlugin implements Listener {
     private ArenaGUI arenaGUI;
     private Heroes heroes;
     private AdminShopManager adminShop;
+    private CitizenSetsManager citizenSets;
+    private EmoteManager emotes;
     
     @Override
     public void onLoad() {
@@ -86,7 +92,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     public void onEnable() {
         instance = this;
         BaseComponent prefix = new TextComponent(new ComponentBuilder("[").color(ChatColor.WHITE).append("Craft").color(ChatColor.DARK_RED).append("Citizen")
-                                                                          .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
+                .color(ChatColor.WHITE).append("]").color(ChatColor.WHITE).create());
         MessageUtil.registerPlugin(this, prefix, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA);
         
         useDiscord = Bukkit.getPluginManager().getPlugin("DiscordSRV") != null;
@@ -182,7 +188,6 @@ public class CLStuff extends JavaPlugin implements Listener {
             if (!(a instanceof Player))
                 return false;
             
-            @SuppressWarnings("deprecation")
             OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
             Player sender = (Player) a;
             int amount = Utils.parseIntegerOrDefault(args[1], 0);
@@ -246,6 +251,16 @@ public class CLStuff extends JavaPlugin implements Listener {
         adminShop = new AdminShopManager(this);
         Bukkit.getPluginManager().registerEvents(adminShop, this);
         
+        citizenSets = new CitizenSetsManager();
+        getCommand("citizensets").setExecutor(new CitizenSetCommandHandler(this, citizenSets));
+        Bukkit.getPluginManager().registerEvents(citizenSets, this);
+        
+        emotes = new EmoteManager(this);
+        getCommand("emote").setExecutor(new EmoteCommand(emotes));
+        
+        getCommand("itembuilder").setExecutor(new ItemBuilderCommand(this));
+        
+        
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
         
@@ -253,14 +268,13 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         try {
             arenaGUI = new ArenaGUI(this);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             // we don't want things to crash just because someone messed up something
         }
     }
     
-    private static final boolean fixItem(CommandSender a, Command b, String c, String[] d) {
+    private static boolean fixItem(CommandSender a, Command b, String c, String[] d) {
         if (!(a instanceof Player))
             return true;
         
@@ -307,7 +321,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     public void onInvClose(InventoryCloseEvent event) {
         fixInventory(event.getPlayer().getInventory());
     }
-
+    
     @EventHandler
     public void onInvClose(PlayerJoinEvent event) {
         fixInventory(event.getPlayer().getInventory());
@@ -383,6 +397,12 @@ public class CLStuff extends JavaPlugin implements Listener {
         exploNerf.save();
         heroes.save();
         adminShop.save();
+        citizenSets.save();
+        emotes.save();
+    }
+    
+    public CitizenSetsManager getCitizenSets() {
+        return citizenSets;
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)

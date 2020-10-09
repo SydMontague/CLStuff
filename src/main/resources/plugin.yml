@@ -6,6 +6,8 @@ depend: [CLCore, CLFeatures]
 softdepend: [DiscordSRV, CombatLogX, MythicMobs]
 loadbefore: [WorldGuard]
 commands:
+  itembuilder:
+    description: Easy item editing in a command
   howtoplay:
     description: Gives you a how to play book.
   stats:
@@ -59,6 +61,11 @@ commands:
     usage: Run /centermap while holding a map, centers to where you stand
   heroes:
     description: Commands for heroes
+  citizensets:
+    description: Commands for citizensets
+    aliases: csets
+  emote:
+    description: Commands for emotes
   adminshop:
     description: Adminshop commands
     usage: Run /adminshop [create|remove] and right click the block
@@ -169,4 +176,10 @@ permissions:
   clstuff.explonerf.info:
     default: false
   clstuff.heroes.admin:
+    default: op
+  clstuff.citizenset.admin:
+    default: op
+  clstuff.itembuilder:
+    default: op
+  clstuff.emote.admin:
     default: op
