@@ -34,6 +34,10 @@ public class EmoteManager {
     
     private void load() {
         File file = new File(plugin.getDataFolder(), "emotes.yml");
+        
+        if (!file.exists())
+            CLStuff.getInstance().getResource(file.getName());
+        
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         
         PREFIX = ChatColor.translateAlternateColorCodes('&', config.getString("prefix"));
