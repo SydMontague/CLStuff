@@ -12,11 +12,11 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public class CitizenSetPageGUI extends PagedListGUIInventory {
-    public CitizenSetPageGUI(Plugin plugin, List<PageItem> pageItems) {
+    public CitizenSetPageGUI(Plugin plugin, List<PageItem> pageItems, CitizenSetsManager csets) {
         super(plugin, false, 2, pageItems, true);
         
         NavigationItem item = new NavigationItem(new ItemBuilder(Material.ENDER_EYE).setDisplayName("&3Back to main page...").build(), -1);
-        item.setClickAction(p -> CitizenSetsListener.getInstance().getGui().display(p));
+        item.setClickAction(p -> csets.getGui().display(p));
         addNavigationItem(item);
     }
     

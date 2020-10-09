@@ -1,8 +1,8 @@
 package de.craftlancer.clstuff.citizensets;
 
+import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.gui.PageItem;
 import de.craftlancer.core.util.ItemBuilder;
-import de.craftlancer.core.util.Tuple;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -10,6 +10,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -123,7 +124,7 @@ public class CitizenSet implements ConfigurationSerializable {
             list.add(new PageItem(new ItemBuilder(offHand).addLore("", ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "OFF HAND").build()));
         others.forEach(i -> list.add(new PageItem(i.clone())));
         
-        gui = new CitizenSetPageGUI(CitizenSetsListener.getInstance().getPlugin(), list);
+        gui = new CitizenSetPageGUI(CLStuff.getInstance(), list, CLStuff.getInstance().getCitizenSets());
     }
     
     /**
@@ -138,7 +139,12 @@ public class CitizenSet implements ConfigurationSerializable {
             return false;
         if (item.getType() != setItem.getType())
             return false;
-        return item.getItemMeta().hasLore() && item.getItemMeta().getLore().equals(setItem.getItemMeta().getLore());
+        if (!item.getItemMeta().getPersistentDataContainer().has(CitizenSetsManager.KEY, PersistentDataType.STRING))
+            return false;
+        if (!setItem.getItemMeta().getPersistentDataContainer().has(CitizenSetsManager.KEY, PersistentDataType.STRING))
+            return false;
+        return setItem.getItemMeta().getPersistentDataContainer().get(CitizenSetsManager.KEY, PersistentDataType.STRING)
+                .equals(item.getItemMeta().getPersistentDataContainer().get(CitizenSetsManager.KEY, PersistentDataType.STRING));
     }
     
     private boolean isAir(ItemStack item) {
@@ -154,7 +160,7 @@ public class CitizenSet implements ConfigurationSerializable {
         
         remove(player.getUniqueId());
         playerRunnableMap.put(player.getUniqueId(),
-                new FunctionRunnable(player, this).runTaskTimer(CitizenSetsListener.getInstance().getPlugin(), 0, 1));
+                new FunctionRunnable(player, this).runTaskTimer(CLStuff.getInstance(), 0, 1));
     }
     
     
@@ -185,7 +191,7 @@ public class CitizenSet implements ConfigurationSerializable {
     
     public void setIcon(ItemStack icon) {
         this.icon = icon;
-        CitizenSetsListener.getInstance().createGui();
+        CLStuff.getInstance().getCitizenSets().createGui();
     }
     
     public ItemStack getIcon() {
@@ -210,7 +216,7 @@ public class CitizenSet implements ConfigurationSerializable {
         
         @Override
         public void run() {
-            set.getFunctions().forEach(f -> f.run(new Tuple<>(player, tickId)));
+            set.getFunctions().forEach(f -> f.run(player, tickId));
             tickId++;
         }
     }

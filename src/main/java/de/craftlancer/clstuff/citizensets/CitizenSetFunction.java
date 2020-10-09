@@ -1,7 +1,6 @@
 package de.craftlancer.clstuff.citizensets;
 
 import de.craftlancer.core.util.ParticleUtil;
-import de.craftlancer.core.util.Tuple;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -12,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public abstract class CitizenSetFunction implements ConfigurationSerializable {
     private String id;
@@ -25,13 +24,13 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         this.id = (String) map.get("id");
     }
     
-    public abstract Consumer<Tuple<Player, Long>> getConsumer();
+    abstract BiConsumer<Player, Long> getConsumer();
     
     /**
      * Ran every 1 tick
      */
-    public void run(Tuple<Player, Long> functionContainer) {
-        getConsumer().accept(functionContainer);
+    public void run(Player player, long tickId) {
+        getConsumer().accept(player, tickId);
     }
     
     public String getId() {
@@ -58,12 +57,9 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
         
         @Override
-        public Consumer<Tuple<Player, Long>> getConsumer() {
-            return tuple -> {
-                long tickId = tuple.getValue();
-                Player player = tuple.getKey();
-                
-                if (tickId % 40 == 0)
+        BiConsumer<Player, Long> getConsumer() {
+            return (player, tickID) -> {
+                if (tickID % 40 == 0)
                     player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 45, 0));
             };
         }
@@ -80,11 +76,8 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
         
         @Override
-        public Consumer<Tuple<Player, Long>> getConsumer() {
-            return tuple -> {
-                long tickId = tuple.getValue();
-                Player player = tuple.getKey();
-                
+        BiConsumer<Player, Long> getConsumer() {
+            return (player, tickId) -> {
                 if (tickId % 40 == 0)
                     player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 45, 0));
             };
@@ -102,11 +95,8 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
         
         @Override
-        public Consumer<Tuple<Player, Long>> getConsumer() {
-            return tuple -> {
-                long tickId = tuple.getValue();
-                Player player = tuple.getKey();
-                
+        BiConsumer<Player, Long> getConsumer() {
+            return (player, tickId) -> {
                 if (tickId % 40 == 0)
                     player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 45, 0));
             };
@@ -154,11 +144,8 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
         
         @Override
-        public Consumer<Tuple<Player, Long>> getConsumer() {
-            return tuple -> {
-                long tickId = tuple.getValue();
-                Player player = tuple.getKey();
-                
+        BiConsumer<Player, Long> getConsumer() {
+            return (player, tickId) -> {
                 if (tickId % 16 == 0)
                     ParticleUtil.spawnSpinningParticleCircle(() -> player.getLocation().clone().add(0, player.isSneaking() ? 2 : 2.25, 0), 16, 2, 1, 0.5, getColor());
             };
@@ -176,11 +163,8 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
         
         @Override
-        public Consumer<Tuple<Player, Long>> getConsumer() {
-            return tuple -> {
-                long tickId = tuple.getValue();
-                Player player = tuple.getKey();
-                
+        BiConsumer<Player, Long> getConsumer() {
+            return (player, tickId) -> {
                 if (tickId % 16 == 0)
                     ParticleUtil.spawnSpinningParticleCircle(() -> player.getLocation().clone().add(0, 2.25, 0), 16, 2, 1, 0.5, getColor());
             };
@@ -198,11 +182,8 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
         
         @Override
-        public Consumer<Tuple<Player, Long>> getConsumer() {
-            return tuple -> {
-                long tickId = tuple.getValue();
-                Player player = tuple.getKey();
-                
+        BiConsumer<Player, Long> getConsumer() {
+            return (player, tickId) -> {
                 Particle.DustOptions particle = new Particle.DustOptions(getColor(), 2.0F);
                 
                 player.getWorld().spawnParticle(Particle.REDSTONE, player.getLocation(), 2, particle);
@@ -210,26 +191,51 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
     }
     
-    public static CitizenSetFunction getFunctionFromString(String type, String id) {
-        return getFunctionFromString(type, id, Color.WHITE);
-    }
-    
-    public static CitizenSetFunction getFunctionFromString(String type, String id, Color color) {
-        switch (type.toUpperCase()) {
-            case "HALO_PARTICLE":
-                return new FunctionHaloParticle(id, color);
-            case "TRAIL_PARTICLE":
-                return new FunctionTrailParticle(id, color);
-            case "AURA_PARTICLE":
-                return new FunctionAuraParticle(id, color);
-            case "WATER_BREATHING":
-                return new FunctionWaterBreathing(id);
-            case "FIRE_RESISTANCE":
-                return new FunctionFireResistance(id);
-            case "NIGHT_VISION":
-                return new FunctionNightVision(id);
-            default:
-                return null;
+    public enum FunctionType {
+        WATER_BREATHING,
+        FIRE_RESISTANCE,
+        NIGHT_VISION,
+        TRAIL_PARTICLE,
+        HALO_PARTICLE;
+        
+        private static FunctionType fromString(String type) {
+            switch (type.toLowerCase()) {
+                case "water_breathing":
+                    return WATER_BREATHING;
+                case "fire_resistance":
+                    return FIRE_RESISTANCE;
+                case "night_vision":
+                    return NIGHT_VISION;
+                case "trail_particle":
+                    return TRAIL_PARTICLE;
+                case "halo_particle":
+                    return HALO_PARTICLE;
+                default:
+                    return null;
+            }
+        }
+        
+        public static CitizenSetFunction getFunction(String type, String id) {
+            return getFunction(type, id, Color.WHITE);
+        }
+        
+        public static CitizenSetFunction getFunction(String type, String id, Color color) {
+            switch (fromString(type)) {
+                case HALO_PARTICLE:
+                    return new FunctionHaloParticle(id, color);
+                case TRAIL_PARTICLE:
+                    return new FunctionTrailParticle(id, color);
+                //case :
+                //    return new FunctionAuraParticle(id, color);
+                case WATER_BREATHING:
+                    return new FunctionWaterBreathing(id);
+                case FIRE_RESISTANCE:
+                    return new FunctionFireResistance(id);
+                case NIGHT_VISION:
+                    return new FunctionNightVision(id);
+                default:
+                    return null;
+            }
         }
     }
 }

@@ -1,39 +1,9 @@
 package de.craftlancer.clstuff;
 
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
-import org.bukkit.Statistic;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import de.craftlancer.clstuff.adminshop.AdminShopManager;
 import de.craftlancer.clstuff.afk.AFKListener;
 import de.craftlancer.clstuff.arena.ArenaGUI;
-import de.craftlancer.clstuff.citizensets.CitizenSetsListener;
+import de.craftlancer.clstuff.citizensets.CitizenSetsManager;
 import de.craftlancer.clstuff.citizensets.commands.CitizenSetCommandHandler;
 import de.craftlancer.clstuff.commands.CLStuffCommands;
 import de.craftlancer.clstuff.commands.CenterMapCommand;
@@ -62,45 +32,38 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
+import org.bukkit.Statistic;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class CLStuff extends JavaPlugin implements Listener {
     
-    private static final DateTimeFormatter DATE_FORMAT;
-    
-    static {
-        Map<Long, String> dow = new HashMap<>();
-        dow.put(1L, "Mon");
-        dow.put(2L, "Tue");
-        dow.put(3L, "Wed");
-        dow.put(4L, "Thu");
-        dow.put(5L, "Fri");
-        dow.put(6L, "Sat");
-        dow.put(7L, "Sun");
-        Map<Long, String> moy = new HashMap<>();
-        moy.put(1L, "Jan");
-        moy.put(2L, "Feb");
-        moy.put(3L, "Mar");
-        moy.put(4L, "Apr");
-        moy.put(5L, "May");
-        moy.put(6L, "Jun");
-        moy.put(7L, "Jul");
-        moy.put(8L, "Aug");
-        moy.put(9L, "Sep");
-        moy.put(10L, "Oct");
-        moy.put(11L, "Nov");
-        moy.put(12L, "Dec");
-        
-        DATE_FORMAT = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().optionalStart().appendText(ChronoField.DAY_OF_WEEK, dow)
-                .appendLiteral(", ").optionalEnd().appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
-                .appendLiteral(' ').appendText(ChronoField.MONTH_OF_YEAR, moy).appendLiteral(' ')
-                .appendValue(ChronoField.YEAR, 4)  // 2 digit year not handled
-                .appendLiteral(" §e").appendValue(ChronoField.HOUR_OF_DAY, 2).appendLiteral(':')
-                .appendValue(ChronoField.MINUTE_OF_HOUR, 2).optionalStart().appendLiteral(':')
-                .appendValue(ChronoField.SECOND_OF_MINUTE, 2).optionalEnd().appendLiteral(" §7")
-                .appendOffset("+HHMM", "GMT")  // should handle
-                // UT/Z/EST/EDT/CST/CDT/MST/MDT/PST/MDT
-                .toFormatter();
-    }
     private static CLStuff instance;
     
     private WGNoDropFlag flag;
@@ -112,9 +75,9 @@ public class CLStuff extends JavaPlugin implements Listener {
     private boolean useDiscord = false;
     private ArenaGUI arenaGUI;
     private Heroes heroes;
-    private CitizenSetsListener citizenSets;
-    private EmoteManager emotes;
     private AdminShopManager adminShop;
+    private CitizenSetsManager citizenSets;
+    private EmoteManager emotes;
     
     @Override
     public void onLoad() {
@@ -191,14 +154,6 @@ public class CLStuff extends JavaPlugin implements Listener {
         getCommand("cchelp").setExecutor(new CCHelpCommandHandler(this));
         getCommand("wild").setExecutor(new WildCommand(this));
         
-        getCommand("citizensets").setExecutor(new CitizenSetCommandHandler(this));
-        
-        getCommand("store").setExecutor((a, b, c, d) -> {
-            a.sendMessage(ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.DARK_GREEN
-                    + "https://craftcitizen.tebex.io/");
-            return true;
-        });
-       
         getCommand("countEntities").setExecutor((a, b, c, d) -> {
             if (!a.isOp())
                 return true;
@@ -275,23 +230,16 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("craft").setExecutor(new CraftCommand());
         getCommand("centermap").setExecutor(new CenterMapCommand(this));
-        getCommand("itembuilder").setExecutor(new ItemBuilderCommand(this));
         
         heroes = new Heroes(this);
         
         getCommand("heroes").setExecutor(new HeroesCommandHandler(this, heroes));
-        
-        emotes = new EmoteManager(this);
-        
-        getCommand("emote").setExecutor(new EmoteCommand(emotes));
         
         flag = new WGNoDropFlag(this);
         serverQuests = new ServerQuests(this);
         
         tokens = new ModelToken(this);
         exploNerf = new ExplosionRegulator(this);
-        citizenSets = new CitizenSetsListener(this);
-        Bukkit.getPluginManager().registerEvents(citizenSets, this);
         Bukkit.getPluginManager().registerEvents(recolor, this);
         Bukkit.getPluginManager().registerEvents(exploNerf, this);
         Bukkit.getPluginManager().registerEvents(tokens, this);
@@ -302,6 +250,16 @@ public class CLStuff extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new PreventCMDUpgrade(this), this);
         adminShop = new AdminShopManager(this);
         Bukkit.getPluginManager().registerEvents(adminShop, this);
+        
+        citizenSets = new CitizenSetsManager();
+        getCommand("citizensets").setExecutor(new CitizenSetCommandHandler(this, citizenSets));
+        Bukkit.getPluginManager().registerEvents(citizenSets, this);
+        
+        emotes = new EmoteManager(this);
+        getCommand("emote").setExecutor(new EmoteCommand(emotes));
+        
+        getCommand("itembuilder").setExecutor(new ItemBuilderCommand(this));
+        
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
@@ -316,7 +274,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         }
     }
     
-    private static final boolean fixItem(CommandSender a, Command b, String c, String[] d) {
+    private static boolean fixItem(CommandSender a, Command b, String c, String[] d) {
         if (!(a instanceof Player))
             return true;
         
@@ -363,7 +321,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     public void onInvClose(InventoryCloseEvent event) {
         fixInventory(event.getPlayer().getInventory());
     }
-
+    
     @EventHandler
     public void onInvClose(PlayerJoinEvent event) {
         fixInventory(event.getPlayer().getInventory());
@@ -438,9 +396,13 @@ public class CLStuff extends JavaPlugin implements Listener {
         tokens.save();
         exploNerf.save();
         heroes.save();
+        adminShop.save();
         citizenSets.save();
         emotes.save();
-        adminShop.save();
+    }
+    
+    public CitizenSetsManager getCitizenSets() {
+        return citizenSets;
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)

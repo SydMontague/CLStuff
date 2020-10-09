@@ -2,7 +2,7 @@ package de.craftlancer.clstuff.citizensets.commands;
 
 import de.craftlancer.clstuff.citizensets.CitizenSet;
 import de.craftlancer.clstuff.citizensets.CitizenSetFunction;
-import de.craftlancer.clstuff.citizensets.CitizenSetsListener;
+import de.craftlancer.clstuff.citizensets.CitizenSetsManager;
 import de.craftlancer.core.Utils;
 import de.craftlancer.core.command.SubCommand;
 import de.craftlancer.core.util.ParticleUtil;
@@ -10,7 +10,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Arrays;
@@ -20,18 +19,23 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CitizenSetFunctionAddCommand extends SubCommand {
-    public CitizenSetFunctionAddCommand(Plugin plugin) {
-        super("clstuff.citizenset.admin", plugin, true);
+    
+    private CitizenSetsManager csets;
+    
+    public CitizenSetFunctionAddCommand(Plugin plugin, CitizenSetsManager csets) {
+        super("clstuff.citizenset.admin", plugin, false);
+        
+        this.csets = csets;
     }
     
     @Override
     protected List<String> onTabComplete(CommandSender sender, String[] args) {
         //List of all citizensets
         if (args.length == 3)
-            return Utils.getMatches(args[2], CitizenSetsListener.getInstance().getCitizenSets().stream().map(CitizenSet::getId).collect(Collectors.toList()));
+            return Utils.getMatches(args[2], csets.getCitizenSets().stream().map(CitizenSet::getId).collect(Collectors.toList()));
         
         if (args.length == 4)
-            return Utils.getMatches(args[3], Arrays.asList("NIGHT_VISION", "FIRE_RESISTANCE", "WATER_BREATHING", "HALO_PARTICLE", "TRAIL_PARTICLE"));
+            return Utils.getMatches(args[3], Arrays.stream(CitizenSetFunction.FunctionType.values()).map(Enum::name).collect(Collectors.toList()));
         if (args.length == 5)
             return Collections.singletonList("id");
         if (args.length == 6 && args[1].equalsIgnoreCase("add") && args[3].toUpperCase().contains("PARTICLE"))
@@ -42,21 +46,21 @@ public class CitizenSetFunctionAddCommand extends SubCommand {
     
     @Override
     protected String execute(CommandSender commandSender, Command command, String s, String[] args) {
-        if (!(commandSender instanceof Player))
-            return null;
+        if (!checkSender(commandSender))
+            return CitizenSetsManager.CC_PREFIX + "§cYou do not have permission to use this command.";
         
         if (args.length < 5)
-            return CitizenSetsListener.CC_PREFIX + "Please specify all necessary arguments.";
+            return CitizenSetsManager.CC_PREFIX + "Please specify all necessary arguments.";
         if (args[1].equalsIgnoreCase("add") && args.length < 6 && args[3].toUpperCase().contains("PARTICLE"))
-            return CitizenSetsListener.CC_PREFIX + "You must specify a color of particle to use.";
+            return CitizenSetsManager.CC_PREFIX + "You must specify a color of particle to use.";
         
-        Optional<CitizenSet> optional = CitizenSetsListener.getInstance().getCitizenSets().stream().filter(set -> set.getId().equals(args[2])).findFirst();
+        Optional<CitizenSet> optional = csets.getCitizenSets().stream().filter(set -> set.getId().equals(args[2])).findFirst();
         
         if (!optional.isPresent())
-            return CitizenSetsListener.CC_PREFIX + "You must specify a valid set id!";
+            return CitizenSetsManager.CC_PREFIX + "You must specify a valid set id!";
         
         if (optional.get().getFunctions().stream().anyMatch(f -> f.getId().equals(args[4])))
-            return CitizenSetsListener.CC_PREFIX + ChatColor.YELLOW + "There is a function in this set that is already using this id!";
+            return CitizenSetsManager.CC_PREFIX + ChatColor.YELLOW + "There is a function in this set that is already using this id!";
         
         Color color = null;
         if (args[1].equalsIgnoreCase("add") && args[3].toUpperCase().contains("PARTICLE")) {
@@ -66,15 +70,15 @@ public class CitizenSetFunctionAddCommand extends SubCommand {
         
         try {
             if (color == null)
-                function = CitizenSetFunction.getFunctionFromString(args[3], args[4]);
+                function = CitizenSetFunction.FunctionType.getFunction(args[3], args[4]);
             else
-                function = CitizenSetFunction.getFunctionFromString(args[3], args[4], color);
+                function = CitizenSetFunction.FunctionType.getFunction(args[3], args[4], color);
         } catch (NullPointerException e) {
-            return CitizenSetsListener.CC_PREFIX + "You must specify a valid function type.";
+            return CitizenSetsManager.CC_PREFIX + "You must specify a valid function type.";
         }
         
         optional.get().addFunction(function);
-        return CitizenSetsListener.CC_PREFIX + ChatColor.GREEN + "Function added.";
+        return CitizenSetsManager.CC_PREFIX + ChatColor.GREEN + "Function added.";
         
     }
     

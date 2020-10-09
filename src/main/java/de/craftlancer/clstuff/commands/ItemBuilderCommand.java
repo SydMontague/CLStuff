@@ -36,6 +36,9 @@ public class ItemBuilderCommand implements CommandExecutor, TabCompleter {
         if (!(commandSender instanceof Player))
             return false;
         
+        if (!commandSender.hasPermission("clstuff.itembuilder"))
+            return false;
+        
         if (args.length == 0) {
             commandSender.sendMessage(PREFIX + "You must specify a value!");
             return false;

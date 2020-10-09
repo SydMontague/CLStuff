@@ -6,6 +6,7 @@ import de.craftlancer.core.gui.PageItem;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
@@ -23,26 +24,25 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class CitizenSetsListener implements Listener {
-    
+public class CitizenSetsManager implements Listener {
+    public static NamespacedKey KEY;
     public static final String CC_PREFIX = ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.YELLOW;
     
-    private static CitizenSetsListener instance;
-    
-    private CLStuff plugin;
     private File file;
     private List<CitizenSet> citizenSets;
     private CitizenSetListGUI gui;
     
-    public CitizenSetsListener(CLStuff plugin) {
+    public CitizenSetsManager() {
         ConfigurationSerialization.registerClass(CitizenSet.class);
         ConfigurationSerialization.registerClass(CitizenSetFunction.class);
         ConfigurationSerialization.registerClass(CitizenSetFunction.FunctionWaterBreathing.class);
@@ -52,17 +52,16 @@ public class CitizenSetsListener implements Listener {
         ConfigurationSerialization.registerClass(CitizenSetFunction.FunctionHaloParticle.class);
         ConfigurationSerialization.registerClass(CitizenSetFunction.FunctionTrailParticle.class);
         ConfigurationSerialization.registerClass(CitizenSetFunction.FunctionAuraParticle.class);
-        instance = this;
         
-        this.plugin = plugin;
-        this.file = new File(plugin.getDataFolder(), "citizenSets.yml");
+        this.file = new File(CLStuff.getInstance().getDataFolder(), "citizenSets.yml");
         
+        KEY = new NamespacedKey(CLStuff.getInstance(), "citizensets");
         load();
         createGui();
     }
     
     public void createGui() {
-        gui = new CitizenSetListGUI(plugin, citizenSets.stream().map(set -> {
+        gui = new CitizenSetListGUI(CLStuff.getInstance(), citizenSets.stream().map(set -> {
             PageItem item = new PageItem(set.getIcon());
             item.setClickAction(player -> set.getGui().display(player));
             return item;
@@ -80,21 +79,24 @@ public class CitizenSetsListener implements Listener {
         
         config.set("citizenSets", citizenSets);
         
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public CLStuff getPlugin() {
-        return plugin;
+        BukkitRunnable saveTask = new LambdaRunnable(() -> {
+            try {
+                config.save(file);
+            } catch (IOException e) {
+                CLStuff.getInstance().getLogger().log(Level.SEVERE, "Error while saving: ", e);
+            }
+        });
+        
+        if (CLStuff.getInstance().isEnabled())
+            saveTask.runTaskAsynchronously(CLStuff.getInstance());
+        else
+            saveTask.run();
     }
     
     @EventHandler()
     public void onInventoryClose(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
-        verify(player, 0);
+        verify(player, false);
     }
     
     @EventHandler(ignoreCancelled = true)
@@ -106,17 +108,17 @@ public class CitizenSetsListener implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getAction() != Action.RIGHT_CLICK_AIR)
             return;
         
-        if (armor.stream().noneMatch(s -> s.contains(inventory.getItemInMainHand().getType().name()))
-                && armor.stream().noneMatch(s -> s.contains(inventory.getItemInOffHand().getType().name())))
+        if (armor.stream().noneMatch(s -> s.contains(inventory.getItemInMainHand().getType().name())
+                && s.contains(inventory.getItemInOffHand().getType().name())))
             return;
         
-        verify(player, 1);
+        verify(player, true);
     }
     
     @EventHandler()
     public void onHandSwap(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
-        verify(player, 1);
+        verify(player, true);
     }
     
     @EventHandler
@@ -124,19 +126,19 @@ public class CitizenSetsListener implements Listener {
         if (!(event.getEntity() instanceof Player))
             return;
         Player player = (Player) event.getEntity();
-        verify(player, 1);
+        verify(player, true);
     }
     
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        verify(player, 0);
+        verify(player, false);
     }
     
     @EventHandler
     public void onItemPickup(PlayerSwapHandItemsEvent event) {
         Player player = event.getPlayer();
-        verify(player, 1);
+        verify(player, true);
     }
     
     @EventHandler()
@@ -151,16 +153,16 @@ public class CitizenSetsListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        verify(player, 0);
+        verify(player, false);
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onPlayerLeave(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        verify(player, 0);
+        verify(player, false);
     }
     
-    private void verify(Player player, int runLater) {
+    private void verify(Player player, boolean later) {
         new LambdaRunnable(() -> {
             PlayerInventory inventory = player.getInventory();
             List<CitizenSet> disabled = new ArrayList<>();
@@ -195,7 +197,7 @@ public class CitizenSetsListener implements Listener {
                 builder.append("]").color(ChatColor.DARK_GRAY);
             
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, builder.create());
-        }).runTaskLater(plugin, runLater);
+        }).runTaskLater(CLStuff.getInstance(), later ? 1 : 0);
     }
     
     public List<CitizenSet> getCitizenSets() {
@@ -214,9 +216,5 @@ public class CitizenSetsListener implements Listener {
     
     public CitizenSetListGUI getGui() {
         return gui;
-    }
-    
-    public static CitizenSetsListener getInstance() {
-        return instance;
     }
 }

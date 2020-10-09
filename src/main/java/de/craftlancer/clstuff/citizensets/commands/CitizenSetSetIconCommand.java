@@ -1,7 +1,7 @@
 package de.craftlancer.clstuff.citizensets.commands;
 
 import de.craftlancer.clstuff.citizensets.CitizenSet;
-import de.craftlancer.clstuff.citizensets.CitizenSetsListener;
+import de.craftlancer.clstuff.citizensets.CitizenSetsManager;
 import de.craftlancer.core.Utils;
 import de.craftlancer.core.command.SubCommand;
 import net.md_5.bungee.api.ChatColor;
@@ -18,36 +18,41 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CitizenSetSetIconCommand extends SubCommand {
-    public CitizenSetSetIconCommand(Plugin plugin) {
-        super("clstuff.citizenset.admin", plugin, true);
+    
+    private CitizenSetsManager csets;
+    
+    public CitizenSetSetIconCommand(Plugin plugin, CitizenSetsManager csets) {
+        super("clstuff.citizenset.admin", plugin, false);
+        
+        this.csets = csets;
     }
     
     @Override
     protected List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 2)
-            return Utils.getMatches(args[1], CitizenSetsListener.getInstance().getCitizenSets().stream().map(CitizenSet::getId).collect(Collectors.toList()));
+            return Utils.getMatches(args[1], csets.getCitizenSets().stream().map(CitizenSet::getId).collect(Collectors.toList()));
         return Collections.emptyList();
     }
     
     @Override
     protected String execute(CommandSender commandSender, Command command, String s, String[] args) {
-        if (!(commandSender instanceof Player))
-            return null;
+        if (!checkSender(commandSender))
+            return CitizenSetsManager.CC_PREFIX + "§cYou do not have permission to use this command.";
         
         Player player = (Player) commandSender;
         ItemStack item = player.getInventory().getItemInMainHand();
         
         if (args.length < 2)
-            return CitizenSetsListener.CC_PREFIX + "You must specify an id!";
+            return CitizenSetsManager.CC_PREFIX + "You must specify an id!";
         
-        Optional<CitizenSet> optional = CitizenSetsListener.getInstance().getCitizenSets().stream().filter(set -> set.getId().equals(args[1])).findFirst();
+        Optional<CitizenSet> optional = csets.getCitizenSets().stream().filter(set -> set.getId().equals(args[1])).findFirst();
         
         if (!optional.isPresent())
-            return CitizenSetsListener.CC_PREFIX + "You must specify a valid id!";
+            return CitizenSetsManager.CC_PREFIX + "You must specify a valid id!";
         
-        optional.get().setIcon(item == null ? new ItemStack(Material.STONE) : item);
+        optional.get().setIcon(item == null || item.getType() == Material.AIR ? new ItemStack(Material.STONE) : item);
         
-        return CitizenSetsListener.CC_PREFIX + ChatColor.GREEN + "You have set the icon for " + args[1] + ".";
+        return CitizenSetsManager.CC_PREFIX + ChatColor.GREEN + "You have set the icon for " + args[1] + ".";
     }
     
     @Override
