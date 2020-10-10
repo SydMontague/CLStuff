@@ -1,3 +1,4 @@
 prefix: '&8[&cE&6m&eo&2t&3e&5s&8] &e'
 useCommandMap: true
+cooldown: 60
 emotes: []

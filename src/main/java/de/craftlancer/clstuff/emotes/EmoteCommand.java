@@ -1,6 +1,9 @@
 package de.craftlancer.clstuff.emotes;
 
+import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -46,7 +49,7 @@ public class EmoteCommand implements CommandExecutor, TabExecutor {
         if (args.length == 0)
             return EmoteManager.PREFIX + "You must specify an emote!";
         if (manager.getEmotes().stream().anyMatch(e -> e.getName().equalsIgnoreCase(args[0])))
-            return emote(player, args[0]);
+            return emote(player, args);
         if (args[0].equalsIgnoreCase("add") && player.hasPermission(EmoteManager.ADMIN_PERMISSION))
             return add(args);
         if (args[0].equalsIgnoreCase("remove") && player.hasPermission(EmoteManager.ADMIN_PERMISSION))
@@ -54,11 +57,25 @@ public class EmoteCommand implements CommandExecutor, TabExecutor {
         return EmoteManager.PREFIX + "§cPlease enter a valid argument!";
     }
     
-    private String emote(Player player, String string) {
-        Emote emote = manager.getEmotes().stream().filter(e -> e.getName().equalsIgnoreCase(string)).findFirst().get();
+    private String emote(Player player, String[] args) {
+        Emote emote = manager.getEmotes().stream().filter(e -> e.getName().equalsIgnoreCase(args[0])).findFirst().get();
         if (!player.hasPermission(emote.getPermission()))
             return EmoteManager.PREFIX + "§cYou do not have permission to run this command.";
-        emote.run(player);
+        
+        if (manager.hasCooldown(player.getUniqueId()))
+            return EmoteManager.PREFIX + "§cYou must wait to use an emote again!";
+        
+        if (player.hasPermission("clstuff.emote.target")
+                && args.length > 1
+                && Bukkit.getPlayer(args[1]) != null
+                && !player.getUniqueId().equals(Bukkit.getPlayer(args[1]).getUniqueId()))
+            emote.target(player, Bukkit.getPlayer(args[1]));
+        else
+            emote.run(player);
+        
+        manager.addCooldown(player.getUniqueId());
+        new LambdaRunnable(() -> manager.removeCooldown(player.getUniqueId())).runTaskLater(CLStuff.getInstance(), EmoteManager.COOLDOWN);
+        
         return null;
     }
     
@@ -86,7 +103,6 @@ public class EmoteCommand implements CommandExecutor, TabExecutor {
             return EmoteManager.PREFIX + "You must enter a valid emote to remove!";
         manager.removeEmote(optional.get().getName());
         return EmoteManager.PREFIX + "§aEmote has been removed.";
-        
     }
     
     @Override
@@ -100,6 +116,11 @@ public class EmoteCommand implements CommandExecutor, TabExecutor {
             }
             return Utils.getMatches(args[0], list);
         }
+        
+        if (args.length == 2 && sender.hasPermission("clstuff.emote.target") && manager.getEmotes().stream().filter(e -> sender.hasPermission(e.getPermission())).map(Emote::getName).anyMatch(a -> a.equals(args[0])))
+            return Utils.getMatches(args[1], Bukkit.getOnlinePlayers().stream()
+                    .filter(p -> !p.getUniqueId().equals(((Player) sender).getUniqueId()))
+                    .map(Player::getName).collect(Collectors.toList()));
         
         if (!args[0].equalsIgnoreCase("add") && !args[0].equalsIgnoreCase("remove"))
             return Collections.emptyList();

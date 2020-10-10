@@ -65,15 +65,27 @@ public class Emote implements ConfigurationSerializable {
         return map;
     }
     
-    public void run(Player player) {
-        List<Player> players = Bukkit.getOnlinePlayers().stream().filter(p -> player.getLocation().distanceSquared(p.getLocation()) <= Math.pow(radius, 2)).collect(Collectors.toList());
+    public void run(Player sender) {
+        List<Player> players = Bukkit.getOnlinePlayers().stream().filter(p -> sender.getLocation().distanceSquared(p.getLocation()) <= Math.pow(radius, 2)).collect(Collectors.toList());
         if (!message.equalsIgnoreCase(""))
-            players.stream().filter(p -> !p.equals(player))
-                    .forEach(p -> p.sendMessage(message.replaceAll("%player%", player.getName())));
+            players.stream().filter(p -> !p.equals(sender))
+                    .forEach(p -> p.sendMessage(message.replaceAll("%player%", sender.getName()).replaceAll("%target%", p.getName())));
         
         players.forEach(p -> p.playSound(p.getLocation(), sound, 1f, (float) pitch));
         
-        ParticleLocation.spawnParticle(particleLocation, player, particle, particleAmount);
+        ParticleLocation.spawnParticle(particleLocation, sender, particle, particleAmount);
+    }
+    
+    public void target(Player sender, Player target) {
+        if (sender.getLocation().distanceSquared(target.getLocation()) > Math.pow(radius, 2))
+            return;
+        
+        if (!message.equalsIgnoreCase(""))
+            target.sendMessage(message.replaceAll("%player%", sender.getName()).replaceAll("%target%", target.getName()));
+        
+        target.playSound(target.getLocation(), sound, 1f, (float) pitch);
+        
+        ParticleLocation.spawnParticle(particleLocation, sender, particle, particleAmount);
     }
     
     public String getName() {

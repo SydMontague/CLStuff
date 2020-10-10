@@ -36,8 +36,10 @@ public class ItemBuilderCommand implements CommandExecutor, TabCompleter {
         if (!(commandSender instanceof Player))
             return false;
         
-        if (!commandSender.hasPermission("clstuff.itembuilder"))
+        if (!commandSender.hasPermission("clstuff.itembuilder")) {
+            commandSender.sendMessage(PREFIX + "§cYou do not have permission to use this command.");
             return false;
+        }
         
         if (args.length == 0) {
             commandSender.sendMessage(PREFIX + "You must specify a value!");
@@ -117,6 +119,9 @@ public class ItemBuilderCommand implements CommandExecutor, TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         if (!(commandSender instanceof Player))
+            return Collections.emptyList();
+        
+        if (!commandSender.hasPermission("clstuff.itembuilder"))
             return Collections.emptyList();
         
         Player player = (Player) commandSender;

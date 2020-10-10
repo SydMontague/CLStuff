@@ -13,16 +13,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class EmoteManager {
     protected static String PREFIX;
     protected static final String ADMIN_PERMISSION = "clstuff.emote.admin";
+    protected static int COOLDOWN;
     private static boolean USE_COMMAND_MAP;
     
     private CLStuff plugin;
     private List<Emote> emotes;
+    private List<UUID> cooldowns = new ArrayList<>();
     
     public EmoteManager(CLStuff plugin) {
         this.plugin = plugin;
@@ -42,6 +46,7 @@ public class EmoteManager {
         
         PREFIX = ChatColor.translateAlternateColorCodes('&', config.getString("prefix"));
         USE_COMMAND_MAP = config.getBoolean("useCommandMap");
+        COOLDOWN = config.getInt("cooldown");
         emotes = (List<Emote>) config.getList("emotes");
     }
     
@@ -78,7 +83,7 @@ public class EmoteManager {
             bukkitCommandMap.setAccessible(true);
             CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
             
-            emotes.forEach(e -> commandMap.register(e.getName(), new EmoteAliasCommand(e.getName(), e)));
+            emotes.forEach(e -> commandMap.register(e.getName(), new EmoteAliasCommand(e.getName(), e, this)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -100,5 +105,17 @@ public class EmoteManager {
     public void removeEmote(String name) {
         Bukkit.getPluginManager().removePermission("clstuff.emote." + name);
         emotes.removeIf(e -> e.getName().equals(name));
+    }
+    
+    public void addCooldown(UUID uuid) {
+        cooldowns.add(uuid);
+    }
+    
+    public void removeCooldown(UUID uuid) {
+        cooldowns.remove(uuid);
+    }
+    
+    public boolean hasCooldown(UUID uuid) {
+        return !Bukkit.getPlayer(uuid).hasPermission("clstuff.emote.bypasscooldown") && cooldowns.contains(uuid);
     }
 }

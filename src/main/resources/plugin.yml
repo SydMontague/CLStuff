@@ -183,3 +183,7 @@ permissions:
     default: op
   clstuff.emote.admin:
     default: op
+  clstuff.emote.target:
+    default: op
+  clstuff.emote.bypasscooldown:
+    default: op
