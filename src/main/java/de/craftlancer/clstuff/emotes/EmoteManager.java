@@ -1,41 +1,43 @@
 package de.craftlancer.clstuff.emotes;
 
-import de.craftlancer.clstuff.CLStuff;
-import de.craftlancer.core.LambdaRunnable;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandMap;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.permissions.Permission;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
+import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.NMSUtils;
 
 public class EmoteManager {
-    protected static String PREFIX;
     protected static final String ADMIN_PERMISSION = "clstuff.emote.admin";
-    protected static int COOLDOWN;
-    private static boolean USE_COMMAND_MAP;
+    
+    private String prefix;
+    private int cooldown;
+    private boolean useCommandMap;
     
     private CLStuff plugin;
-    private List<Emote> emotes;
+    private Map<String, Emote> emotes = new HashMap<>();
     private List<UUID> cooldowns = new ArrayList<>();
     
     public EmoteManager(CLStuff plugin) {
         this.plugin = plugin;
         ConfigurationSerialization.registerClass(Emote.class);
         load();
-        registerPermissions();
-        registerCommands();
     }
     
+    @SuppressWarnings("unchecked")
     private void load() {
         File file = new File(plugin.getDataFolder(), "emotes.yml");
         
@@ -44,10 +46,19 @@ public class EmoteManager {
         
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         
-        PREFIX = ChatColor.translateAlternateColorCodes('&', config.getString("prefix"));
-        USE_COMMAND_MAP = config.getBoolean("useCommandMap");
-        COOLDOWN = config.getInt("cooldown");
-        emotes = (List<Emote>) config.getList("emotes");
+        prefix = ChatColor.translateAlternateColorCodes('&', config.getString("prefix", ""));
+        useCommandMap = config.getBoolean("useCommandMap", true);
+        cooldown = config.getInt("cooldown", 60);
+        
+        ((List<Emote>) config.getList("emotes", new ArrayList<>())).forEach(this::addEmote);
+    }
+    
+    public String getPrefix() {
+        return prefix;
+    }
+    
+    public int getCooldown() {
+        return cooldown;
     }
     
     public void save() {
@@ -70,41 +81,33 @@ public class EmoteManager {
             saveTask.run();
     }
     
-    private void registerPermissions() {
-        emotes.forEach(e -> Bukkit.getPluginManager().addPermission(new Permission(e.getPermission())));
-    }
-    
-    private void registerCommands() {
-        if (!USE_COMMAND_MAP)
-            return;
-        try {
-            final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-            
-            bukkitCommandMap.setAccessible(true);
-            CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
-            
-            emotes.forEach(e -> commandMap.register(e.getName(), new EmoteAliasCommand(e.getName(), e, this)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
     public CLStuff getPlugin() {
         return plugin;
     }
     
-    public List<Emote> getEmotes() {
+    public Map<String, Emote> getEmotes() {
         return emotes;
     }
     
-    public void addEmote(Emote emote) {
-        emotes.add(emote);
-        Bukkit.getPluginManager().addPermission(new Permission(emote.getPermission()));
+    public Emote getEmote(String emote) {
+        return emotes.get(emote);
+    }
+
+    public boolean hasEmote(String emote) {
+        return emotes.containsKey(emote);
     }
     
-    public void removeEmote(String name) {
+    public void addEmote(Emote emote) {
+        emotes.put(emote.getName(), emote);
+        Bukkit.getPluginManager().addPermission(new Permission(emote.getPermission()));
+        
+        if(useCommandMap)
+            NMSUtils.getCommandMap().register(emote.getName(), new EmoteAliasCommand(emote, this));
+    }
+    
+    public boolean removeEmote(String name) {
         Bukkit.getPluginManager().removePermission("clstuff.emote." + name);
-        emotes.removeIf(e -> e.getName().equals(name));
+        return emotes.remove(name) != null;
     }
     
     public void addCooldown(UUID uuid) {

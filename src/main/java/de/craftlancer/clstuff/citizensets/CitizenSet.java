@@ -51,6 +51,7 @@ public class CitizenSet implements ConfigurationSerializable {
         this.functions = new ArrayList<>();
     }
     
+    @SuppressWarnings("unchecked")
     public CitizenSet(Map<String, Object> map) {
         this.name = (String) map.get("name");
         this.id = (String) map.get("id");
@@ -175,8 +176,8 @@ public class CitizenSet implements ConfigurationSerializable {
         functions.add(function);
     }
     
-    public void removeFunction(String id) {
-        functions.removeIf(f -> f.getId().equals(id));
+    public void removeFunction(String functionId) {
+        functions.removeIf(f -> f.getId().equals(functionId));
     }
     
     public List<CitizenSetFunction> getFunctions() {

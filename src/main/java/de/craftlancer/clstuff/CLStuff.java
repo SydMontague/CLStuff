@@ -251,7 +251,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         adminShop = new AdminShopManager(this);
         Bukkit.getPluginManager().registerEvents(adminShop, this);
         
-        citizenSets = new CitizenSetsManager();
+        citizenSets = new CitizenSetsManager(this);
         getCommand("citizensets").setExecutor(new CitizenSetCommandHandler(this, citizenSets));
         Bukkit.getPluginManager().registerEvents(citizenSets, this);
         

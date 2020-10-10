@@ -66,16 +66,10 @@ public class CitizenSetFunctionAddCommand extends SubCommand {
         if (args[1].equalsIgnoreCase("add") && args[3].toUpperCase().contains("PARTICLE")) {
             color = ParticleUtil.getColorFromString(args[5]);
         }
-        CitizenSetFunction function;
-        
-        try {
-            if (color == null)
-                function = CitizenSetFunction.FunctionType.getFunction(args[3], args[4]);
-            else
-                function = CitizenSetFunction.FunctionType.getFunction(args[3], args[4], color);
-        } catch (NullPointerException e) {
+        CitizenSetFunction function = CitizenSetFunction.FunctionType.getFunction(args[3], args[4], color);
+
+        if(function == null)
             return CitizenSetsManager.CC_PREFIX + "You must specify a valid function type.";
-        }
         
         optional.get().addFunction(function);
         return CitizenSetsManager.CC_PREFIX + ChatColor.GREEN + "Function added.";
