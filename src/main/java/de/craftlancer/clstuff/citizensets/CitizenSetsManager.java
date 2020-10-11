@@ -35,14 +35,17 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class CitizenSetsManager implements Listener {
-    public static NamespacedKey KEY;
+    public static final NamespacedKey KEY = new NamespacedKey(CLStuff.getInstance(), "citizensets");
     public static final String CC_PREFIX = ChatColor.WHITE + "[" + ChatColor.DARK_RED + "Craft" + ChatColor.WHITE + "Citizen] " + ChatColor.YELLOW;
     
+    private final CLStuff plugin;
     private File file;
     private List<CitizenSet> citizenSets;
     private CitizenSetListGUI gui;
     
-    public CitizenSetsManager() {
+    public CitizenSetsManager(CLStuff plugin) {
+        this.plugin = plugin;
+        
         ConfigurationSerialization.registerClass(CitizenSet.class);
         ConfigurationSerialization.registerClass(CitizenSetFunction.class);
         ConfigurationSerialization.registerClass(CitizenSetFunction.FunctionWaterBreathing.class);
@@ -53,15 +56,14 @@ public class CitizenSetsManager implements Listener {
         ConfigurationSerialization.registerClass(CitizenSetFunction.FunctionTrailParticle.class);
         ConfigurationSerialization.registerClass(CitizenSetFunction.FunctionAuraParticle.class);
         
-        this.file = new File(CLStuff.getInstance().getDataFolder(), "citizenSets.yml");
+        this.file = new File(plugin.getDataFolder(), "citizenSets.yml");
         
-        KEY = new NamespacedKey(CLStuff.getInstance(), "citizensets");
         load();
         createGui();
     }
     
     public void createGui() {
-        gui = new CitizenSetListGUI(CLStuff.getInstance(), citizenSets.stream().map(set -> {
+        gui = new CitizenSetListGUI(plugin, citizenSets.stream().map(set -> {
             PageItem item = new PageItem(set.getIcon());
             item.setClickAction(player -> set.getGui().display(player));
             return item;
@@ -70,7 +72,7 @@ public class CitizenSetsManager implements Listener {
     
     public void load() {
         if (!file.exists())
-            CLStuff.getInstance().saveResource(file.getName(), false);
+            plugin.saveResource(file.getName(), false);
         
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         
@@ -86,20 +88,19 @@ public class CitizenSetsManager implements Listener {
             try {
                 config.save(file);
             } catch (IOException e) {
-                CLStuff.getInstance().getLogger().log(Level.SEVERE, "Error while saving: ", e);
+                plugin.getLogger().log(Level.SEVERE, "Error while saving: ", e);
             }
         });
         
-        if (CLStuff.getInstance().isEnabled())
-            saveTask.runTaskAsynchronously(CLStuff.getInstance());
+        if (plugin.isEnabled())
+            saveTask.runTaskAsynchronously(plugin);
         else
             saveTask.run();
     }
     
     @EventHandler()
     public void onInventoryClose(InventoryCloseEvent event) {
-        Player player = (Player) event.getPlayer();
-        verify(player, false);
+        verify((Player) event.getPlayer());
     }
     
     @EventHandler(ignoreCancelled = true)
@@ -115,13 +116,12 @@ public class CitizenSetsManager implements Listener {
                 && s.contains(inventory.getItemInOffHand().getType().name())))
             return;
         
-        verify(player, true);
+        new LambdaRunnable(() -> verify(player)).runTaskLater(plugin, 1);
     }
     
     @EventHandler()
     public void onHandSwap(PlayerItemHeldEvent event) {
-        Player player = event.getPlayer();
-        verify(player, true);
+        new LambdaRunnable(() -> verify(event.getPlayer())).runTaskLater(plugin, 1);
     }
     
     @EventHandler
@@ -129,19 +129,18 @@ public class CitizenSetsManager implements Listener {
         if (!(event.getEntity() instanceof Player))
             return;
         Player player = (Player) event.getEntity();
-        verify(player, true);
+        new LambdaRunnable(() -> verify(player)).runTaskLater(plugin, 1);
     }
     
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
-        verify(player, false);
+        verify(player);
     }
     
     @EventHandler
     public void onItemPickup(PlayerSwapHandItemsEvent event) {
-        Player player = event.getPlayer();
-        verify(player, true);
+        new LambdaRunnable(() -> verify(event.getPlayer())).runTaskLater(plugin, 1);
     }
     
     @EventHandler()
@@ -155,52 +154,52 @@ public class CitizenSetsManager implements Listener {
     
     @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        verify(player, false);
+        verify(event.getPlayer());
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onPlayerLeave(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
-        verify(player, false);
+        verify(event.getPlayer());
     }
     
-    private void verify(Player player, boolean later) {
-        new LambdaRunnable(() -> {
-            PlayerInventory inventory = player.getInventory();
-            List<CitizenSet> disabled = new ArrayList<>();
-            List<CitizenSet> enabled = new ArrayList<>();
-            
-            citizenSets.forEach(set -> {
-                boolean isCompleteSet = set.isCompleteSet(inventory);
-                if (!isCompleteSet && set.contains(player)) {
-                    disabled.add(set);
-                    set.remove(player.getUniqueId());
-                }
-                if (isCompleteSet && !set.contains(player)) {
-                    enabled.add(set);
-                    set.run(player);
-                }
-            });
-            
-            if (disabled.size() == 0 && enabled.size() == 0)
-                return;
-            
-            ComponentBuilder builder = new ComponentBuilder();
-            builder.append("[").color(ChatColor.DARK_GRAY).append("CitizenSets").color(ChatColor.DARK_BLUE).append("] ").color(ChatColor.DARK_GRAY);
-            if (disabled.size() > 0)
-                builder.append("DISABLED ").color(ChatColor.DARK_RED).bold(true).append("[").color(ChatColor.DARK_GRAY).bold(false);
-            disabled.forEach(set -> builder.append(disabled.get(0).equals(set) ? set.getName() : ", " + set.getId()).color(ChatColor.DARK_BLUE));
-            if (disabled.size() > 0)
-                builder.append("] ").color(ChatColor.DARK_GRAY);
-            if (enabled.size() > 0)
-                builder.append("ENABLED ").color(ChatColor.DARK_GREEN).bold(true).append("[").color(ChatColor.DARK_GRAY).bold(false);
-            enabled.forEach(set -> builder.append(enabled.get(0).equals(set) ? set.getName() : ", " + set.getId()).color(ChatColor.DARK_BLUE));
-            if (enabled.size() > 0)
-                builder.append("]").color(ChatColor.DARK_GRAY);
-            
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, builder.create());
-        }).runTaskLater(CLStuff.getInstance(), later ? 1 : 0);
+    private void verify(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        List<CitizenSet> disabled = new ArrayList<>();
+        List<CitizenSet> enabled = new ArrayList<>();
+        
+        citizenSets.forEach(set -> {
+            boolean isCompleteSet = set.isCompleteSet(inventory);
+            if (!isCompleteSet && set.contains(player)) {
+                disabled.add(set);
+                set.remove(player.getUniqueId());
+            }
+            if (isCompleteSet && !set.contains(player)) {
+                enabled.add(set);
+                set.run(player);
+            }
+        });
+        
+        if (disabled.isEmpty() && enabled.isEmpty())
+            return;
+        
+        ComponentBuilder builder = new ComponentBuilder();
+        builder.append("[").color(ChatColor.DARK_GRAY).append("CitizenSets").color(ChatColor.DARK_BLUE).append("] ").color(ChatColor.DARK_GRAY);
+        
+        if (!disabled.isEmpty()) {
+            builder.append("DISABLED ").color(ChatColor.DARK_RED).bold(true).append("[").color(ChatColor.DARK_GRAY).bold(false);
+            builder.append(disabled.stream().map(CitizenSet::getName).collect(Collectors.joining(", ")));
+            builder.color(ChatColor.DARK_BLUE);
+            builder.append("] ").color(ChatColor.DARK_GRAY);
+        }
+        
+        if (!enabled.isEmpty()) {
+            builder.append("ENABLED ").color(ChatColor.DARK_GREEN).bold(true).append("[").color(ChatColor.DARK_GRAY).bold(false);
+            builder.append(enabled.stream().map(CitizenSet::getName).collect(Collectors.joining(", ")));
+            builder.color(ChatColor.DARK_BLUE);
+            builder.append("]").color(ChatColor.DARK_GRAY);
+        }
+        
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, builder.create());
     }
     
     public List<CitizenSet> getCitizenSets() {

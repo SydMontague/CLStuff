@@ -103,7 +103,7 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
     }
     
-    public static abstract class FunctionParticle extends CitizenSetFunction {
+    public abstract static class FunctionParticle extends CitizenSetFunction {
         
         private Color color;
         
@@ -220,7 +220,15 @@ public abstract class CitizenSetFunction implements ConfigurationSerializable {
         }
         
         public static CitizenSetFunction getFunction(String type, String id, Color color) {
-            switch (fromString(type)) {
+            if(color == null)
+                color = Color.WHITE;
+            
+            FunctionType typeEnum = fromString(type);
+            
+            if(typeEnum == null)
+                return null;
+            
+            switch (typeEnum) {
                 case HALO_PARTICLE:
                     return new FunctionHaloParticle(id, color);
                 case TRAIL_PARTICLE:
