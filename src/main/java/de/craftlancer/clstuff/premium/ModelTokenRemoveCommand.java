@@ -22,7 +22,7 @@ public class ModelTokenRemoveCommand extends ModelTokenSubCommand {
         
         int id = Utils.parseIntegerOrDefault(args[1], -1);
         
-        return getToken().removeTokenById(id) ? "Item removed" : "No item with given hash found.";
+        return getToken().removeTokenById(id) ? "Item removed" : "No item with given ID found.";
     }
     
     @Override

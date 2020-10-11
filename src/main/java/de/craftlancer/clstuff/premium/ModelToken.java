@@ -247,7 +247,7 @@ public class ModelToken implements Listener {
     }
     
     public boolean removeTokenById(int id) {
-        return tokenMap.remove(idList.remove(id)) != null;
+        return idList.size() > id && tokenMap.remove(idList.remove(id)) != null;
     }
     
     public Map<ItemStack, TokenData> getTokens() {

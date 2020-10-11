@@ -38,16 +38,17 @@ public class Heroes {
         ConfigurationSerialization.registerClass(HeroesLocation.class);
     }
     
+    @SuppressWarnings("unchecked")
     public Heroes(CLStuff plugin) {
         this.plugin = plugin;
         moduleFolder = new File(plugin.getDataFolder(), "heroes");
         
         YamlConfiguration config = YamlConfiguration.loadConfiguration(new File(moduleFolder, "config.yml"));
-        prefix = config.getString("Prefix");
-        refreshDelay = config.getInt("Refresh_Delay");
-        
-        loadLocations();
-        
+        prefix = config.getString("Prefix", "");
+        refreshDelay = config.getInt("Refresh_Delay", 432000);
+
+        YamlConfiguration locationConfig = YamlConfiguration.loadConfiguration(new File(moduleFolder, "locations.yml"));
+        heroesLocations = (List<HeroesLocation>) locationConfig.getList("locations", new ArrayList<>());
         
         new BaltopCalculateRunnable(this).runTaskTimerAsynchronously(plugin, 0, refreshDelay);
         
@@ -78,29 +79,6 @@ public class Heroes {
     
     public long getRefreshDelay() {
         return refreshDelay;
-    }
-    
-    @SuppressWarnings("unchecked")
-    private void loadLocations() {
-        File oldLocationFile = new File(moduleFolder,  "oldLocations.yml");
-        
-        // convert old config
-        if (oldLocationFile.exists()) {
-            heroesLocations = new ArrayList<>();
-            YamlConfiguration config = YamlConfiguration.loadConfiguration(oldLocationFile);
-            for (String category : config.getKeys(false)) {
-                for (String ranking : config.getConfigurationSection(category).getKeys(false)) {
-                    ConfigurationSection section = config.getConfigurationSection(category).getConfigurationSection(ranking);
-                    List<Location> signLocations = (List<Location>) section.getList("sign_location");
-                    List<Location> displayLocation = (List<Location>) section.getList(section.contains("banner_location") ? "banner_location" : "head_location");
-                    heroesLocations.add(new HeroesLocation(category, ranking, signLocations, displayLocation));
-                }
-            }
-            oldLocationFile.delete();
-        } else {
-            YamlConfiguration config = YamlConfiguration.loadConfiguration(new File(moduleFolder, "locations.yml"));
-            heroesLocations = (List<HeroesLocation>) config.getList("locations");
-        }
     }
     
     public void save() {

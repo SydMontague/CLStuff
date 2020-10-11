@@ -17,6 +17,7 @@ import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.heroes.Heroes;
 import de.craftlancer.clstuff.heroes.commands.HeroesCommandHandler;
+import de.craftlancer.clstuff.mobcontrol.MobControl;
 import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
@@ -78,6 +79,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private AdminShopManager adminShop;
     private CitizenSetsManager citizenSets;
     private EmoteManager emotes;
+    private MobControl mobControl;
     
     @Override
     public void onLoad() {
@@ -265,6 +267,8 @@ public class CLStuff extends JavaPlugin implements Listener {
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
         
         new LambdaRunnable(this::save).runTaskTimer(this, 18000L, 18000L);
+        
+        this.mobControl = new MobControl(this);
         
         try {
             arenaGUI = new ArenaGUI(this);

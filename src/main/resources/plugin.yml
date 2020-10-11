@@ -73,6 +73,10 @@ commands:
     description: Reloads custom model data upgrade preventer config
   fixitems:
     description: Fixes your broken items
+  mobcontrol:
+    description: Reloads MobControl config
+    usage: /mobcontrol
+    permission: clstuff.mobcontrol
 permissions:
   clstuff.centermap:
     default: false
