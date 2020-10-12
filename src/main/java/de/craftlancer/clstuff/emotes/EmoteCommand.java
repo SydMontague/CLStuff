@@ -72,7 +72,7 @@ public class EmoteCommand implements TabExecutor {
                 && !player.getUniqueId().equals(Bukkit.getPlayer(args[1]).getUniqueId()))
             emote.target(player, Bukkit.getPlayer(args[1]));
         else
-            emote.run(player);
+            emote.targetAll(player);
         
         manager.addCooldown(player.getUniqueId());
         new LambdaRunnable(() -> manager.removeCooldown(player.getUniqueId())).runTaskLater(manager.getPlugin(), manager.getCooldown());
