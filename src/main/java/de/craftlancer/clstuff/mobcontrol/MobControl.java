@@ -85,6 +85,9 @@ public class MobControl implements Listener, CommandExecutor {
         
         int minChance = 100;
         for (Player p : Bukkit.getOnlinePlayers()) {
+            if(!p.getWorld().equals(event.getEntity().getWorld()))
+                continue;
+            
             Optional<GroupSetting> setting = settings.getGroupSetting(CLCore.getInstance().getPermissions().getPrimaryGroup(p));
             if (setting.isPresent() && setting.get().getRange() >= p.getLocation().distanceSquared(event.getLocation()))
                 minChance = Math.min(minChance, setting.get().getChance());

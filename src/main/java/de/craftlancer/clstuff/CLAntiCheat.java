@@ -128,6 +128,7 @@ public class CLAntiCheat implements Listener {
             case LECTERN:
             case SHULKER_BOX:
             case SMOKER:
+            case ENDER_CHEST:
                 return true;
             default:
                 return false;
