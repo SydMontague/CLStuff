@@ -3,6 +3,7 @@ package de.craftlancer.clstuff;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -33,6 +34,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
+import com.SirBlobman.combatlogx.api.ICombatLogX;
+import com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent.TagReason;
+import com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent.TagType;
+
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.logging.PluginFileLogger;
 import me.ryanhamshire.GriefPrevention.Claim;
@@ -43,9 +48,14 @@ public class CLAntiCheat implements Listener {
     private Logger logger;
     private Plugin plugin;
     
+    private ICombatLogX combatLogPlugin = null;
+    
     public CLAntiCheat(Plugin plugin) {
         this.plugin = plugin;
         this.logger = new PluginFileLogger(CLAntiCheat.class.getCanonicalName(), plugin, "anticheat.log");
+        
+        if (Bukkit.getPluginManager().isPluginEnabled("CombatLogX"))
+            combatLogPlugin = (ICombatLogX) Bukkit.getPluginManager().getPlugin("CombatLogX");
     }
     
     /*
@@ -136,10 +146,10 @@ public class CLAntiCheat implements Listener {
     }
     
     private static boolean hasClaimPermission(Player player, Claim claim, ClaimPermission permission) {
-        if(claim == null)
+        if (claim == null)
             return true;
         
-        if(player.getUniqueId().equals(claim.ownerID))
+        if (player.getUniqueId().equals(claim.ownerID))
             return true;
         
         return claim.hasExplicitPermission(player, permission);
@@ -155,13 +165,17 @@ public class CLAntiCheat implements Listener {
         
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
-        if (claim != null && !claim.isAdminClaim() && !hasClaimPermission(p, claim, ClaimPermission.Access))
+        if (claim != null && !claim.isAdminClaim() && !hasClaimPermission(p, claim, ClaimPermission.Access)) {
             logger.info(() -> String.format("%s has logged out inside a claim of %s at: %d %d %d",
                                             p.getName(),
                                             claim.getOwnerName(),
                                             loc.getBlockX(),
                                             loc.getBlockY(),
                                             loc.getBlockZ()));
+            
+            if (combatLogPlugin != null)
+                combatLogPlugin.getCombatManager().tag(p, null, TagType.PLAYER, TagReason.ATTACKED);
+        }
     }
     
     /*
@@ -188,7 +202,7 @@ public class CLAntiCheat implements Listener {
         Player p = e.getPlayer();
         Location loc = e.getPlayer().getLocation();
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
-
+        
         if (claim == null || claim.isAdminClaim() || !hasClaimPermission(p, claim, ClaimPermission.Access)) {
             e.setCancelled(true);
             e.setUseBed(Result.DENY);
