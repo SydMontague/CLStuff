@@ -6,6 +6,8 @@ depend: [CLCore, CLFeatures]
 softdepend: [DiscordSRV, CombatLogX, MythicMobs]
 loadbefore: [WorldGuard]
 commands:
+  tablist:
+    description: Commands for editing tablist
   itembuilder:
     description: Easy item editing in a command
   howtoplay:
@@ -73,6 +75,8 @@ commands:
     description: Reloads custom model data upgrade preventer config
   fixitems:
     description: Fixes your broken items
+  connectionmessages:
+    description: Command for login/logout messages
 permissions:
   clstuff.centermap:
     default: false
@@ -186,4 +190,6 @@ permissions:
   clstuff.emote.target:
     default: op
   clstuff.emote.bypasscooldown:
+    default: op
+  clstuff.connectionmessage.admin:
     default: op

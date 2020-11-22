@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.heroes.runnables;
 
+import de.craftlancer.clclans.CLClans;
 import de.craftlancer.clstuff.heroes.Heroes;
 import de.craftlancer.clstuff.heroes.HeroesLocation;
 import de.craftlancer.clstuff.heroes.MaterialUtil;
@@ -11,6 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BaltopApplyRunnable extends BukkitRunnable {
     private List<Tuple<UUID, Double>> top3;
@@ -33,9 +35,11 @@ public class BaltopApplyRunnable extends BukkitRunnable {
             
             HeroesLocation heroesLocation = heroes.getHeroLocation("baltop", String.valueOf(counter));
             List<Location> signLocationList = heroesLocation.getSignLocations();
-            List<Location> headLocationList = heroesLocation.getDisplayLocations();
+            List<Location> headLocationList = heroesLocation.getDisplayLocations().stream().filter(l -> l.getBlock().getType().name().contains("HEAD")).collect(Collectors.toList());
+            List<Location> bannerLocationList = heroesLocation.getDisplayLocations().stream().filter(l -> l.getBlock().getType().name().contains("BANNER")).collect(Collectors.toList());
             
             signLocationList.forEach(signLocation -> setBaltopSign(entry.getKey(), signLocation, entry.getValue()));
+            bannerLocationList.forEach(bannerLocation -> ClanApplyRunnable.setClanBanner(CLClans.getInstance().getClan(Bukkit.getOfflinePlayer(entry.getKey())), bannerLocation));
             
             for (Location loc : headLocationList)
                 heroes.addHeadUpdate(entry.getKey(), loc);

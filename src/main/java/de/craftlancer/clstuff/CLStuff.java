@@ -258,8 +258,14 @@ public class CLStuff extends JavaPlugin implements Listener {
         emotes = new EmoteManager(this);
         getCommand("emote").setExecutor(new EmoteCommand(emotes));
         
+        //Bukkit.getPluginManager().registerEvents(new DeathMessageListener(), this);
+        
         getCommand("itembuilder").setExecutor(new ItemBuilderCommand(this));
         
+        ConnectionMessages connectionMessages = new ConnectionMessages(this);
+        
+        getCommand("connectionmessages").setExecutor(connectionMessages);
+        Bukkit.getPluginManager().registerEvents(connectionMessages, this);
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
@@ -272,6 +278,8 @@ public class CLStuff extends JavaPlugin implements Listener {
             e.printStackTrace();
             // we don't want things to crash just because someone messed up something
         }
+        
+        new Tablist(this);
     }
     
     private static boolean fixItem(CommandSender a, Command b, String c, String[] d) {

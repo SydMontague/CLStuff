@@ -1,0 +1,18 @@
+# Placeholders:
+# %player% - the player's display name
+# %prefix% - the prefix specified below
+
+prefix: "&f&l[&4&lC&f&lC] &e"
+
+# If a player doesn't have a permission for a join/leave message, it will default to these:
+defaultLoginMessage: "%prefix% %player% has joined the server."
+defaultLeaveMessage: "%prefix% %player% has left the server."
+
+# Use syntax key (permission) -> value (message)
+# Use underscores instead of periods for permissions
+# Order should go in rank with least priority -> most priority
+loginMessages:
+  clstuff_login_peasant: "&aA complete noob, %player%, has joined the server."
+
+logoutMessages:
+  clstuff_logout_noob: "&c%player% left the server, what a noob..."

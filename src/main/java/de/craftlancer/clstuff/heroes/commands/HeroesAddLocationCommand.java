@@ -1,10 +1,10 @@
 package de.craftlancer.clstuff.heroes.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import de.craftlancer.clstuff.heroes.Heroes;
+import de.craftlancer.clstuff.heroes.HeroesLocation;
+import de.craftlancer.clstuff.heroes.MaterialUtil;
+import de.craftlancer.core.Utils;
+import de.craftlancer.core.command.SubCommand;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -12,11 +12,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import de.craftlancer.clstuff.heroes.Heroes;
-import de.craftlancer.clstuff.heroes.HeroesLocation;
-import de.craftlancer.clstuff.heroes.MaterialUtil;
-import de.craftlancer.core.Utils;
-import de.craftlancer.core.command.SubCommand;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class HeroesAddLocationCommand extends SubCommand {
     private Heroes heroes;
@@ -31,24 +29,21 @@ public class HeroesAddLocationCommand extends SubCommand {
     protected List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 2)
             return Utils.getMatches(args[1], Arrays.asList("sign", "head", "banner"));
-        if (args.length == 3) {
+        if (args.length == 3)
             if (args[1].equalsIgnoreCase("head"))
                 return Utils.getMatches(args[2], Arrays.asList("baltop", "playertop"));
-            else if (args[1].equalsIgnoreCase("banner"))
-                return Utils.getMatches(args[2], Collections.singletonList("clantop"));
             else
                 return Utils.getMatches(args[2], Arrays.asList("clantop", "baltop", "playertop"));
-        }
         if (args.length == 4)
             return Arrays.asList("1", "2", "3");
-        return new ArrayList<>();
+        return Collections.emptyList();
     }
     
     @Override
     protected String execute(CommandSender sender, Command command, String s, String[] args) {
         
-        if (!(sender instanceof Player))
-            return null;
+        if (!checkSender(sender))
+            return heroes.getPrefix() + "§cYou don't have permission to execute this command.";
         
         Player player = (Player) sender;
         

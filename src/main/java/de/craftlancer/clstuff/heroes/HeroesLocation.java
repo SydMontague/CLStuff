@@ -28,7 +28,6 @@ public class HeroesLocation implements ConfigurationSerializable {
         this(category, ranking, new ArrayList<>(), new ArrayList<>());
     }
     
-    @SuppressWarnings("unchecked")
     public HeroesLocation(Map<String, Object> map) {
         this.category = (String) map.get("category");
         this.ranking = (String) map.get("ranking");
@@ -64,27 +63,11 @@ public class HeroesLocation implements ConfigurationSerializable {
         return signLocations;
     }
     
-    public void setDisplayLocations(List<Location> displayLocations) {
-        this.displayLocations = new ArrayList<>(displayLocations);
-    }
-    
-    public void setSignLocations(List<Location> signLocations) {
-        this.signLocations = new ArrayList<>(signLocations);
-    }
-    
     public void addSignLocation(Location location) {
         signLocations.add(location);
     }
     
     public void addDisplayLocation(Location location) {
         displayLocations.add(location);
-    }
-    
-    public void removeDisplayLocation(Location location) {
-        displayLocations.remove(location);
-    }
-    
-    public void removeSignLocation(Location location) {
-        signLocations.remove(location);
     }
 }

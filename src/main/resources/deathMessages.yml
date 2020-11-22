@@ -1,0 +1,96 @@
+# When coronavirus is over, change cramming to '&6%victim% &epartied too hard...'
+prefix: '&c&l[&4☠&c&l]&e '
+contact:
+  - '&eFind water elsewhere, &6%victim%&e!'
+player_attack:
+  - '&4%victim% &cwas killed by &a%killer% &cusing %weapon%&c!'
+  - '&4%victim% &cblocked &a%killer%"s &c%weapon%&c with his face!'
+  - '&4%victim% &cdied from &a%killer%"s &c%weapon%&c while using deadly kung fu moves!'
+  - '&4%victim% &cshould have run away from &a%killer%&c armed with %weapon%&c to live to fight another day!'
+  - '&4%victim% &cmay have survived &a%killer%"s &c%weapon%&c with help from friends.'
+entity_attack:
+  - '&6%victim% &ewas killed by a &6%killer%&e!'
+player_sweep_attack:
+  - '&6%victim% &ewas killed by %killer%"s sweep attack!'
+entity_sweep_attack:
+  - '&4%victim%&c stood in &a%killer%"s danger zone...'
+projectile_player:
+  - '&4%victim% &cwas shot by &a%killer%&c using %weapon%!'
+projectile_living:
+  - '&6%victim% &ewas shot by &6%killer%&e!'
+projectile_block:
+  - '&6%victim% &ewas shot to death... Next time bring a shield!'
+suffocation:
+  - '&6%victim% &erealized they can"t breath while inside a block!'
+fall:
+  - '&6%victim% &ecame to a sudden halt.'
+  - '&6%victim%"s &easpirations of flying fell with him'
+  - '&6%victim% &ehas many talents but walking on clouds is not one of them'
+  - '&6%victim%"s &eboot laces were in the way of a heroic escape'
+  - '&eLife is short enough, but &6%victim% &ecouldn"t wait!'
+fire:
+  - '&6%victim% &elikes their steak well done.'
+fire_tick:
+  - '&6%victim% &eforgot their fire resistance potion...'
+  - '&6%victim% &enever learned to stop, drop and roll'
+lava:
+  - '&eIn case the heat didn"t give it away, that was lava, &6%victim%&e!'
+  - '&6%victim% &econtributed to Global Warming'
+  - '&6%victim% &ewas walking on sunshine.  Oh wait! That"s lava!'
+drowning:
+  - '&6%victim% &eforgot their Taucherglocke!'
+  - '&6%victim% &ewas claimed by the depth.'
+  - '&6%victim% &eswims like a fish but couldn"t breathe like one.'
+block_explosion:
+  - '&6%victim% &ewas blown up sky-high.'
+entity_explosion:
+  - '&6%victim% &ewas blown to smithereens.'
+void:
+  - '&6%victim% &efound out there is nothing in the void...'
+lightning:
+  - '&6%victim% &eangered the old gods...'
+suicide:
+  - '&6%victim% &ecommitted suicide. Kids, don"t try this at home.'
+starvation:
+  - '&6%victim% &eforgot their /kit peasant...'
+poison:
+  - '&6%victim% &edidn"t bring an antidote!'
+magic:
+  - '&6%victim%"s &elife came to a magical end.'
+wither:
+  - '&6%victim% &ewithered away...'
+falling_block:
+  - '&eThe sky fell on &6%victim%"s &ehead.'
+thorns:
+  - '&6%victim% &efound out that those spikes are not just a fashion choice!'
+dragon_breath:
+  - '&6%victim% &etook a shower in &5dragon breath&e...'
+custom:
+  - '&6%victim% &edied for a &omysterious &r&ereason...'
+fly_into_wall:
+  - '&6%victim% &ebumped their head too hard...'
+hot_floor:
+  - '&6%victim% &etried to walk on hot coals...'
+cramming:
+  - '&6%victim% &edidn"t socially distance.'
+zombie:
+  - '&eZombies eat brains, &6%victim%&e was killed for false advertising.'
+skeleton:
+  - '&eWhen &6%victim%&e heard the rattling of bones, it was already too late.'
+enderman:
+  - '&6%victim% &ewas judging an Enderman, Enderman don"t like to be judged.'
+  - '&6%victim% &elost a deadly staring contest.'
+pillager:
+  - '&6%victim% &eis now Mr. Unpopular in the Village.'
+  - '&6%victim% &ewas attacked by forces of evil.'
+illusioner:
+  - '&6%victim% &eis now Mr. Unpopular in the Village.'
+  - '&6%victim% &ewas attacked by forces of evil.'
+vindicator:
+  - '&6%victim% &eis now Mr. Unpopular in the Village.'
+  - '&6%victim% &ewas attacked by forces of evil.'
+vex:
+  - '&6%victim% &eis now Mr. Unpopular in the Village.'
+  - '&6%victim% &ewas attacked by forces of evil.'
+wolf:
+  - '&6%victim% &efound out that wolves don"t like to be scratched behind their ears.'

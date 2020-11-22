@@ -1,0 +1,14 @@
+##
+## Placeholders:
+## %online% - amount of online players
+## %player% - the specific player the tablist is being sent to
+
+headers:
+  - "&c&lCraft&f&lCitizen \n&6%online% &eplayers online"
+  - "&c&lCraft&f&lCitizen \n&eThanks for playing, &6%player%!"
+footers:
+  - "\n&aUse &2/store &ato check out our store!"
+  - "\n&aJoin our discord! &3/discord"
+
+## Change the header and footers every {period} ticks
+period: 100
