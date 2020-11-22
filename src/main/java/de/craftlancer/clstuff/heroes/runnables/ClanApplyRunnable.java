@@ -1,7 +1,9 @@
 package de.craftlancer.clstuff.heroes.runnables;
 
-import java.util.List;
-
+import de.craftlancer.clclans.Clan;
+import de.craftlancer.clstuff.heroes.Heroes;
+import de.craftlancer.clstuff.heroes.HeroesLocation;
+import de.craftlancer.clstuff.heroes.MaterialUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -12,10 +14,7 @@ import org.bukkit.block.data.Rotatable;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import de.craftlancer.clclans.Clan;
-import de.craftlancer.clstuff.heroes.Heroes;
-import de.craftlancer.clstuff.heroes.HeroesLocation;
-import de.craftlancer.clstuff.heroes.MaterialUtil;
+import java.util.List;
 
 public class ClanApplyRunnable extends BukkitRunnable {
     private List<Clan> topClans;
@@ -53,10 +52,14 @@ public class ClanApplyRunnable extends BukkitRunnable {
         sign.update();
     }
     
-    private static void setClanBanner(Clan clan, Location bannerLocation) {
-        if (clan.getBanner() == null || bannerLocation == null || !MaterialUtil.isBanner(bannerLocation.getBlock().getType()) || !bannerLocation.getWorld().isChunkLoaded(bannerLocation.getBlockX() >> 4, bannerLocation.getBlockZ() >> 4)) {
+    protected static void setClanBanner(Clan clan, Location bannerLocation) {
+        if (clan == null
+                || clan.getBanner() == null
+                || bannerLocation == null
+                || !MaterialUtil.isBanner(bannerLocation.getBlock().getType())
+                || !bannerLocation.getWorld().isChunkLoaded(bannerLocation.getBlockX() >> 4, bannerLocation.getBlockZ() >> 4))
             return;
-        }
+        
         
         if (bannerLocation.getBlock().getType().toString().contains("_WALL_BANNER")) {
             Directional directional = (Directional) bannerLocation.getBlock().getBlockData();
