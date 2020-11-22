@@ -35,8 +35,6 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 import com.SirBlobman.combatlogx.api.ICombatLogX;
-import com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent.TagReason;
-import com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent.TagType;
 
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.logging.PluginFileLogger;
@@ -172,9 +170,6 @@ public class CLAntiCheat implements Listener {
                                             loc.getBlockX(),
                                             loc.getBlockY(),
                                             loc.getBlockZ()));
-            
-            if (combatLogPlugin != null)
-                combatLogPlugin.getCombatManager().tag(p, null, TagType.PLAYER, TagReason.ATTACKED);
         }
     }
     
