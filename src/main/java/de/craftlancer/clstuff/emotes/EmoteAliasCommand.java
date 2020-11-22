@@ -39,7 +39,7 @@ public class EmoteAliasCommand extends Command {
             return false;
         }
         
-        emote.run(player);
+        emote.targetAll(player);
         
         manager.addCooldown(player.getUniqueId());
         new LambdaRunnable(() -> manager.removeCooldown(player.getUniqueId())).runTaskLater(manager.getPlugin(), manager.getCooldown());

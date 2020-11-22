@@ -1,7 +1,6 @@
 package de.craftlancer.clstuff.emotes;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -9,10 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Emote implements ConfigurationSerializable {
     private String permission;
@@ -65,23 +61,26 @@ public class Emote implements ConfigurationSerializable {
         return map;
     }
     
-    public void run(Player sender) {
-        List<Player> players = Bukkit.getOnlinePlayers().stream().filter(p -> sender.getLocation().distanceSquared(p.getLocation()) <= Math.pow(radius, 2)).collect(Collectors.toList());
-        if (!message.equalsIgnoreCase(""))
-            players.stream().filter(p -> !p.equals(sender))
-                    .forEach(p -> p.sendMessage(message.replaceAll("%player%", sender.getName()).replaceAll("%target%", p.getName())));
-        
-        players.forEach(p -> p.playSound(p.getLocation(), sound, 1f, (float) pitch));
+    public void targetAll(Player sender) {
+        for (Player target : Bukkit.getOnlinePlayers()) {
+            if (!target.getWorld().equals(sender.getWorld()) || target.getLocation().distanceSquared(sender.getLocation()) > radius * radius)
+                continue;
+
+            target.playSound(sender.getLocation(), sound, 1f, (float) pitch);
+            
+            if (!sender.equals(target) && !message.isEmpty())
+                target.sendMessage(message.replace("%player%", sender.getName()).replace("%target%", target.getName()));
+        }
         
         ParticleLocation.spawnParticle(particleLocation, sender, particle, particleAmount);
     }
     
     public void target(Player sender, Player target) {
-        if (sender.getLocation().distanceSquared(target.getLocation()) > Math.pow(radius, 2))
+        if (!sender.getWorld().equals(target.getWorld()) || sender.getLocation().distanceSquared(target.getLocation()) > radius * radius)
             return;
         
-        if (!message.equalsIgnoreCase(""))
-            target.sendMessage(message.replaceAll("%player%", sender.getName()).replaceAll("%target%", target.getName()));
+        if (!message.isEmpty())
+            target.sendMessage(message.replace("%player%", sender.getName()).replace("%target%", target.getName()));
         
         target.playSound(target.getLocation(), sound, 1f, (float) pitch);
         
@@ -115,19 +114,20 @@ public class Emote implements ConfigurationSerializable {
         }
         
         public static void spawnParticle(ParticleLocation type, Player player, Particle particle, int particleAmount) {
-            if (type == ABOVE)
-                player.getWorld().spawnParticle(particle, player.getLocation().clone().add(0, 2.25, 0), particleAmount);
-            else if (type == ASS)
-                player.getWorld().spawnParticle(particle, player.getLocation().clone().add(0, 1, 0), particleAmount);
-            else if (type == AROUND) {
-                for (int i = 0; i < particleAmount; i++) {
-                    Location ploc = player.getLocation();
-                    Location location = new Location(ploc.getWorld(),
-                            ploc.getX() + (((double) new Random().nextInt(100) - 50) / 100),
-                            ploc.getY() + (((double) new Random().nextInt(25) / 10)),
-                            ploc.getZ() + (((double) new Random().nextInt(100) - 50) / 100));
-                    player.getWorld().spawnParticle(particle, location, 1);
-                }
+            if(type == null)
+                return;
+            
+            switch(type) {
+                case ABOVE:
+                    player.getWorld().spawnParticle(particle, player.getLocation().add(0, 2.25, 0), particleAmount);
+                    break;
+                case ASS:
+                    player.getWorld().spawnParticle(particle, player.getLocation().add(0, 1, 0), particleAmount);
+                    break;
+                case AROUND:
+                    for (int i = 0; i < particleAmount; i++) 
+                        player.getWorld().spawnParticle(particle, player.getLocation().add(0, 1.25, 0), 1, 0.5D, 1.25D, 0.5D);
+                    break;
             }
         }
     }

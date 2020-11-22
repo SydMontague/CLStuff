@@ -99,7 +99,9 @@ public class EmoteManager {
     
     public void addEmote(Emote emote) {
         emotes.put(emote.getName(), emote);
-        Bukkit.getPluginManager().addPermission(new Permission(emote.getPermission()));
+        
+        if(Bukkit.getPluginManager().getPermission(emote.getPermission()) == null)
+            Bukkit.getPluginManager().addPermission(new Permission(emote.getPermission()));
         
         if(useCommandMap)
             NMSUtils.getCommandMap().register(emote.getName(), new EmoteAliasCommand(emote, this));
