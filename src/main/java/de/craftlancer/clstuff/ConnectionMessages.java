@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff;
 
+import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.Utils;
 import de.craftlancer.core.util.Tuple;
 
@@ -96,7 +97,10 @@ public class ConnectionMessages implements Listener, TabExecutor {
             }
         }
         
-        event.setJoinMessage(format(msg, player.getDisplayName()));
+        String finalMsg = msg;
+        
+        event.setJoinMessage(null);
+        new LambdaRunnable(() -> Bukkit.broadcastMessage(format(finalMsg, player.getDisplayName()))).runTaskLater(plugin, 1L);
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
