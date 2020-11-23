@@ -49,18 +49,18 @@ public class Tablist {
     }
     
     private String getNextHeader() {
-        lastHeaderIndex = headers.size() == lastHeaderIndex + 1 ? 0 : lastHeaderIndex + 1;
-        return headers.get(lastFooterIndex);
+        lastHeaderIndex = (++lastHeaderIndex) % headers.size();
+        return headers.get(lastHeaderIndex);
     }
     
     private String getNextFooter() {
-        lastFooterIndex = footers.size() == lastFooterIndex + 1 ? 0 : lastFooterIndex + 1;
+        lastFooterIndex = (++lastFooterIndex) % footers.size();
         return footers.get(lastFooterIndex);
     }
     
     private String replace(String string, Player player) {
         return ChatColor.translateAlternateColorCodes('&', string
-                .replaceAll("%online%", String.valueOf(Bukkit.getOnlinePlayers().size()))
-                .replaceAll("%player%", player.getName()));
+                .replace("%online%", String.valueOf(Bukkit.getOnlinePlayers().size()))
+                .replace("%player%", player.getName()));
     }
 }

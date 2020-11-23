@@ -1,6 +1,8 @@
 package de.craftlancer.clstuff;
 
 import de.craftlancer.core.Utils;
+import de.craftlancer.core.util.Tuple;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -20,18 +22,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ConnectionMessages implements Listener, TabExecutor {
     private String prefix;
     private String defaultLoginMessage;
     private String defaultLogoutMessage;
-    private Map<Permission, String> login = new HashMap<>();
-    private Map<Permission, String> logout = new HashMap<>();
+    
+    private LinkedList<Tuple<Permission, String>> login;
+    private LinkedList<Tuple<Permission, String>> logout;
+    
     private CLStuff plugin;
     private File messagesFile;
     
@@ -51,53 +53,74 @@ public class ConnectionMessages implements Listener, TabExecutor {
         ConfigurationSection loginSection = config.getConfigurationSection("loginMessages");
         ConfigurationSection logoutSection = config.getConfigurationSection("logoutMessages");
         
+        login = new LinkedList<>();
+        logout = new LinkedList<>();
+        
         prefix = ChatColor.translateAlternateColorCodes('&', config.getString("prefix", "&f&l[&4&lC&f&lC] &e"));
         defaultLoginMessage = config.getString("defaultLoginMessage");
         defaultLogoutMessage = config.getString("defaultLogoutMessage");
         
         loginSection.getKeys(false).forEach(key -> {
-            Permission permission = new Permission(key.replaceAll("_", "."));
+            Permission permission = new Permission(key.replace("_", "."));
             String message = loginSection.getString(key);
             
             if (Bukkit.getPluginManager().getPermission(permission.getName()) == null)
                 Bukkit.getPluginManager().addPermission(permission);
-            login.put(permission, message);
+            login.add(new Tuple<>(permission, message));
         });
         
         logoutSection.getKeys(false).forEach(key -> {
-            Permission permission = new Permission(key.replaceAll("_", "."));
+            Permission permission = new Permission(key.replace("_", "."));
             String message = logoutSection.getString(key);
             
             if (Bukkit.getPluginManager().getPermission(permission.getName()) == null)
                 Bukkit.getPluginManager().addPermission(permission);
-            logout.put(permission, message);
+            logout.add(new Tuple<>(permission, message));
         });
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLogin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        List<Map.Entry<Permission, String>> stream = login.entrySet().stream().filter(entry -> player.hasPermission(entry.getKey())).collect(Collectors.toList());
-        
+
         //Gets the last entry (the one with most priority) that the user has.
-        Optional<String> optional = stream.stream().skip(stream.size() - 1).map(Map.Entry::getValue).findFirst();
+        Iterator<Tuple<Permission, String>> itr = login.descendingIterator();
+        String msg = defaultLoginMessage;
+
+        while(itr.hasNext()) {
+            Tuple<Permission, String> next = itr.next();
+            
+            if(player.hasPermission(next.getKey())) {
+                msg = next.getValue();
+                break;
+            }
+        }
         
-        event.setJoinMessage(format(optional.orElse(defaultLoginMessage), player.getDisplayName()));
+        event.setJoinMessage(format(msg, player.getDisplayName()));
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLogin(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        List<Map.Entry<Permission, String>> stream = logout.entrySet().stream().filter(entry -> player.hasPermission(entry.getKey())).collect(Collectors.toList());
         
         //Gets the last entry (the one with most priority) that the user has.
-        Optional<String> optional = stream.stream().skip(stream.size() - 1).map(Map.Entry::getValue).findFirst();
+        Iterator<Tuple<Permission, String>> itr = logout.descendingIterator();
+        String msg = defaultLogoutMessage;
+
+        while(itr.hasNext()) {
+            Tuple<Permission, String> next = itr.next();
+            
+            if(player.hasPermission(next.getKey())) {
+                msg = next.getValue();
+                break;
+            }
+        }
         
-        event.setQuitMessage(format(optional.orElse(defaultLogoutMessage), player.getDisplayName()));
+        event.setQuitMessage(format(msg, player.getDisplayName()));
     }
     
     private String format(String message, String name) {
-        return ChatColor.translateAlternateColorCodes('&', message.replaceAll("%player%", name).replaceAll("%prefix%", prefix));
+        return ChatColor.translateAlternateColorCodes('&', message.replace("%player%", name).replace("%prefix%", prefix));
     }
     
     @Override
