@@ -3,7 +3,6 @@ package de.craftlancer.clstuff;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.Utils;
 import de.craftlancer.core.util.Tuple;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -29,6 +28,8 @@ import java.util.List;
 
 public class ConnectionMessages implements Listener, TabExecutor {
     private String prefix;
+    private String joinPrefix;
+    private String leavePrefix;
     private String defaultLoginMessage;
     private String defaultLogoutMessage;
     
@@ -57,7 +58,9 @@ public class ConnectionMessages implements Listener, TabExecutor {
         login = new LinkedList<>();
         logout = new LinkedList<>();
         
-        prefix = ChatColor.translateAlternateColorCodes('&', config.getString("prefix", "&f&l[&4&lC&f&lC] &e"));
+        joinPrefix = config.getString("joinPrefix", "&8[&a+&8]&e");
+        leavePrefix = config.getString("leavePrefix", "&8[&c-&8]&e");
+        prefix = "&8[&dJoinMessages&8]";
         defaultLoginMessage = config.getString("defaultLoginMessage");
         defaultLogoutMessage = config.getString("defaultLogoutMessage");
         
@@ -83,15 +86,15 @@ public class ConnectionMessages implements Listener, TabExecutor {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerLogin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
+        
         //Gets the last entry (the one with most priority) that the user has.
         Iterator<Tuple<Permission, String>> itr = login.descendingIterator();
         String msg = defaultLoginMessage;
-
-        while(itr.hasNext()) {
+        
+        while (itr.hasNext()) {
             Tuple<Permission, String> next = itr.next();
             
-            if(player.hasPermission(next.getKey())) {
+            if (player.hasPermission(next.getKey())) {
                 msg = next.getValue();
                 break;
             }
@@ -100,7 +103,7 @@ public class ConnectionMessages implements Listener, TabExecutor {
         String finalMsg = msg;
         
         event.setJoinMessage(null);
-        new LambdaRunnable(() -> Bukkit.broadcastMessage(format(finalMsg, player.getDisplayName()))).runTaskLater(plugin, 1L);
+        new LambdaRunnable(() -> Bukkit.broadcastMessage(format(finalMsg, player.getDisplayName(), leavePrefix))).runTaskLater(plugin, 1L);
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -110,20 +113,20 @@ public class ConnectionMessages implements Listener, TabExecutor {
         //Gets the last entry (the one with most priority) that the user has.
         Iterator<Tuple<Permission, String>> itr = logout.descendingIterator();
         String msg = defaultLogoutMessage;
-
-        while(itr.hasNext()) {
+        
+        while (itr.hasNext()) {
             Tuple<Permission, String> next = itr.next();
             
-            if(player.hasPermission(next.getKey())) {
+            if (player.hasPermission(next.getKey())) {
                 msg = next.getValue();
                 break;
             }
         }
         
-        event.setQuitMessage(format(msg, player.getDisplayName()));
+        event.setQuitMessage(format(msg, player.getDisplayName(), joinPrefix));
     }
     
-    private String format(String message, String name) {
+    private String format(String message, String name, String prefix) {
         return ChatColor.translateAlternateColorCodes('&', message.replace("%player%", name).replace("%prefix%", prefix));
     }
     
