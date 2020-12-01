@@ -17,6 +17,7 @@ import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.heroes.Heroes;
 import de.craftlancer.clstuff.heroes.commands.HeroesCommandHandler;
+import de.craftlancer.clstuff.mobcontrol.ItemCooldowns;
 import de.craftlancer.clstuff.mobcontrol.MobControl;
 import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
@@ -275,6 +276,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         new LambdaRunnable(this::save).runTaskTimer(this, 18000L, 18000L);
         
         this.mobControl = new MobControl(this);
+        new ItemCooldowns(this);
         
         try {
             arenaGUI = new ArenaGUI(this);

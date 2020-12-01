@@ -26,13 +26,6 @@ import de.craftlancer.core.CLCore;
 import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 
-/*
- * Per-World settings
- * Reload command
- * Chance of hostile spawns in range of noob player not spawning, based on rank
- * Set spawn limits and spawn ticks per world via command
- * 
- */
 public class MobControl implements Listener, CommandExecutor {
     private final CLStuff plugin;
     private final Random rng = new Random();

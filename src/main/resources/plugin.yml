@@ -81,6 +81,10 @@ commands:
     description: Reloads MobControl config
     usage: /mobcontrol
     permission: clstuff.mobcontrol
+  itemCooldowns:
+    description: Reloads item cooldowns
+    usage: /itemCooldowns
+    permission: clstuff.itemcooldown
 permissions:
   clstuff.centermap:
     default: false
