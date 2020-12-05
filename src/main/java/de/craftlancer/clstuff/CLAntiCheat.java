@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.Inventory;
@@ -41,6 +42,8 @@ import de.craftlancer.core.logging.PluginFileLogger;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.ClaimPermission;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import net.ess3.api.events.TPARequestEvent;
+import net.ess3.api.events.UserTeleportHomeEvent;
 
 public class CLAntiCheat implements Listener {
     private Logger logger;
@@ -176,7 +179,7 @@ public class CLAntiCheat implements Listener {
     /*
      * Prevent settings home in enemy claims
      */
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent e) {
         if (!(e.getMessage().startsWith("/sethome") || e.getMessage().startsWith("/ecreatehome")))
             return;
@@ -195,15 +198,94 @@ public class CLAntiCheat implements Listener {
     @EventHandler
     public void onBedEnter(PlayerBedEnterEvent e) {
         Player p = e.getPlayer();
-        Location loc = e.getPlayer().getLocation();
+        Location loc = p.getLocation();
         Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
         
         if (claim == null || claim.isAdminClaim() || !hasClaimPermission(p, claim, ClaimPermission.Access)) {
             e.setCancelled(true);
             e.setUseBed(Result.DENY);
-            p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you can build in.");
+            p.sendMessage(ChatColor.RED + "You can't use /sethome here, you must be in a claim you have access to.");
             logger.info(() -> String.format("%s tried setting a home at %d %d %d.", p.getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
         }
+    }
+
+    /*
+     * Prevent entering enemy claims via /tpa, /home or respawn
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onTPA(TPARequestEvent event) {
+        @SuppressWarnings("deprecation")
+        Player target = event.getTarget().getBase();
+        Player sender = event.getRequester().getPlayer();
+        
+        if(target.isOp() || sender.isOp())
+            return;
+        
+        Location loc = event.isTeleportHere() ? sender.getLocation() : target.getLocation();
+        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
+
+        if(claim == null)
+            return;
+        if(claim.isAdminClaim())
+            return;
+        if(hasClaimPermission(target, claim, ClaimPermission.Access))
+            return;
+        if(hasClaimPermission(sender, claim, ClaimPermission.Access))
+            return;
+        
+        event.setCancelled(true);
+        event.getRequester().sendMessage(ChatColor.RED + "You can't use /tpa commands to places neither player has access to.");
+        
+        logger.info(() -> String.format("%s requested /tpa %s %s, %d %d %d without claim access to %s's claim.",
+                                        sender.getName(),
+                                        event.isTeleportHere() ? "of" : "to",
+                                        target.getName(),
+                                        loc.getBlockX(),
+                                        loc.getBlockY(),
+                                        loc.getBlockZ(),
+                                        claim.getOwnerName()));
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onTeleportHome(UserTeleportHomeEvent event) {
+        @SuppressWarnings("deprecation")
+        Player sender = event.getUser().getBase();
+        Location loc = sender.getLocation();
+
+        if(sender.isOp())
+            return;
+        
+        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
+        
+        if(claim == null)
+            return;
+        if(claim.isAdminClaim())
+            return;
+        if(hasClaimPermission(sender, claim, ClaimPermission.Access))
+            return;
+        
+        event.setCancelled(true);
+        sender.sendMessage(ChatColor.RED + "Your requested home is on a claim you have no access to. Aborting.");
+    }
+    
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        Location loc = event.getRespawnLocation();
+
+        if(player.isOp())
+            return;
+        
+        Claim claim = GriefPrevention.instance.dataStore.getClaimAt(loc, true, null);
+        if(claim == null)
+            return;
+        if(claim.isAdminClaim())
+            return;
+        if(hasClaimPermission(player, claim, ClaimPermission.Access))
+            return;
+        
+        player.sendMessage(ChatColor.RED + "Your respawn location is on a claim you have no access to. Please reset your respawn location.");
+        event.setRespawnLocation(loc.getWorld().getSpawnLocation());
     }
     
     @EventHandler

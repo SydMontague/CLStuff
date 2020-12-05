@@ -12,37 +12,47 @@
   </properties>
 
   <repositories>
+    <!-- Spigot -->
     <repository>
       <id>spigot-repo</id>
       <url>http://hub.spigotmc.org/nexus/content/groups/public/</url>
     </repository>
+    
+    <!-- GriefPrevention -->
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
     </repository>
 
+    <!-- CombatLogX -->
     <repository>
       <id>codemc-repo</id>
       <url>https://repo.codemc.io/repository/maven-public/</url>
     </repository>
+    
+    <!-- WorldGuard/WorldEdit -->
     <repository>
       <id>sk89q-repo</id>
       <url>http://maven.sk89q.com/repo/</url>
     </repository>
 
+    <!-- Essentials -->
+    <repository>
+      <id>Essentials</id>
+      <url>https://repo.essentialsx.net/releases/</url>
+    </repository>
+    
+    <!-- DiscordSRV -->
     <repository>
       <id>Scarsz-Nexus</id>
       <url>https://nexus.scarsz.me/content/groups/public/</url>
     </repository>
 
+    <!-- MythicMobs -->
     <repository>
       <id>nexus</id>
       <name>Lumine Releases</name>
       <url>https://mvn.lumine.io/repository/maven-public/</url>
-    </repository>
-    <repository>
-      <id>ess-repo</id>
-      <url>https://ci.ender.zone/plugin/repository/everything/</url>
     </repository>
   </repositories>
 
@@ -112,6 +122,12 @@
       <artifactId>MythicMobs</artifactId>
       <version>4.9.1</version>
       <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
+        <groupId>net.ess3</groupId> <!-- TODO change to net.essentialsx with 2.19.0 -->
+        <artifactId>EssentialsX</artifactId>
+        <version>2.18.2</version>
     </dependency>
   </dependencies>
 
