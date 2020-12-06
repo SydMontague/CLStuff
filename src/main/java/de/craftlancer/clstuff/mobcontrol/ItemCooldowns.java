@@ -14,6 +14,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,6 +23,15 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerRiptideEvent;
 import org.bukkit.inventory.ItemStack;
+
+import com.SirBlobman.combatlogx.api.ICombatLogX;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.flags.StateFlag.State;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.LambdaRunnable;
@@ -33,12 +43,19 @@ import de.craftlancer.core.util.MessageUtil;
  * 
  */
 public class ItemCooldowns implements Listener, CommandExecutor {
+    private static final StateFlag COOLDOWN_FLAG = new StateFlag("custom-cooldowns", false);
+    
     private final CLStuff plugin;
+    private ICombatLogX combatLogPlugin = null;
     
     private Map<Material, Integer> consumeCooldowns = new EnumMap<>(Material.class);
     private int riptideCooldown;
     private int totemCooldown;
     private int pearlCooldown;
+
+    public static void registerFlag() {
+        WorldGuard.getInstance().getFlagRegistry().register(COOLDOWN_FLAG);
+    }
     
     public ItemCooldowns(CLStuff plugin) {
         this.plugin = plugin;
@@ -46,6 +63,9 @@ public class ItemCooldowns implements Listener, CommandExecutor {
         
         plugin.getCommand("itemCooldowns").setExecutor(this);
         Bukkit.getPluginManager().registerEvents(this, plugin);
+
+        if(Bukkit.getPluginManager().isPluginEnabled("CombatLogX"))
+            combatLogPlugin = (ICombatLogX) Bukkit.getPluginManager().getPlugin("CombatLogX");
     }
     
     private void loadConfiguration() {
@@ -73,7 +93,7 @@ public class ItemCooldowns implements Listener, CommandExecutor {
         
         loadConfiguration();
         
-        MessageUtil.sendMessage(plugin, sender, MessageLevel.NORMAL, "MobControl reloaded.");
+        MessageUtil.sendMessage(plugin, sender, MessageLevel.NORMAL, "ItemCooldowns reloaded.");
         return true;
     }
     
@@ -92,18 +112,21 @@ public class ItemCooldowns implements Listener, CommandExecutor {
     public void onPlayerRiptide(PlayerRiptideEvent event) {
         if(this.riptideCooldown < 0)
             return;
+
+        if(!isFlagSet(event.getPlayer()) && !combatLogPlugin.getCombatManager().isInCombat(event.getPlayer()))
+            return;
         
         event.getPlayer().setCooldown(Material.TRIDENT, riptideCooldown);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onTotem(EntityResurrectEvent event) {
-        if(!(event.getEntity() instanceof HumanEntity))
+        if(!(event.getEntity() instanceof Player))
             return;
         if(this.totemCooldown < 0)
             return;
         
-        HumanEntity player = (HumanEntity) event.getEntity();
+        Player player = (Player) event.getEntity();
         
         if(player.getCooldown(Material.TOTEM_OF_UNDYING) > 0)
             event.setCancelled(true);
@@ -120,10 +143,26 @@ public class ItemCooldowns implements Listener, CommandExecutor {
         
         EnderPearl pearl = (EnderPearl) event.getEntity();
 
-        if(!(pearl.getShooter() instanceof HumanEntity))
+        if(!(pearl.getShooter() instanceof Player))
             return;
         
-        new LambdaRunnable(() -> ((HumanEntity) pearl.getShooter()).setCooldown(Material.ENDER_PEARL, pearlCooldown)).runTask(plugin);
+        Player shooter = (Player) pearl.getShooter();
+
+        if(!isFlagSet(shooter) && !combatLogPlugin.getCombatManager().isInCombat(shooter))
+            return;
+        
+        new LambdaRunnable(() -> shooter.setCooldown(Material.ENDER_PEARL, pearlCooldown)).runTask(plugin);
     }
+    
+    private boolean isFlagSet(Player player) {
+        LocalPlayer wgPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+        
+        com.sk89q.worldedit.util.Location wgLoc = BukkitAdapter.adapt(player.getLocation());
+        RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+        StateFlag.State state = query.queryState(wgLoc, wgPlayer, COOLDOWN_FLAG);
+        
+        return state == State.ALLOW;
+    }
+    
     
 }

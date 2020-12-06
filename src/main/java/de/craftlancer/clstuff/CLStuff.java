@@ -85,6 +85,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     @Override
     public void onLoad() {
         WGNoDropFlag.registerFlag();
+        ItemCooldowns.registerFlag();
     }
     
     public static CLStuff getInstance() {
