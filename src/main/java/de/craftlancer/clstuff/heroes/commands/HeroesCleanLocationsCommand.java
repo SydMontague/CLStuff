@@ -1,19 +1,19 @@
 package de.craftlancer.clstuff.heroes.commands;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
-
+import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.heroes.Heroes;
 import de.craftlancer.clstuff.heroes.MaterialUtil;
 import de.craftlancer.core.command.SubCommand;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.Plugin;
 
 public class HeroesCleanLocationsCommand extends SubCommand {
     
     private Heroes heroes;
     
     public HeroesCleanLocationsCommand(Plugin plugin, Heroes heroes) {
-        super("clstuff.heroes.admin", plugin, true);
+        super(CLStuff.getAdminPermission(), plugin, true);
         
         this.heroes = heroes;
     }

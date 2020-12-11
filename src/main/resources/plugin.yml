@@ -85,6 +85,12 @@ commands:
     description: Reloads item cooldowns
     usage: /itemCooldowns
     permission: clstuff.itemcooldown
+  tablistreload:
+    description: Reloads tablist
+  donatortickets:
+    description: Command to give players donator tickets
+  inventorymanagement:
+    description: Utility to help manage players inventories.
 permissions:
   clstuff.centermap:
     default: false
@@ -187,17 +193,11 @@ permissions:
     default: false
   clstuff.explonerf.info:
     default: false
-  clstuff.heroes.admin:
-    default: op
-  clstuff.citizenset.admin:
-    default: op
-  clstuff.itembuilder:
-    default: op
   clstuff.emote.admin:
     default: op
   clstuff.emote.target:
     default: op
   clstuff.emote.bypasscooldown:
     default: op
-  clstuff.connectionmessage.admin:
+  clstuff.admin:
     default: op

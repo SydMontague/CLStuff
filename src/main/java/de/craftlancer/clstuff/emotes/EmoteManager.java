@@ -1,5 +1,15 @@
 package de.craftlancer.clstuff.emotes;
 
+import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.NMSUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.permissions.Permission;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,19 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.permissions.Permission;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import de.craftlancer.clstuff.CLStuff;
-import de.craftlancer.core.LambdaRunnable;
-import de.craftlancer.core.NMSUtils;
-
 public class EmoteManager {
-    protected static final String ADMIN_PERMISSION = "clstuff.emote.admin";
     
     private String prefix;
     private int cooldown;
@@ -37,7 +35,6 @@ public class EmoteManager {
         load();
     }
     
-    @SuppressWarnings("unchecked")
     private void load() {
         File file = new File(plugin.getDataFolder(), "emotes.yml");
         
@@ -92,7 +89,7 @@ public class EmoteManager {
     public Emote getEmote(String emote) {
         return emotes.get(emote);
     }
-
+    
     public boolean hasEmote(String emote) {
         return emotes.containsKey(emote);
     }
@@ -100,10 +97,10 @@ public class EmoteManager {
     public void addEmote(Emote emote) {
         emotes.put(emote.getName(), emote);
         
-        if(Bukkit.getPluginManager().getPermission(emote.getPermission()) == null)
+        if (Bukkit.getPluginManager().getPermission(emote.getPermission()) == null)
             Bukkit.getPluginManager().addPermission(new Permission(emote.getPermission()));
         
-        if(useCommandMap)
+        if (useCommandMap)
             NMSUtils.getCommandMap().register(emote.getName(), new EmoteAliasCommand(emote, this));
     }
     

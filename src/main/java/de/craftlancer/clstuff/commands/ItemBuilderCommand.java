@@ -36,7 +36,7 @@ public class ItemBuilderCommand implements CommandExecutor, TabCompleter {
         if (!(commandSender instanceof Player))
             return false;
         
-        if (!commandSender.hasPermission("clstuff.itembuilder")) {
+        if (!commandSender.hasPermission(CLStuff.getAdminPermission())) {
             commandSender.sendMessage(PREFIX + "§cYou do not have permission to use this command.");
             return false;
         }

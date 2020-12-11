@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.heroes.commands;
 
+import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.heroes.Heroes;
 import de.craftlancer.clstuff.heroes.HeroesLocation;
 import de.craftlancer.clstuff.heroes.MaterialUtil;
@@ -20,7 +21,7 @@ public class HeroesAddLocationCommand extends SubCommand {
     private Heroes heroes;
     
     public HeroesAddLocationCommand(Plugin plugin, Heroes heroes) {
-        super("clstuff.heroes.admin", plugin, false);
+        super(CLStuff.getAdminPermission(), plugin, false);
         
         this.heroes = heroes;
     }
