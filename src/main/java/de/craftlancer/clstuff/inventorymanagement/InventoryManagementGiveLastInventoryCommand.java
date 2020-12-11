@@ -9,8 +9,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class InventoryManagementGiveLastInventoryCommand extends SubCommand {
@@ -27,6 +30,13 @@ public class InventoryManagementGiveLastInventoryCommand extends SubCommand {
     protected List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 2)
             return Utils.getMatches(args[1], Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
+        if (args.length == 3)
+            return Utils.getMatches(args[2], Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList()));
+        if (args.length == 4) {
+            Player player = Bukkit.getPlayer(args[2]);
+            if (player != null)
+                return Utils.getMatches(args[3], management.getLastInventories(player.getUniqueId()).stream().map(LastInventory::getDate).collect(Collectors.toList()));
+        }
         
         return Collections.emptyList();
     }
@@ -37,19 +47,37 @@ public class InventoryManagementGiveLastInventoryCommand extends SubCommand {
             return management.getPrefix() + "You do not have access to this command.";
         
         if (args.length < 2)
-            return management.getPrefix() + "Please enter a player name.";
+            return management.getPrefix() + "Please enter a player name to give the inventory to.";
+        if (args.length < 3)
+            return management.getPrefix() + "Please enter the name of the player who died.";
+        if (args.length < 4)
+            return management.getPrefix() + "Please enter a date for the inventory.";
         
-        Player player = Bukkit.getPlayer(args[1]);
+        UUID uuid = null;
+        try {
+            uuid = UUID.fromString(args[2]);
+        } catch (IllegalArgumentException e) {
+            Player player = Bukkit.getPlayer(args[2]);
+            
+            if (player != null)
+                uuid = player.getUniqueId();
+        }
         
-        if (player == null)
+        Player to = Bukkit.getPlayer(args[1]);
+        
+        if (to == null)
             return management.getPrefix() + "Please enter a valid player name that is online.";
+        if (uuid == null)
+            return management.getPrefix() + "Please enter a valid player name or UUID of the player who died.";
         
-        LastInventory lastInventory = management.getLastInventory(player.getUniqueId());
+        String date = (String.join(" ", Arrays.copyOfRange(args, 3, args.length)));
         
-        if (lastInventory == null)
-            return management.getPrefix() + "This player does not have a last inventory.";
+        Optional<LastInventory> optional = management.getLastInventories(uuid).stream().filter(l -> l.getDate().equals(date)).findFirst();
         
-        setContents(player, lastInventory);
+        if (!optional.isPresent())
+            return management.getPrefix() + "Please enter a valid date for the inventory (use tab complete).";
+        
+        setContents(to, optional.get());
         
         return management.getPrefix() + "Player's inventory has been updated.";
     }

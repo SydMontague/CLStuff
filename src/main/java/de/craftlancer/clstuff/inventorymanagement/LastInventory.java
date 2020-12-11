@@ -1,12 +1,16 @@
 package de.craftlancer.clstuff.inventorymanagement;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,13 +27,20 @@ public class LastInventory implements ConfigurationSerializable {
     
     private UUID owner;
     private long timeCreated;
+    private Location location;
+    private String date;
     
-    public LastInventory(PlayerInventory inventory, UUID owner) {
-        this.owner = owner;
+    public LastInventory(PlayerInventory inventory, Player player) {
+        this.owner = player.getUniqueId();
         this.timeCreated = System.currentTimeMillis();
         this.offhand = inventory.getItemInOffHand() == null ? AIR : inventory.getItemInOffHand();
         this.contents = Arrays.stream(inventory.getContents()).map(i -> i == null || i.getType() == Material.AIR ? AIR : i).collect(Collectors.toList());
         this.armorContents = Arrays.stream(inventory.getArmorContents()).map(i -> i == null || i.getType() == Material.AIR ? AIR : i).collect(Collectors.toList());
+        this.location = player.getLocation();
+        
+        Date date = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-M-yyyy-hh:mm:ss");
+        this.date = formatter.format(date);
     }
     
     public LastInventory(Map<String, Object> map) {
@@ -38,6 +49,10 @@ public class LastInventory implements ConfigurationSerializable {
         this.armorContents = (List<ItemStack>) map.get("armor");
         this.contents = (List<ItemStack>) map.get("contents");
         this.offhand = (ItemStack) map.get("offhand");
+        this.location = (Location) map.get("location");
+        this.date = (String) map.get("date");
+        
+        
     }
     
     @Override
@@ -49,6 +64,8 @@ public class LastInventory implements ConfigurationSerializable {
         map.put("armor", armorContents);
         map.put("contents", contents);
         map.put("offhand", offhand);
+        map.put("location", location);
+        map.put("date", date);
         
         return map;
     }
@@ -81,5 +98,13 @@ public class LastInventory implements ConfigurationSerializable {
     
     public ItemStack getOffhand() {
         return offhand;
+    }
+    
+    public Location getLocation() {
+        return location;
+    }
+    
+    public String getDate() {
+        return date;
     }
 }

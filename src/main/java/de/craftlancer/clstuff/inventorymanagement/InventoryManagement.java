@@ -1,8 +1,10 @@
 package de.craftlancer.clstuff.inventorymanagement;
 
 import de.craftlancer.clstuff.CLStuff;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,15 +17,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class InventoryManagement implements Listener {
     
     private static final long ONE_WEEK = 604800000;
     
-    private Map<UUID, LastInventory> lastInventories = new HashMap<>();
+    private Map<UUID, List<LastInventory>> lastInventories = new HashMap<>();
     private CLStuff plugin;
-    private File directory;
     private File lastInventoryFile;
     
     public InventoryManagement(CLStuff plugin) {
@@ -31,9 +31,9 @@ public class InventoryManagement implements Listener {
         ConfigurationSerialization.registerClass(LastInventory.class);
         
         this.plugin = plugin;
-        this.directory = new File(plugin.getDataFolder(), "inventoryManagement");
+        File directory = new File(plugin.getDataFolder(), "inventoryManagement");
         directory.mkdirs();
-        this.lastInventoryFile = new File(directory, "lastInventories.yml");
+        this.lastInventoryFile = new File(directory, "inventoryManagementData.yml");
         
         load();
     }
@@ -44,7 +44,12 @@ public class InventoryManagement implements Listener {
         
         YamlConfiguration lastInventoryConfig = YamlConfiguration.loadConfiguration(lastInventoryFile);
         
-        ((List<LastInventory>) lastInventoryConfig.getList("inventories", new ArrayList<>())).forEach(l -> lastInventories.put(l.getOwner(), l));
+        ConfigurationSection section = lastInventoryConfig.getConfigurationSection("lastInventories");
+        
+        if (section == null)
+            return;
+        
+        section.getKeys(false).forEach(key -> lastInventories.put(UUID.fromString(key), (List<LastInventory>) section.getList(key)));
     }
     
     public void save() {
@@ -53,8 +58,12 @@ public class InventoryManagement implements Listener {
         
         YamlConfiguration lastInventoryConfig = YamlConfiguration.loadConfiguration(lastInventoryFile);
         
-        lastInventoryConfig.set("inventories", lastInventories.values().stream()
-                .filter(lastInventory -> lastInventory.getTimeCreated() + ONE_WEEK <= System.currentTimeMillis()).collect(Collectors.toList()));
+        ConfigurationSection section = lastInventoryConfig.createSection("lastInventories");
+        
+        lastInventories.forEach((uuid, list) -> {
+            list.removeIf(l -> l.getTimeCreated() + ONE_WEEK <= System.currentTimeMillis());
+            section.set(uuid.toString(), list);
+        });
         
         try {
             lastInventoryConfig.save(lastInventoryFile);
@@ -65,10 +74,13 @@ public class InventoryManagement implements Listener {
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerDeath(PlayerDeathEvent event) {
-        lastInventories.put(event.getEntity().getUniqueId(), new LastInventory(event.getEntity().getInventory(), event.getEntity().getUniqueId()));
+        Player player = event.getEntity();
+        List<LastInventory> list = lastInventories.getOrDefault(player.getUniqueId(), new ArrayList<>());
+        list.add(new LastInventory(player.getInventory(), player));
+        lastInventories.put(player.getUniqueId(), list);
     }
     
-    public LastInventory getLastInventory(UUID owner) {
+    public List<LastInventory> getLastInventories(UUID owner) {
         return lastInventories.get(owner);
     }
     
