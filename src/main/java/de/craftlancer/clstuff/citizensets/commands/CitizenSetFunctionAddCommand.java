@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.citizensets.commands;
 
+import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.citizensets.CitizenSet;
 import de.craftlancer.clstuff.citizensets.CitizenSetFunction;
 import de.craftlancer.clstuff.citizensets.CitizenSetsManager;
@@ -23,7 +24,7 @@ public class CitizenSetFunctionAddCommand extends SubCommand {
     private CitizenSetsManager csets;
     
     public CitizenSetFunctionAddCommand(Plugin plugin, CitizenSetsManager csets) {
-        super("clstuff.citizenset.admin", plugin, false);
+        super(CLStuff.getAdminPermission(), plugin, false);
         
         this.csets = csets;
     }
@@ -67,8 +68,8 @@ public class CitizenSetFunctionAddCommand extends SubCommand {
             color = ParticleUtil.getColorFromString(args[5]);
         }
         CitizenSetFunction function = CitizenSetFunction.FunctionType.getFunction(args[3], args[4], color);
-
-        if(function == null)
+        
+        if (function == null)
             return CitizenSetsManager.CC_PREFIX + "You must specify a valid function type.";
         
         optional.get().addFunction(function);

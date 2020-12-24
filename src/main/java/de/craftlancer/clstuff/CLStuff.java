@@ -11,14 +11,20 @@ import de.craftlancer.clstuff.commands.CraftCommand;
 import de.craftlancer.clstuff.commands.ItemBuilderCommand;
 import de.craftlancer.clstuff.commands.StatsCommand;
 import de.craftlancer.clstuff.commands.WildCommand;
+import de.craftlancer.clstuff.connectionmessages.ConnectionMessages;
+import de.craftlancer.clstuff.connectionmessages.ConnectionMessagesCommandHandler;
 import de.craftlancer.clstuff.emotes.EmoteCommand;
 import de.craftlancer.clstuff.emotes.EmoteManager;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
 import de.craftlancer.clstuff.heroes.Heroes;
 import de.craftlancer.clstuff.heroes.commands.HeroesCommandHandler;
+import de.craftlancer.clstuff.inventorymanagement.InventoryManagement;
+import de.craftlancer.clstuff.inventorymanagement.InventoryManagementCommandHandler;
 import de.craftlancer.clstuff.mobcontrol.ItemCooldowns;
 import de.craftlancer.clstuff.mobcontrol.MobControl;
+import de.craftlancer.clstuff.premium.DonatorTicketCommandHandler;
+import de.craftlancer.clstuff.premium.DonatorTicketRegistry;
 import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
@@ -68,6 +74,8 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     private static CLStuff instance;
     
+    private static String ADMIN_PERMISSION = "clstuff.admin";
+    
     private WGNoDropFlag flag;
     private ServerQuests serverQuests;
     private Rankings rankings;
@@ -81,6 +89,9 @@ public class CLStuff extends JavaPlugin implements Listener {
     private CitizenSetsManager citizenSets;
     private EmoteManager emotes;
     private MobControl mobControl;
+    private ConnectionMessages connectionMessages;
+    private DonatorTicketRegistry donatorTicketRegistry;
+    private InventoryManagement inventoryManagement;
     
     @Override
     public void onLoad() {
@@ -90,6 +101,10 @@ public class CLStuff extends JavaPlugin implements Listener {
     
     public static CLStuff getInstance() {
         return instance;
+    }
+    
+    public static String getAdminPermission() {
+        return ADMIN_PERMISSION;
     }
     
     @Override
@@ -266,11 +281,16 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("itembuilder").setExecutor(new ItemBuilderCommand(this));
         
-        ConnectionMessages connectionMessages = new ConnectionMessages(this);
-        
-        getCommand("connectionmessages").setExecutor(connectionMessages);
+        connectionMessages = new ConnectionMessages(this);
+        getCommand("connectionmessages").setExecutor(new ConnectionMessagesCommandHandler(this, connectionMessages));
         Bukkit.getPluginManager().registerEvents(connectionMessages, this);
         
+        donatorTicketRegistry = new DonatorTicketRegistry(this);
+        getCommand("donatortickets").setExecutor(new DonatorTicketCommandHandler(this, donatorTicketRegistry));
+        
+        inventoryManagement = new InventoryManagement(this);
+        Bukkit.getPluginManager().registerEvents(inventoryManagement, this);
+        getCommand("inventorymanagement").setExecutor(new InventoryManagementCommandHandler(this, inventoryManagement));
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
         
@@ -286,7 +306,8 @@ public class CLStuff extends JavaPlugin implements Listener {
             // we don't want things to crash just because someone messed up something
         }
         
-        new Tablist(this);
+        Tablist tablist = new Tablist(this);
+        getCommand("tablistreload").setExecutor(tablist);
     }
     
     private static boolean fixItem(CommandSender a, Command b, String c, String[] d) {
@@ -414,6 +435,9 @@ public class CLStuff extends JavaPlugin implements Listener {
         adminShop.save();
         citizenSets.save();
         emotes.save();
+        donatorTicketRegistry.save();
+        connectionMessages.save();
+        inventoryManagement.save();
     }
     
     public CitizenSetsManager getCitizenSets() {

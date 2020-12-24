@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.emotes;
 
+import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.Utils;
 import org.bukkit.Bukkit;
@@ -44,14 +45,14 @@ public class EmoteCommand implements TabExecutor {
     
     private String execute(Player player, String[] args) {
         if (args.length == 0)
-            return manager.getPrefix()  + "You must specify an emote!";
+            return manager.getPrefix() + "You must specify an emote!";
         if (manager.hasEmote(args[0]))
             return emote(player, args);
-        if (args[0].equalsIgnoreCase("add") && player.hasPermission(EmoteManager.ADMIN_PERMISSION))
+        if (args[0].equalsIgnoreCase("add") && player.hasPermission(CLStuff.getAdminPermission()))
             return add(args);
-        if (args[0].equalsIgnoreCase("remove") && player.hasPermission(EmoteManager.ADMIN_PERMISSION))
+        if (args[0].equalsIgnoreCase("remove") && player.hasPermission(CLStuff.getAdminPermission()))
             return remove(args[1]);
-        return manager.getPrefix()  + "§cPlease enter a valid argument!";
+        return manager.getPrefix() + "§cPlease enter a valid argument!";
     }
     
     private String emote(Player player, String[] args) {
@@ -61,10 +62,10 @@ public class EmoteCommand implements TabExecutor {
             return manager.getPrefix() + "§cThis emote doesn't exist.";
         
         if (!player.hasPermission(emote.getPermission()))
-            return manager.getPrefix()  + "§cYou do not have permission to run this command.";
+            return manager.getPrefix() + "§cYou do not have permission to run this command.";
         
         if (manager.hasCooldown(player.getUniqueId()))
-            return manager.getPrefix()  + "§cYou must wait to use an emote again!";
+            return manager.getPrefix() + "§cYou must wait to use an emote again!";
         
         if (player.hasPermission("clstuff.emote.target")
                 && args.length > 1
@@ -110,7 +111,7 @@ public class EmoteCommand implements TabExecutor {
         if (args.length == 1) {
             List<String> list = new ArrayList<>();
             list.addAll(manager.getEmotes().values().stream().filter(e -> sender.hasPermission(e.getPermission())).map(Emote::getName).collect(Collectors.toList()));
-            if (sender.hasPermission(EmoteManager.ADMIN_PERMISSION)) {
+            if (sender.hasPermission(CLStuff.getAdminPermission())) {
                 list.add("add");
                 list.add("remove");
             }

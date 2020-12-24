@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.citizensets.commands;
 
+import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.citizensets.CitizenSet;
 import de.craftlancer.clstuff.citizensets.CitizenSetsManager;
 import de.craftlancer.core.Utils;
@@ -22,7 +23,7 @@ public class CitizenSetSetIconCommand extends SubCommand {
     private CitizenSetsManager csets;
     
     public CitizenSetSetIconCommand(Plugin plugin, CitizenSetsManager csets) {
-        super("clstuff.citizenset.admin", plugin, false);
+        super(CLStuff.getAdminPermission(), plugin, false);
         
         this.csets = csets;
     }
