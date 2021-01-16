@@ -19,23 +19,28 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 
 public class WildCommand implements CommandExecutor, Listener {
     private static final int CLAIM_DISTANCE = 200;
     private static final String COOLDOWN_KEY = "clstuff.lastWild";
     
-    private CLStuff plugin;
-    private final Random rng = new Random();
-    private final int minRadius;
-    private final int maxRadius;
+    CLStuff plugin;
+    final Random rng = new Random();
+    final int minRadius;
+    final int maxRadius;
+    final int attempsPerTick;
     
     public WildCommand(CLStuff plugin) {
         this.plugin = plugin;
         this.minRadius = plugin.getConfig().getInt("wild.minRadius", 1000);
         this.maxRadius = plugin.getConfig().getInt("wild.maxRadius", 5000);
+        this.attempsPerTick = plugin.getConfig().getInt("wild.attemptsPerTick", 5);
         
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
@@ -74,11 +79,27 @@ public class WildCommand implements CommandExecutor, Listener {
                 sender.sendMessage(ChatColor.RED + "Please wait a moment until you run this command again.");
                 return true;
             }
-            
+
+            MessageUtil.sendMessage(plugin, player, MessageLevel.NORMAL, "Searching for a suitable location...");
+            new WildTask(player).runTaskTimer(plugin, 1, 1);
+            player.setMetadata(COOLDOWN_KEY, new FixedMetadataValue(plugin, System.currentTimeMillis()));
+        }
+        return true;
+    }
+    
+    private class WildTask extends BukkitRunnable {
+        private final Player player;
+        
+        public WildTask(Player player) {
+            this.player = player;
+        }
+        
+        @Override
+        public void run() {
             World world = Bukkit.getWorlds().get(0);
-            Location loc;
+            Location loc = null;
             
-            do {
+            for(int i = 0; i < attempsPerTick && !isValidLocation(loc); i++) {
                 double rotation = 2 * Math.PI * rng.nextDouble();
                 int distance =  minRadius + rng.nextInt(maxRadius - minRadius);
 
@@ -86,15 +107,20 @@ public class WildCommand implements CommandExecutor, Listener {
                 int locZ = (int) (distance * Math.sin(rotation));
                 
                 loc = new Location(world, locX + 0.5D, world.getHighestBlockYAt(locX, locZ) + 1D, locZ + 0.5D);
-            } while (!isValidLocation(loc));
+            }
             
-            player.teleport(loc);
-            player.setMetadata(COOLDOWN_KEY, new FixedMetadataValue(plugin, System.currentTimeMillis()));
+            if(isValidLocation(loc)) {
+                MessageUtil.sendMessage(plugin, player, MessageLevel.NORMAL, "Location found, teleporting.");
+                player.teleport(loc);
+                player.setMetadata(COOLDOWN_KEY, new FixedMetadataValue(plugin, System.currentTimeMillis()));
+            }
         }
-        return true;
     }
     
-    private boolean isValidLocation(Location loc) {
+    static boolean isValidLocation(Location loc) {
+        if (loc == null)
+            return false;
+        
         if (GriefPrevention.instance.dataStore.getClaims().stream().anyMatch(a -> a.isNear(loc, CLAIM_DISTANCE)))
             return false;
         
