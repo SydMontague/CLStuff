@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.commands;
 
+import java.util.Optional;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -97,7 +98,7 @@ public class WildCommand implements CommandExecutor, Listener {
         @Override
         public void run() {
             World world = Bukkit.getWorlds().get(0);
-            Location loc = null;
+            Optional<Location> loc = Optional.empty();
             
             for(int i = 0; i < attempsPerTick && !isValidLocation(loc); i++) {
                 double rotation = 2 * Math.PI * rng.nextDouble();
@@ -106,20 +107,24 @@ public class WildCommand implements CommandExecutor, Listener {
                 int locX = (int) (distance * Math.cos(rotation));
                 int locZ = (int) (distance * Math.sin(rotation));
                 
-                loc = new Location(world, locX + 0.5D, world.getHighestBlockYAt(locX, locZ) + 1D, locZ + 0.5D);
+                loc = Optional.of(new Location(world, locX + 0.5D, 64, locZ + 0.5D));
             }
             
             if(isValidLocation(loc)) {
+                loc.ifPresent(f -> f.setY(world.getHighestBlockYAt(f.getBlockX(), f.getBlockZ()) + 1D));
                 MessageUtil.sendMessage(plugin, player, MessageLevel.NORMAL, "Location found, teleporting.");
-                player.teleport(loc);
+                player.teleport(loc.get());
                 player.setMetadata(COOLDOWN_KEY, new FixedMetadataValue(plugin, System.currentTimeMillis()));
+                this.cancel();
             }
         }
     }
     
-    static boolean isValidLocation(Location loc) {
-        if (loc == null)
+    static boolean isValidLocation(Optional<Location> locc) {
+        if (!locc.isPresent())
             return false;
+        
+        Location loc = locc.get();
         
         if (GriefPrevention.instance.dataStore.getClaims().stream().anyMatch(a -> a.isNear(loc, CLAIM_DISTANCE)))
             return false;
