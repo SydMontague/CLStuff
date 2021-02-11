@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 public class PlayerScoreApplyRunnable extends BukkitRunnable {
     
-    private List<Tuple<UUID, Integer>> top3;
+    private List<Tuple<UUID, Double>> top3;
     private Heroes heroes;
     
-    PlayerScoreApplyRunnable(List<Tuple<UUID, Integer>> top3, Heroes heroes) {
+    PlayerScoreApplyRunnable(List<Tuple<UUID, Double>> top3, Heroes heroes) {
         this.top3 = top3;
         this.heroes = heroes;
     }
@@ -27,7 +27,7 @@ public class PlayerScoreApplyRunnable extends BukkitRunnable {
     @Override
     public void run() {
         int counter = 1;
-        for (Tuple<UUID, Integer> entry : top3) {
+        for (Tuple<UUID, Double> entry : top3) {
             HeroesLocation heroesLocation = heroes.getHeroLocation("playertop", String.valueOf(counter));
             
             List<Location> signLocationList = heroesLocation.getSignLocations();
@@ -44,7 +44,7 @@ public class PlayerScoreApplyRunnable extends BukkitRunnable {
         }
     }
     
-    private void setSign(Location signLocation, int score, UUID playerUUID) {
+    private void setSign(Location signLocation, double score, UUID playerUUID) {
         if (signLocation == null || !MaterialUtil.isSign(signLocation.getBlock().getType()) || !signLocation.getWorld().isChunkLoaded(signLocation.getBlockX() >> 4, signLocation.getBlockZ() >> 4))
             return;
         org.bukkit.block.Sign sign = (org.bukkit.block.Sign) signLocation.getBlock().getState();

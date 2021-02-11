@@ -51,7 +51,6 @@ public class CitizenSet implements ConfigurationSerializable {
         this.functions = new ArrayList<>();
     }
     
-    @SuppressWarnings("unchecked")
     public CitizenSet(Map<String, Object> map) {
         this.name = (String) map.get("name");
         this.id = (String) map.get("id");
@@ -201,6 +200,34 @@ public class CitizenSet implements ConfigurationSerializable {
     
     public String getId() {
         return id;
+    }
+    
+    public ItemStack getHelmet() {
+        return helmet;
+    }
+    
+    public ItemStack getChestplate() {
+        return chestplate;
+    }
+    
+    public ItemStack getLeggings() {
+        return leggings;
+    }
+    
+    public ItemStack getBoots() {
+        return boots;
+    }
+    
+    public ItemStack getMainHand() {
+        return mainHand;
+    }
+    
+    public ItemStack getOffHand() {
+        return offHand;
+    }
+    
+    public List<ItemStack> getOthers() {
+        return others;
     }
     
     private static class FunctionRunnable extends BukkitRunnable {

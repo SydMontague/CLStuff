@@ -54,6 +54,7 @@ public class DonatorTicketAccount implements ConfigurationSerializable {
     }
     
     public void updatePoints(int amount) {
+        lastPointClaimTime = System.currentTimeMillis();
         points += amount;
         
         if (Bukkit.getPlayer(owner) != null)
