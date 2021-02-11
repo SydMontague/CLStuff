@@ -13,5 +13,6 @@ public class CitizenSetCommandHandler extends CommandHandler {
         registerSubCommand("list", new CitizenSetListCommand(plugin, csets));
         registerSubCommand("setIcon", new CitizenSetSetIconCommand(plugin, csets));
         registerSubCommand("function", new CitizenSetFunctionCommand(plugin, csets));
+        registerSubCommand("getItems", new CitizenSetGetItemsCommand(plugin, csets));
     }
 }

@@ -28,6 +28,9 @@ import de.craftlancer.clstuff.premium.DonatorTicketRegistry;
 import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
+import de.craftlancer.clstuff.rankings.RankingsCommandHandler;
+import de.craftlancer.clstuff.rewards.RewardsCommandHandler;
+import de.craftlancer.clstuff.rewards.RewardsManager;
 import de.craftlancer.clstuff.squest.ServerQuests;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.NMSUtils;
@@ -92,6 +95,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private ConnectionMessages connectionMessages;
     private DonatorTicketRegistry donatorTicketRegistry;
     private InventoryManagement inventoryManagement;
+    private RewardsManager rewardsManager;
     
     @Override
     public void onLoad() {
@@ -242,9 +246,12 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         getCommand("fixitems").setExecutor(CLStuff::fixItem);
         
+        rewardsManager = new RewardsManager(this);
+        getCommand("rewards").setExecutor(new RewardsCommandHandler(this, rewardsManager));
+        
         rankings = new Rankings(this);
         recolor = new RecolorCommand();
-        getCommand("rankings").setExecutor(rankings);
+        getCommand("rankings").setExecutor(new RankingsCommandHandler(this, rankings));
         getCommand("recolor").setExecutor(recolor);
         
         getCommand("craft").setExecutor(new CraftCommand());
@@ -438,6 +445,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         donatorTicketRegistry.save();
         connectionMessages.save();
         inventoryManagement.save();
+        rewardsManager.save();
     }
     
     public CitizenSetsManager getCitizenSets() {
