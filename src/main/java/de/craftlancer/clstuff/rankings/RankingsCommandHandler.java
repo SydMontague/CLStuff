@@ -21,9 +21,10 @@ public class RankingsCommandHandler extends CommandHandler {
     
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args.length == 0)
+        if (args.length == 0 || !getCommands().keySet().contains(args[0]))
             return rankings.onCommand(sender, cmd, label, args);
         else
             return super.onCommand(sender, cmd, label, args);
+        
     }
 }

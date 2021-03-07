@@ -6,6 +6,8 @@ depend: [CLCore, CLFeatures]
 softdepend: [DiscordSRV, CombatLogX, MythicMobs]
 loadbefore: [WorldGuard]
 commands:
+  noteblock:
+    description: Commands to edit noteblocks
   tablist:
     description: Commands for editing tablist
   itembuilder:
@@ -203,4 +205,6 @@ permissions:
   clstuff.emote.bypasscooldown:
     default: op
   clstuff.admin:
+    default: op
+  clstuff.noteblock.set:
     default: op

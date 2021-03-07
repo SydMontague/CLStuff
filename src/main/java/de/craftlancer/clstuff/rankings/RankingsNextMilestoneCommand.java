@@ -10,6 +10,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,7 +34,9 @@ public class RankingsNextMilestoneCommand extends SubCommand {
         
         double score = rankings.getScore(player);
         
-        Optional<String> optionalKey = rankings.getRewardMap().entrySet().stream().filter(e -> e.getKey() > score).map(Map.Entry::getValue).findFirst();
+        Optional<String> optionalKey = rankings.getRewardMap().entrySet().stream().filter(e -> e.getKey() > score)
+                .sorted(Comparator.comparingDouble(Map.Entry::getKey))
+                .map(Map.Entry::getValue).findFirst();
         
         if (!optionalKey.isPresent()) {
             MessageUtil.sendMessage(rankings, sender, MessageLevel.INFO, "There are no more rewards for you to get! Maybe ask an admin to make more? :)");
