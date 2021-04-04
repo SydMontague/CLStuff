@@ -29,8 +29,8 @@ import de.craftlancer.clstuff.premium.ModelToken;
 import de.craftlancer.clstuff.premium.RecolorCommand;
 import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.rankings.RankingsCommandHandler;
-import de.craftlancer.clstuff.resourcepack.NoteBlockCommandHandler;
-import de.craftlancer.clstuff.resourcepack.NoteBlockRegistry;
+import de.craftlancer.clstuff.resourcepack.CustomBlockRegistry;
+import de.craftlancer.clstuff.resourcepack.command.CustomBlockCommandHandler;
 import de.craftlancer.clstuff.rewards.RewardsCommandHandler;
 import de.craftlancer.clstuff.rewards.RewardsManager;
 import de.craftlancer.clstuff.squest.ServerQuests;
@@ -98,7 +98,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private DonatorTicketRegistry donatorTicketRegistry;
     private InventoryManagement inventoryManagement;
     private RewardsManager rewardsManager;
-    private NoteBlockRegistry noteBlockRegistry;
+    private CustomBlockRegistry customBlockRegistry;
     
     @Override
     public void onLoad() {
@@ -247,9 +247,9 @@ public class CLStuff extends JavaPlugin implements Listener {
             return true;
         });
         
-        noteBlockRegistry = new NoteBlockRegistry(this);
-        getCommand("noteblock").setExecutor(new NoteBlockCommandHandler(this, noteBlockRegistry));
-        Bukkit.getPluginManager().registerEvents(noteBlockRegistry, this);
+        customBlockRegistry = new CustomBlockRegistry(this);
+        getCommand("customblock").setExecutor(new CustomBlockCommandHandler(this, customBlockRegistry));
+        Bukkit.getPluginManager().registerEvents(customBlockRegistry, this);
         
         getCommand("fixitems").setExecutor(CLStuff::fixItem);
         
@@ -453,7 +453,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         connectionMessages.save();
         inventoryManagement.save();
         rewardsManager.save();
-        noteBlockRegistry.save();
+        customBlockRegistry.save();
     }
     
     public CitizenSetsManager getCitizenSets() {
