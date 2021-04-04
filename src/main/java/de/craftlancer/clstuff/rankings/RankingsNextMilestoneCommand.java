@@ -35,7 +35,7 @@ public class RankingsNextMilestoneCommand extends SubCommand {
         double score = rankings.getScore(player);
         
         Optional<String> optionalKey = rankings.getRewardMap().entrySet().stream().filter(e -> e.getKey() > score)
-                .sorted(Comparator.comparingDouble(Map.Entry::getKey))
+                .sorted(Comparator.comparingInt(Map.Entry::getKey))
                 .map(Map.Entry::getValue).findFirst();
         
         if (!optionalKey.isPresent()) {
