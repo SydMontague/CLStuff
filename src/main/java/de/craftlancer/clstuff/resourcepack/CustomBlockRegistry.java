@@ -111,6 +111,12 @@ public class CustomBlockRegistry implements Listener {
             return;
         }
         
+        if (item.getType() == Material.STRING && block.getLocation().getY() > 0)
+            if (!block.getRelative(0, -1, 0).getType().isSolid()) {
+                event.setCancelled(true);
+                return;
+            }
+        
         Optional<CustomBlockItem> optional = customBlockItems.stream()
                 .filter(n -> n.getItemMaterial() == item.getType() &&
                         n.getItem().getItemMeta().getCustomModelData() == item.getItemMeta().getCustomModelData()).
@@ -130,6 +136,13 @@ public class CustomBlockRegistry implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onCustomBlockBreak(BlockBreakEvent event) {
         final Block block = event.getBlock();
+        final Block relative = block.getRelative(0, 1, 0);
+        
+        if (relative.getType() == Material.TRIPWIRE) {
+            runTimeCustomBlocks.remove(block.getLocation());
+            dropCustomBlockIfPresent(relative);
+            relative.setType(Material.AIR);
+        }
         
         if (!blockTypes.contains(block.getType()))
             return;
