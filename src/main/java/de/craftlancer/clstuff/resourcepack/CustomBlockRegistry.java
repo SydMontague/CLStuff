@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +54,8 @@ public class CustomBlockRegistry implements Listener {
     
     private static CustomBlockRegistry instance;
     
-    private final List<Material> blockTypes = Arrays.asList(Material.NOTE_BLOCK, Material.TRIPWIRE);
-    private final List<Material> itemTypes = Arrays.asList(Material.NOTE_BLOCK, Material.STRING);
+    private final EnumSet<Material> blockTypes = EnumSet.of(Material.NOTE_BLOCK, Material.TRIPWIRE);
+    private final EnumSet<Material> itemTypes = EnumSet.of(Material.NOTE_BLOCK, Material.STRING);
     private CLStuff plugin;
     private ConditionalPagedMenu gui;
     private List<CustomBlockItem> customBlockItems;
