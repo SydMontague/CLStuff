@@ -25,5 +25,6 @@ public class RankingsCommandHandler extends CommandHandler {
             return rankings.onCommand(sender, cmd, label, args);
         else
             return super.onCommand(sender, cmd, label, args);
+        
     }
 }
