@@ -12,7 +12,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Attachable;
 import org.bukkit.block.data.BlockData;
@@ -156,6 +155,10 @@ public class CustomBlockRegistry implements Listener {
     //Prevent
     @EventHandler(ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getAction() == Action.PHYSICAL)
+            if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.TRIPWIRE)
+                event.setCancelled(true);
+        
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getPlayer().isSneaking())
             return;
         
@@ -237,6 +240,7 @@ public class CustomBlockRegistry implements Listener {
             runTimeCustomBlocks.put(block.getLocation(), block.getState());
         
         runTimeCustomBlocks.get(block.getLocation()).update(true);
+        event.setCancelled(true);
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -260,13 +264,12 @@ public class CustomBlockRegistry implements Listener {
     
     @EventHandler(ignoreCancelled = true)
     public void onPistonExtend(BlockPistonExtendEvent event) {
+        if (event.getBlocks().stream().anyMatch(b -> b.getType() == Material.NOTE_BLOCK)) {
+            event.setCancelled(true);
+            return;
+        }
         
-        BlockFace face = event.getDirection();
-        Map<Location, BlockState> map = new HashMap<>();
         for (Block block : event.getBlocks()) {
-            if (block.getType() == Material.NOTE_BLOCK)
-                map.put(block.getLocation().add(face.getModX(), face.getModY(), face.getModZ()),
-                        runTimeCustomBlocks.getOrDefault(block.getLocation(), block.getState()));
             if (block.getType() == Material.TRIPWIRE)
                 if (dropCustomBlockIfPresent(block))
                     block.setType(Material.AIR);
@@ -275,26 +278,24 @@ public class CustomBlockRegistry implements Listener {
         
         for (Block key : event.getBlocks())
             runTimeCustomBlocks.remove(key.getLocation());
-        
-        map.forEach((loc, run) -> runTimeCustomBlocks.put(loc, run));
     }
     
     @EventHandler(ignoreCancelled = true)
     public void onPistonRetract(BlockPistonRetractEvent event) {
-        BlockFace face = event.getDirection();
-        Map<Location, BlockState> map = new HashMap<>();
+        if (event.getBlocks().stream().anyMatch(b -> b.getType() == Material.NOTE_BLOCK)) {
+            event.setCancelled(true);
+            return;
+        }
+        
         for (Block block : event.getBlocks()) {
-            if (block.getType() == Material.NOTE_BLOCK)
-                map.put(block.getLocation().add(face.getModX(), face.getModY(), face.getModZ()),
-                        runTimeCustomBlocks.getOrDefault(block.getLocation(), block.getState()));
             if (block.getType() == Material.TRIPWIRE)
-                dropCustomBlockIfPresent(block);
+                if (dropCustomBlockIfPresent(block))
+                    block.setType(Material.AIR);
+            
         }
         
         for (Block key : event.getBlocks())
             runTimeCustomBlocks.remove(key.getLocation());
-        
-        map.forEach((loc, run) -> runTimeCustomBlocks.put(loc, run));
     }
     
     public void createInventory() {
