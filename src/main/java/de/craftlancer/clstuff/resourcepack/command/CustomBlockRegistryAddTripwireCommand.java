@@ -65,10 +65,11 @@ public class CustomBlockRegistryAddTripwireCommand extends SubCommand {
         boolean isArmed = Boolean.parseBoolean(args[4]);
         boolean isAttached = Boolean.parseBoolean(args[5]);
         Set<BlockFace> set = new HashSet<>();
-        if (args.length > 7)
+        if (args.length > 6)
             for (String string : Arrays.copyOfRange(args, 6, args.length))
                 set.add(BlockFace.valueOf(string.toUpperCase()));
-        
+        else
+            return "§eYou must enter at least one direction for this tripwire to face.";
         
         registry.addCustomBlockItem(new CustomTripwireItem(id, item.clone(), isArmed, isAttached, set));
         return "§aSuccessfully added tripwire item.";
