@@ -147,7 +147,7 @@ public class ConnectionMessages implements Listener {
         String finalMsg = msg;
         
         event.setJoinMessage(null);
-        new LambdaRunnable(() -> Bukkit.broadcastMessage(format(finalMsg, player.getDisplayName(), loginPrefix))).runTaskLater(plugin, 1L);
+        new LambdaRunnable(() -> Bukkit.broadcastMessage(format(finalMsg, player.getDisplayName(), loginPrefix))).runTaskLater(plugin, 2L);
         
         if (!player.hasPermission(CLStuff.getAdminPermission()))
             return;

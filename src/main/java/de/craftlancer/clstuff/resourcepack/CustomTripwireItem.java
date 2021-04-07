@@ -100,9 +100,12 @@ public class CustomTripwireItem extends CustomBlockItem {
         if (tripwire.isAttached() != isAttached())
             return false;
         
-        for (BlockFace allowedFace : tripwire.getAllowedFaces())
+        for (BlockFace allowedFace : tripwire.getAllowedFaces()) {
             if (faces.contains(allowedFace) && !tripwire.getFaces().contains(allowedFace))
                 return false;
+            if (tripwire.getFaces().contains(allowedFace) && !faces.contains(allowedFace))
+                return false;
+        }
         
         return true;
     }
