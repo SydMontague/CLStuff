@@ -1,11 +1,9 @@
 package de.craftlancer.clstuff.adminshop;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-
+import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -22,10 +20,11 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import de.craftlancer.clstuff.CLStuff;
-import de.craftlancer.core.LambdaRunnable;
-import de.craftlancer.core.util.MessageLevel;
-import de.craftlancer.core.util.MessageUtil;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 public class AdminShopManager implements Listener {
     private static final String PERMISSION = "clstuff.adminshop";
@@ -53,7 +52,7 @@ public class AdminShopManager implements Listener {
         defaultBroadcast = config.getString("defaultBroadcast");
         
         config.getKeys(false).forEach(a -> {
-            if(a.equalsIgnoreCase("defaultBroadcast"))
+            if (a.equalsIgnoreCase("defaultBroadcast"))
                 return;
             
             Location loc = fromConfigKey(a);
@@ -72,11 +71,11 @@ public class AdminShopManager implements Listener {
         new LambdaRunnable(this::displayParticles).runTaskTimer(plugin, 0, 10);
     }
     
-    private static final String toConfigKey(Location loc) {
+    private static String toConfigKey(Location loc) {
         return String.format("%s,%d,%d,%d", loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
     }
     
-    private static final Location fromConfigKey(String string) {
+    private static Location fromConfigKey(String string) {
         String[] split = string.split(",");
         World world = Bukkit.getWorld(split[0]);
         int x = Integer.parseInt(split[1]);
@@ -102,8 +101,7 @@ public class AdminShopManager implements Listener {
         BukkitRunnable saveTask = new LambdaRunnable(() -> {
             try {
                 config.save(configFile);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "Error while saving Admin Shops: ", e);
             }
         });
@@ -134,8 +132,7 @@ public class AdminShopManager implements Listener {
             if (!shops.containsKey(clicked) && METADATA_CREATE.equals(mode)) {
                 shops.put(clicked, new AdminShop(plugin, this));
                 MessageUtil.sendMessage(plugin, player, MessageLevel.NORMAL, "AdminShop created");
-            }
-            else if (shops.containsKey(clicked) && METADATA_REMOVE.equals(mode)) {
+            } else if (shops.containsKey(clicked) && METADATA_REMOVE.equals(mode)) {
                 shops.remove(clicked);
                 MessageUtil.sendMessage(plugin, player, MessageLevel.NORMAL, "AdminShop removed");
             }
@@ -170,7 +167,7 @@ public class AdminShopManager implements Listener {
         
         AdminShop shop = shops.get(clicked);
         
-        event.getPlayer().openInventory(shop.getInventory());
+        shop.display(event.getPlayer());
         event.setCancelled(true);
     }
     
@@ -182,7 +179,7 @@ public class AdminShopManager implements Listener {
     
     private void displayParticles() {
         shops.keySet().stream().filter(a -> a.getWorld().isChunkLoaded(a.getBlockX() >> 4, a.getBlockZ() >> 4))
-             .forEach(a -> a.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, a.clone().add(0.5, 1.2, 0.5), 5, 0.2D, 0.2D, 0.2D));
+                .forEach(a -> a.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, a.clone().add(0.5, 1.2, 0.5), 5, 0.2D, 0.2D, 0.2D));
     }
     
     public void setDefaultBroadcast(String message) {
