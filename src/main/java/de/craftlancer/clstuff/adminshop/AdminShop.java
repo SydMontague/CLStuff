@@ -1,9 +1,17 @@
 package de.craftlancer.clstuff.adminshop;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.function.Consumer;
-
+import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.menu.ConditionalMenu;
+import de.craftlancer.core.menu.Menu;
+import de.craftlancer.core.menu.MenuItem;
+import de.craftlancer.core.resourcepack.ResourcePackManager;
+import de.craftlancer.core.resourcepack.TranslateSpaceFont;
+import de.craftlancer.core.util.InventoryUtils;
+import de.craftlancer.core.util.ItemBuilder;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
+import de.craftlancer.core.util.Tuple;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -11,32 +19,29 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import de.craftlancer.clstuff.CLStuff;
-import de.craftlancer.core.gui.GUIInventory;
-import de.craftlancer.core.util.InventoryUtils;
-import de.craftlancer.core.util.ItemBuilder;
-import de.craftlancer.core.util.MessageLevel;
-import de.craftlancer.core.util.MessageUtil;
-import net.md_5.bungee.api.ChatColor;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 public class AdminShop {
     private static final ItemStack BORDER_ITEM = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).setDisplayName(" ").build();
-    private static final ItemStack QUESTION_MARK = new ItemBuilder(Material.STONE).setCustomModelData(5).setDisplayName("Edit").build();
+    private static final ItemStack ADMIN_QUESTION_MARK = new ItemBuilder(Material.STONE).setCustomModelData(5).setDisplayName("§6To default page...").build();
+    private static final ItemStack QUESTION_MARK = new ItemBuilder(Material.STONE).setCustomModelData(5).setDisplayName("§6What is this?")
+            .setLore("", "§7Click on an arrow to make", "§7a trade. You must have all", "§7Items listed on the left side of", "§7the arrow to make a trade.").build();
     private static final ItemStack ARROW_GREEN_ITEM = new ItemBuilder(Material.ARROW).setCustomModelData(2).setDisplayName("Trade for").build();
     
     private static final ItemStack BROADCAST_OFF_ITEM = new ItemBuilder(Material.ARROW).setCustomModelData(1).setDisplayName("Broadcast Off").build();
     private static final ItemStack BROADCAST_ON_ITEM = new ItemBuilder(Material.ARROW).setCustomModelData(2).setDisplayName("Broadcast On").build();
     
     private static final ItemStack CONFIRM_CHANGE_ITEM = new ItemBuilder(Material.LIME_CONCRETE).setCustomModelData(1).setDisplayName("Confirm changes")
-                                                                                                .build();
+            .build();
     private static final ItemStack REVERT_CHANGE_ITEM = new ItemBuilder(Material.RED_CONCRETE).setCustomModelData(1).setDisplayName("Revert changes").build();
     
     private CLStuff plugin;
     private AdminShopManager manager;
     private AdminShopTrade[] trades = new AdminShopTrade[4];
     
-    private GUIInventory gui;
-    private GUIInventory adminGUI;
+    private ConditionalMenu menu;
     
     public AdminShop(CLStuff plugin, AdminShopManager manager) {
         this.plugin = plugin;
@@ -47,10 +52,6 @@ public class AdminShop {
         trades[2] = new AdminShopTrade();
         trades[3] = new AdminShopTrade();
         
-        gui = new GUIInventory(plugin, 6);
-        adminGUI = new GUIInventory(plugin, 6);
-        updateGUI();
-        updateAdminGUI();
     }
     
     public AdminShop(CLStuff plugin, AdminShopManager manager, AdminShopTrade[] trades) {
@@ -58,77 +59,6 @@ public class AdminShop {
         this.manager = manager;
         this.trades = trades;
         
-        gui = new GUIInventory(plugin, 6);
-        adminGUI = new GUIInventory(plugin, 6);
-        updateGUI();
-        updateAdminGUI();
-    }
-    
-    private void updateAdminGUI() {
-        adminGUI.setItem(0, BORDER_ITEM);
-        adminGUI.setItem(1, BORDER_ITEM);
-        adminGUI.setItem(2, BORDER_ITEM);
-        adminGUI.setItem(3, BORDER_ITEM);
-        adminGUI.setItem(4, BORDER_ITEM);
-        adminGUI.setItem(5, BORDER_ITEM);
-        adminGUI.setItem(6, BORDER_ITEM);
-        adminGUI.setItem(7, BORDER_ITEM);
-        adminGUI.setItem(8, BORDER_ITEM);
-        
-        for (int i = 0; i < 4; i++) {
-            AdminShopTrade trade = trades[i];
-            
-            adminGUI.setItem(9 + i * 9, trade.getInput()[0]);
-            adminGUI.setItem(10 + i * 9, trade.getInput()[1]);
-            adminGUI.setItem(11 + i * 9, trade.getInput()[2]);
-            adminGUI.setItem(12 + i * 9, trade.getInput()[3]);
-            adminGUI.setItem(13 + i * 9, trade.getInput()[4]);
-            adminGUI.setItem(14 + i * 9, trade.getInput()[5]);
-            adminGUI.setItem(15 + i * 9, trade.getInput()[6]);
-            adminGUI.setItem(16 + i * 9, trade.isBroadcast() ? BROADCAST_ON_ITEM : BROADCAST_OFF_ITEM);
-            adminGUI.setItem(17 + i * 9, trade.getOutput());
-            
-            final int localI = i;
-            adminGUI.setClickAction(9 + i * 9, p -> adminGUI.setItem(9 + localI * 9, p.getItemOnCursor()));
-            adminGUI.setClickAction(10 + i * 9, p -> adminGUI.setItem(10 + localI * 9, p.getItemOnCursor()));
-            adminGUI.setClickAction(11 + i * 9, p -> adminGUI.setItem(11 + localI * 9, p.getItemOnCursor()));
-            adminGUI.setClickAction(12 + i * 9, p -> adminGUI.setItem(12 + localI * 9, p.getItemOnCursor()));
-            adminGUI.setClickAction(13 + i * 9, p -> adminGUI.setItem(13 + localI * 9, p.getItemOnCursor()));
-            adminGUI.setClickAction(14 + i * 9, p -> adminGUI.setItem(14 + localI * 9, p.getItemOnCursor()));
-            adminGUI.setClickAction(15 + i * 9, p -> adminGUI.setItem(15 + localI * 9, p.getItemOnCursor()));
-            adminGUI.setClickAction(16 + i * 9, p -> {
-                trade.setBroadcast(!trade.isBroadcast());
-                adminGUI.setItem(16 + localI * 9, trade.isBroadcast() ? BROADCAST_ON_ITEM : BROADCAST_OFF_ITEM);
-                p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-            });
-            adminGUI.setClickAction(17 + i * 9, p -> adminGUI.setItem(17 + localI * 9, p.getItemOnCursor()));
-        }
-        
-        adminGUI.setItem(45, BORDER_ITEM);
-        adminGUI.setItem(46, BORDER_ITEM);
-        adminGUI.setItem(47, BORDER_ITEM);
-        adminGUI.setItem(48, REVERT_CHANGE_ITEM);
-        adminGUI.setItem(49, QUESTION_MARK);
-        adminGUI.setItem(50, CONFIRM_CHANGE_ITEM);
-        adminGUI.setItem(51, BORDER_ITEM);
-        adminGUI.setItem(52, BORDER_ITEM);
-        adminGUI.setItem(53, BORDER_ITEM);
-        
-        adminGUI.setClickAction(48, p -> {
-            updateAdminGUI();
-            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-        });
-        adminGUI.setClickAction(49, p -> {
-            if (p.hasPermission("clstuff.adminshop")) {
-                p.openInventory(getInventory());
-                p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-            }
-        });
-        adminGUI.setClickAction(50, p -> {
-            p.openInventory(getInventory());
-            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
-            updateTrades();
-        });
     }
     
     private void updateTrades() {
@@ -137,69 +67,118 @@ public class AdminShop {
             if (trade == null)
                 trade = new AdminShopTrade();
             
-            for (int j = 0; j < 7; j++)
-                trade.setInput(j, getAdminInventory().getItem(9 + 9 * i + j));
+            Menu m = menu.getMenu("defaultAdmin");
             
-            trade.setOutput(getAdminInventory().getItem(9 + 9 * i + 8));
+            for (int j = 0; j < 7; j++)
+                trade.setInput(j, m.getMenuItem(9 + 9 * i + j).getItem());
+            
+            trade.setOutput(m.getMenuItem(9 + 9 * i + 8).getItem());
         }
         
-        updateGUI();
-        updateAdminGUI();
+        
+        createMenu();
     }
     
-    private void updateGUI() {
-        gui.setItem(0, BORDER_ITEM);
-        gui.setItem(1, BORDER_ITEM);
-        gui.setItem(2, BORDER_ITEM);
-        gui.setItem(3, BORDER_ITEM);
-        gui.setItem(4, BORDER_ITEM);
-        gui.setItem(5, BORDER_ITEM);
-        gui.setItem(6, BORDER_ITEM);
-        gui.setItem(7, BORDER_ITEM);
-        gui.setItem(8, BORDER_ITEM);
+    public void createMenu() {
+        this.menu = new ConditionalMenu(plugin, 6,
+                Arrays.asList(new Tuple<>("defaultUser", "Admin Shop"), new Tuple<>("defaultAdmin", "Admin Shop Editor"),
+                        new Tuple<>("resourceUser", ChatColor.WHITE + "" + TranslateSpaceFont.TRANSLATE_NEGATIVE_8 + "\uE304" + TranslateSpaceFont.getSpecificAmount(-169) + "§8Admin Shop"),
+                        new Tuple<>("resourceAdmin", ChatColor.WHITE + "" + TranslateSpaceFont.TRANSLATE_NEGATIVE_8 + "\uE304" + TranslateSpaceFont.getSpecificAmount(-169) + "§8Admin Shop Editor")));
+        
+        for (int i = 0; i < 9; i++)
+            menu.set(i, new MenuItem(BORDER_ITEM), "defaultUser", "defaultAdmin");
+        
+        for (int i = 45; i < 54; i++)
+            menu.set(i, new MenuItem(BORDER_ITEM), "defaultUser", "defaultAdmin");
         
         for (int i = 0; i < 4; i++) {
             AdminShopTrade trade = trades[i];
             
-            gui.setItem(9 + i * 9, trade.getInput()[0]);
-            gui.setItem(10 + i * 9, trade.getInput()[1]);
-            gui.setItem(11 + i * 9, trade.getInput()[2]);
-            gui.setItem(12 + i * 9, trade.getInput()[3]);
-            gui.setItem(13 + i * 9, trade.getInput()[4]);
-            gui.setItem(14 + i * 9, trade.getInput()[5]);
-            gui.setItem(15 + i * 9, trade.getInput()[6]);
-            gui.setItem(16 + i * 9, ARROW_GREEN_ITEM);
-            gui.setItem(17 + i * 9, trade.getOutput());
+            MenuItem input0 = new MenuItem(trade.getInput()[0]);
+            MenuItem input1 = new MenuItem(trade.getInput()[1]);
+            MenuItem input2 = new MenuItem(trade.getInput()[2]);
+            MenuItem input3 = new MenuItem(trade.getInput()[3]);
+            MenuItem input4 = new MenuItem(trade.getInput()[4]);
+            MenuItem input5 = new MenuItem(trade.getInput()[5]);
+            MenuItem input6 = new MenuItem(trade.getInput()[6]);
+            MenuItem arrow = new MenuItem(ARROW_GREEN_ITEM);
+            MenuItem isBroadcast = new MenuItem(trade.isBroadcast() ? BROADCAST_ON_ITEM : BROADCAST_OFF_ITEM);
+            MenuItem output = new MenuItem(trade.getOutput());
+            
+            final int localI = i;
+            menu.set(9 + i * 9, input0.clone().addClickAction(p -> menu.replace(9 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            menu.set(10 + i * 9, input1.clone().addClickAction(p -> menu.replace(10 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            menu.set(11 + i * 9, input2.clone().addClickAction(p -> menu.replace(11 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            menu.set(12 + i * 9, input3.clone().addClickAction(p -> menu.replace(12 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            menu.set(13 + i * 9, input4.clone().addClickAction(p -> menu.replace(13 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            menu.set(14 + i * 9, input5.clone().addClickAction(p -> menu.replace(14 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            menu.set(15 + i * 9, input6.clone().addClickAction(p -> menu.replace(15 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            menu.set(16 + i * 9, isBroadcast.clone().addClickAction(c -> {
+                trade.setBroadcast(!trade.isBroadcast());
+                menu.replace(16 + localI * 9, trade.isBroadcast() ? BROADCAST_ON_ITEM : BROADCAST_OFF_ITEM, "defaultAdmin", "resourceAdmin");
+                c.getPlayer().playSound(c.getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+            }), "defaultAdmin", "resourceAdmin");
+            menu.set(17 + i * 9, output.clone().addClickAction(p -> menu.replace(17 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
             
             Consumer<Player> action = new TradeAction(trade);
-            gui.setClickAction(16 + i * 9, action);
-            gui.setClickAction(17 + i * 9, action);
+            
+            menu.set(9 + i * 9, input0.clone(), "defaultUser", "resourceUser");
+            menu.set(10 + i * 9, input1.clone(), "defaultUser", "resourceUser");
+            menu.set(11 + i * 9, input2.clone(), "defaultUser", "resourceUser");
+            menu.set(12 + i * 9, input3.clone(), "defaultUser", "resourceUser");
+            menu.set(13 + i * 9, input4.clone(), "defaultUser", "resourceUser");
+            menu.set(14 + i * 9, input5.clone(), "defaultUser", "resourceUser");
+            menu.set(15 + i * 9, input6.clone(), "defaultUser", "resourceUser");
+            menu.set(16 + i * 9, arrow.clone().addClickAction(c -> action.accept(c.getPlayer())), "defaultUser", "resourceUser");
+            menu.set(17 + i * 9, output.clone().addClickAction(c -> action.accept(c.getPlayer())), "defaultUser", "resourceUser");
         }
         
-        gui.setItem(45, BORDER_ITEM);
-        gui.setItem(46, BORDER_ITEM);
-        gui.setItem(47, BORDER_ITEM);
-        gui.setItem(48, BORDER_ITEM);
-        gui.setItem(49, QUESTION_MARK);
-        gui.setItem(50, BORDER_ITEM);
-        gui.setItem(51, BORDER_ITEM);
-        gui.setItem(52, BORDER_ITEM);
-        gui.setItem(53, BORDER_ITEM);
+        menu.set(48, new MenuItem(REVERT_CHANGE_ITEM).addClickAction(click -> {
+            createMenu();
+            click.getPlayer().playSound(click.getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+            display(click.getPlayer());
+        }), "defaultAdmin", "resourceAdmin");
         
-        gui.setClickAction(49, p -> {
-            if (p.hasPermission("clstuff.adminshop")) {
-                p.openInventory(getAdminInventory());
-                p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);   
-            }
-        });
+        menu.set(49, new MenuItem(ADMIN_QUESTION_MARK).addClickAction(click -> {
+            Player p = click.getPlayer();
+            
+            display(p, ResourcePackManager.getInstance().isFullyAccepted(p) ? "resourceUser" : "defaultUser");
+            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+        }), "defaultAdmin", "resourceAdmin");
+        
+        menu.set(50, new MenuItem(CONFIRM_CHANGE_ITEM).addClickAction(click -> {
+            Player p = click.getPlayer();
+            
+            updateTrades();
+            display(p, ResourcePackManager.getInstance().isFullyAccepted(p) ? "resourceUser" : "defaultUser");
+            p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
+        }), "defaultAdmin", "resourceAdmin");
+        
+        menu.set(49, new MenuItem(QUESTION_MARK), "defaultUser", "resourceUser");
     }
     
-    public Inventory getInventory() {
-        return gui.getInventory();
+    public void display(Player player) {
+        boolean usingResourcePack = ResourcePackManager.getInstance().isFullyAccepted(player);
+        String key;
+        if (player.hasPermission("clstuff.adminshop")) {
+            if (usingResourcePack)
+                key = "resourceAdmin";
+            else
+                key = "defaultAdmin";
+        } else {
+            if (usingResourcePack)
+                key = "resourceUser";
+            else
+                key = "defaultUser";
+        }
+        display(player, key);
     }
     
-    public Inventory getAdminInventory() {
-        return adminGUI.getInventory();
+    public void display(Player player, String key) {
+        if (menu == null)
+            createMenu();
+        
+        player.openInventory(menu.getMenu(key).getInventory());
     }
     
     public AdminShopTrade getTrade(int id) {
@@ -245,6 +224,8 @@ public class AdminShop {
                 String message = ChatColor.translateAlternateColorCodes('&', m).replace("%player%", p.getName()).replace("%item%", displayName);
                 Bukkit.broadcastMessage(message);
             }
+            
+            Bukkit.getPluginManager().callEvent(new AdminShopTransactionEvent(p, trade));
         }
         
     }
