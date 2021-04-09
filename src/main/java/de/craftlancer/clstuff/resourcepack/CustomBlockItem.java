@@ -52,4 +52,20 @@ public abstract class CustomBlockItem implements ConfigurationSerializable {
     public abstract void setBlockData(Block block);
     
     public abstract boolean equals(Block block);
+    
+    public boolean compareItem(ItemStack i) {
+        if (item.getType() != i.getType())
+            return false;
+        
+        if (!item.getItemMeta().hasCustomModelData() && !i.getItemMeta().hasCustomModelData())
+            return true;
+        
+        if (!item.getItemMeta().hasCustomModelData() && i.getItemMeta().hasCustomModelData())
+            return false;
+        
+        if (item.getItemMeta().hasCustomModelData() && !i.getItemMeta().hasCustomModelData())
+            return false;
+        
+        return item.getItemMeta().getCustomModelData() == i.getItemMeta().getCustomModelData();
+    }
 }

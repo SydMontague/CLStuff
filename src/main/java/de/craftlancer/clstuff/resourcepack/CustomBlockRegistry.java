@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.resourcepack;
 
+import com.google.common.collect.Sets;
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.menu.ConditionalPagedMenu;
@@ -7,35 +8,23 @@ import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.resourcepack.TranslateSpaceFont;
 import de.craftlancer.core.util.ItemBuilder;
 import de.craftlancer.core.util.Tuple;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.data.Attachable;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.Rotatable;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -53,8 +42,9 @@ public class CustomBlockRegistry implements Listener {
     
     private static CustomBlockRegistry instance;
     
-    private final EnumSet<Material> blockTypes = EnumSet.of(Material.NOTE_BLOCK, Material.TRIPWIRE);
-    private final EnumSet<Material> itemTypes = EnumSet.of(Material.NOTE_BLOCK, Material.STRING);
+    private final Map<Material, CustomBlockItem> defaults = new HashMap<>();
+    private final EnumSet<Material> blockTypes = EnumSet.of(Material.RED_MUSHROOM, Material.BROWN_MUSHROOM);
+    private final EnumSet<Material> itemTypes = EnumSet.of(Material.RED_MUSHROOM, Material.BROWN_MUSHROOM);
     private CLStuff plugin;
     private ConditionalPagedMenu gui;
     private List<CustomBlockItem> customBlockItems;
@@ -63,8 +53,9 @@ public class CustomBlockRegistry implements Listener {
     
     public CustomBlockRegistry(CLStuff plugin) {
         ConfigurationSerialization.registerClass(CustomBlockItem.class);
-        ConfigurationSerialization.registerClass(CustomTripwireItem.class);
-        ConfigurationSerialization.registerClass(CustomNoteBlockItem.class);
+        ConfigurationSerialization.registerClass(CustomMushroomItem.class);
+//        ConfigurationSerialization.registerClass(CustomTripwireItem.class);
+//        ConfigurationSerialization.registerClass(CustomNoteBlockItem.class);
         instance = this;
         this.plugin = plugin;
         
@@ -76,6 +67,11 @@ public class CustomBlockRegistry implements Listener {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         
         customBlockItems = (List<CustomBlockItem>) config.getList("customBlockItems", new ArrayList<>());
+        
+        defaults.put(Material.RED_MUSHROOM, new CustomMushroomItem("defaultRedMushroom", new ItemStack(Material.RED_MUSHROOM),
+                Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN)));
+        defaults.put(Material.BROWN_MUSHROOM, new CustomMushroomItem("defaultBrownMushroom", new ItemStack(Material.BROWN_MUSHROOM),
+                Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN)));
     }
     
     public void save() {
@@ -99,30 +95,26 @@ public class CustomBlockRegistry implements Listener {
     public void onCustomBlockPlace(BlockPlaceEvent event) {
         final Block block = event.getBlock();
         final Player player = event.getPlayer();
-        final ItemStack item = player.getInventory().getItemInMainHand();
+        final ItemStack item = player.getInventory().getItemInMainHand().clone();
         
         if (!itemTypes.contains(item.getType()))
             return;
+
+
+//        if (item.getType() == Material.STRING && block.getLocation().getY() > 0)
+//            if (!block.getRelative(0, -1, 0).getType().isSolid()) {
+//                event.setCancelled(true);
+//                return;
+//            }
         
-        if (!item.getItemMeta().hasCustomModelData()) {
+        Optional<CustomBlockItem> optional = customBlockItems.stream()
+                .filter(n -> n.compareItem(item)).findFirst();
+        
+        if (!optional.isPresent()) {
             player.sendMessage("§cThis item cannot be placed.");
             event.setCancelled(true);
             return;
         }
-        
-        if (item.getType() == Material.STRING && block.getLocation().getY() > 0)
-            if (!block.getRelative(0, -1, 0).getType().isSolid()) {
-                event.setCancelled(true);
-                return;
-            }
-        
-        Optional<CustomBlockItem> optional = customBlockItems.stream()
-                .filter(n -> n.getItemMaterial() == item.getType() &&
-                        n.getItem().getItemMeta().getCustomModelData() == item.getItemMeta().getCustomModelData()).
-                        findFirst();
-        
-        if (!optional.isPresent())
-            return;
         
         CustomBlockItem customBlockItem = optional.get();
         
@@ -135,13 +127,6 @@ public class CustomBlockRegistry implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onCustomBlockBreak(BlockBreakEvent event) {
         final Block block = event.getBlock();
-        final Block relative = block.getRelative(0, 1, 0);
-        
-        if (relative.getType() == Material.TRIPWIRE) {
-            runTimeCustomBlocks.remove(block.getLocation());
-            dropCustomBlockIfPresent(relative);
-            relative.setType(Material.AIR);
-        }
         
         if (!blockTypes.contains(block.getType()))
             return;
@@ -151,82 +136,82 @@ public class CustomBlockRegistry implements Listener {
         if (dropCustomBlockIfPresent(block))
             event.setDropItems(false);
     }
-    
-    //Prevent
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() == Action.PHYSICAL)
-            if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.TRIPWIRE)
-                event.setCancelled(true);
-        
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getPlayer().isSneaking())
-            return;
-        
-        Block block = event.getClickedBlock();
-        
-        if (block.getType() != Material.NOTE_BLOCK)
-            return;
-        
-        event.setCancelled(true);
-        
-        Player player = event.getPlayer();
-        ItemStack item = player.getInventory().getItemInMainHand();
-        Material material = item.getType();
-        
-        if (item.getType().isAir() || !item.getType().isBlock())
-            return;
-        
-        BlockData tempData = material.createBlockData();
-        
-        if (tempData instanceof Attachable
-                || tempData instanceof Rotatable
-                || tempData instanceof Directional)
-            return;
-        
-        Block placed = event.getClickedBlock().getRelative(event.getBlockFace());
-        BlockState state = placed.getState();
-        Block against = event.getClickedBlock();
-        
-        placed.setType(item.getType());
-        
-        runTimeCustomBlocks.remove(placed.getLocation());
-        
-        BlockPlaceEvent e = new BlockPlaceEvent(placed, state, against, item, player, true, EquipmentSlot.HAND);
-        
-        Bukkit.getPluginManager().callEvent(e);
-        
-        if (e.isCancelled()) {
-            placed.setType(Material.AIR);
-            return;
-        }
-        
-        if (player.getGameMode() != GameMode.CREATIVE)
-            item.setAmount(item.getAmount() - 1);
-    }
-    
-    @EventHandler(ignoreCancelled = true)
-    public void onBlockPower(BlockRedstoneEvent event) {
-        if (blockTypes.contains(event.getBlock().getType()))
-            event.setNewCurrent(event.getOldCurrent());
-    }
-    
-    @EventHandler(ignoreCancelled = true)
-    public void onBlockDestroy(BlockFromToEvent event) {
-        final Block block = event.getToBlock();
-        
-        if (event.getBlock().getType() == Material.LAVA)
-            return;
-        
-        if (!blockTypes.contains(block.getType()))
-            return;
-        
-        runTimeCustomBlocks.remove(block.getLocation());
-        
-        if (dropCustomBlockIfPresent(block)) {
-            event.setCancelled(true);
-            block.setType(Material.AIR);
-        }
-    }
+
+//    //Prevent
+//    @EventHandler(ignoreCancelled = true)
+//    public void onPlayerInteract(PlayerInteractEvent event) {
+//        if (event.getAction() == Action.PHYSICAL)
+//            if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.TRIPWIRE)
+//                event.setCancelled(true);
+//
+//        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getPlayer().isSneaking())
+//            return;
+//
+//        Block block = event.getClickedBlock();
+//
+//        if (block.getType() != Material.NOTE_BLOCK)
+//            return;
+//
+//        event.setCancelled(true);
+//
+//        Player player = event.getPlayer();
+//        ItemStack item = player.getInventory().getItemInMainHand();
+//        Material material = item.getType();
+//
+//        if (item.getType().isAir() || !item.getType().isBlock())
+//            return;
+//
+//        BlockData tempData = material.createBlockData();
+//
+//        if (tempData instanceof Attachable
+//                || tempData instanceof Rotatable
+//                || tempData instanceof Directional)
+//            return;
+//
+//        Block placed = event.getClickedBlock().getRelative(event.getBlockFace());
+//        BlockState state = placed.getState();
+//        Block against = event.getClickedBlock();
+//
+//        placed.setType(item.getType());
+//
+//        runTimeCustomBlocks.remove(placed.getLocation());
+//
+//        BlockPlaceEvent e = new BlockPlaceEvent(placed, state, against, item, player, true, EquipmentSlot.HAND);
+//
+//        Bukkit.getPluginManager().callEvent(e);
+//
+//        if (e.isCancelled()) {
+//            placed.setType(Material.AIR);
+//            return;
+//        }
+//
+//        if (player.getGameMode() != GameMode.CREATIVE)
+//            item.setAmount(item.getAmount() - 1);
+//    }
+
+//    @EventHandler(ignoreCancelled = true)
+//    public void onBlockPower(BlockRedstoneEvent event) {
+//        if (blockTypes.contains(event.getBlock().getType()))
+//            event.setNewCurrent(event.getOldCurrent());
+//    }
+
+//    @EventHandler(ignoreCancelled = true)
+//    public void onBlockDestroy(BlockFromToEvent event) {
+//        final Block block = event.getToBlock();
+//
+//        if (event.getBlock().getType() == Material.LAVA)
+//            return;
+//
+//        if (!blockTypes.contains(block.getType()))
+//            return;
+//
+//        runTimeCustomBlocks.remove(block.getLocation());
+//
+//        if (dropCustomBlockIfPresent(block)) {
+//            event.setCancelled(true);
+//            block.setType(Material.AIR);
+//        }
+//    }
     
     
     @EventHandler(ignoreCancelled = true)
@@ -261,42 +246,42 @@ public class CustomBlockRegistry implements Listener {
             return true;
         });
     }
-    
-    @EventHandler(ignoreCancelled = true)
-    public void onPistonExtend(BlockPistonExtendEvent event) {
-        if (event.getBlocks().stream().anyMatch(b -> b.getType() == Material.NOTE_BLOCK)) {
-            event.setCancelled(true);
-            return;
-        }
-        
-        for (Block block : event.getBlocks()) {
-            if (block.getType() == Material.TRIPWIRE)
-                if (dropCustomBlockIfPresent(block))
-                    block.setType(Material.AIR);
-            
-        }
-        
-        for (Block key : event.getBlocks())
-            runTimeCustomBlocks.remove(key.getLocation());
-    }
-    
-    @EventHandler(ignoreCancelled = true)
-    public void onPistonRetract(BlockPistonRetractEvent event) {
-        if (event.getBlocks().stream().anyMatch(b -> b.getType() == Material.NOTE_BLOCK)) {
-            event.setCancelled(true);
-            return;
-        }
-        
-        for (Block block : event.getBlocks()) {
-            if (block.getType() == Material.TRIPWIRE)
-                if (dropCustomBlockIfPresent(block))
-                    block.setType(Material.AIR);
-            
-        }
-        
-        for (Block key : event.getBlocks())
-            runTimeCustomBlocks.remove(key.getLocation());
-    }
+
+//    @EventHandler(ignoreCancelled = true)
+//    public void onPistonExtend(BlockPistonExtendEvent event) {
+//        if (event.getBlocks().stream().anyMatch(b -> b.getType() == Material.NOTE_BLOCK)) {
+//            event.setCancelled(true);
+//            return;
+//        }
+//
+//        for (Block block : event.getBlocks()) {
+//            if (block.getType() == Material.TRIPWIRE)
+//                if (dropCustomBlockIfPresent(block))
+//                    block.setType(Material.AIR);
+//
+//        }
+//
+//        for (Block key : event.getBlocks())
+//            runTimeCustomBlocks.remove(key.getLocation());
+//    }
+//
+//    @EventHandler(ignoreCancelled = true)
+//    public void onPistonRetract(BlockPistonRetractEvent event) {
+//        if (event.getBlocks().stream().anyMatch(b -> b.getType() == Material.NOTE_BLOCK)) {
+//            event.setCancelled(true);
+//            return;
+//        }
+//
+//        for (Block block : event.getBlocks()) {
+//            if (block.getType() == Material.TRIPWIRE)
+//                if (dropCustomBlockIfPresent(block))
+//                    block.setType(Material.AIR);
+//
+//        }
+//
+//        for (Block key : event.getBlocks())
+//            runTimeCustomBlocks.remove(key.getLocation());
+//    }
     
     public void createInventory() {
         gui = new ConditionalPagedMenu(plugin, 6, getPageItems(), true, true,

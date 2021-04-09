@@ -9,11 +9,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 
-public class CustomBlockRegistryListCommand extends SubCommand {
+public class CustomBlockListCommand extends SubCommand {
     
     private CustomBlockRegistry registry;
     
-    public CustomBlockRegistryListCommand(CLStuff plugin, CustomBlockRegistry registry) {
+    public CustomBlockListCommand(CLStuff plugin, CustomBlockRegistry registry) {
         super("clstuff.admin", plugin, false);
         
         this.registry = registry;
