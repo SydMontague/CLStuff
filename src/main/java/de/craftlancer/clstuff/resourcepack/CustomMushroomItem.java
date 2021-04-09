@@ -1,8 +1,8 @@
 package de.craftlancer.clstuff.resourcepack;
 
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.MultipleFacing;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,11 @@ public class CustomMushroomItem extends CustomBlockItem {
     private Set<BlockFace> faces;
     
     public CustomMushroomItem(String id, ItemStack item, Set<BlockFace> faces) {
-        super(id, item);
+        this(id, item, faces, true);
+    }
+    
+    public CustomMushroomItem(String id, ItemStack item, Set<BlockFace> faces, boolean dropItem) {
+        super(id, item, dropItem);
         
         this.faces = faces;
     }
@@ -48,24 +52,27 @@ public class CustomMushroomItem extends CustomBlockItem {
     }
     
     @Override
-    public void setBlockData(Block block) {
-        if (!(block.getBlockData() instanceof MultipleFacing))
-            return;
+    public BlockData getBlockData(BlockData data) {
+        if (!(data instanceof MultipleFacing))
+            return data;
         
-        MultipleFacing facing = (MultipleFacing) block.getBlockData();
+        MultipleFacing facing = (MultipleFacing) data;
         
         for (BlockFace face : facing.getAllowedFaces())
             facing.setFace(face, faces.contains(face));
         
-        block.setBlockData(facing);
+        return data;
     }
     
     @Override
-    public boolean equals(Block block) {
-        if (!(block.getBlockData() instanceof MultipleFacing))
+    public boolean equals(BlockData block) {
+        if (block.getMaterial() != getBlockMaterial())
             return false;
         
-        MultipleFacing facing = (MultipleFacing) block.getBlockData();
+        if (!(block instanceof MultipleFacing))
+            return false;
+        
+        MultipleFacing facing = (MultipleFacing) block;
         
         for (BlockFace allowedFace : facing.getAllowedFaces()) {
             if (faces.contains(allowedFace) && !facing.getFaces().contains(allowedFace))

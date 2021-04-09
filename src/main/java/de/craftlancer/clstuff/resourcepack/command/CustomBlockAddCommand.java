@@ -10,6 +10,7 @@ public class CustomBlockAddCommand extends SubCommandHandler {
     public CustomBlockAddCommand(CLStuff plugin, CustomBlockRegistry registry) {
         super("clstuff.admin", plugin, false, 1);
         
+        registerSubCommand("mushroom", new CustomBlockAddMushroomCommand(plugin, registry));
         //registerSubCommand("noteblock", new CustomBlockRegistryAddNoteBlockCommand(plugin, registry));
         //registerSubCommand("tripwire", new CustomBlockRegistryAddTripwireCommand(plugin, registry));
     }

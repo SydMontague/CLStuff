@@ -3,7 +3,7 @@ package de.craftlancer.clstuff.resourcepack;
 import org.bukkit.Instrument;
 import org.bukkit.Material;
 import org.bukkit.Note;
-import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.NoteBlock;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -68,25 +68,25 @@ public class CustomNoteBlockItem extends CustomBlockItem {
     }
     
     @Override
-    public void setBlockData(Block block) {
-        if (!(block.getBlockData() instanceof NoteBlock))
-            return;
+    public BlockData getBlockData(BlockData data) {
+        if (!(data instanceof NoteBlock))
+            return data;
         
-        NoteBlock noteBlock = (NoteBlock) block.getBlockData();
+        NoteBlock noteBlock = (NoteBlock) data;
         
         noteBlock.setNote(getNote());
         noteBlock.setPowered(isPowered());
         noteBlock.setInstrument(instrument);
         
-        block.setBlockData(noteBlock);
+        return data;
     }
     
     @Override
-    public boolean equals(Block block) {
-        if (block.getType() != getBlockMaterial())
+    public boolean equals(BlockData block) {
+        if (block.getMaterial() != getBlockMaterial())
             return false;
         
-        NoteBlock noteBlock = (NoteBlock) block.getBlockData();
+        NoteBlock noteBlock = (NoteBlock) block;
         
         if (!noteBlock.getInstrument().equals(getInstrument()))
             return false;

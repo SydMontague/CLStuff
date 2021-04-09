@@ -8,8 +8,8 @@ import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.resourcepack.TranslateSpaceFont;
 import de.craftlancer.core.util.ItemBuilder;
 import de.craftlancer.core.util.Tuple;
-import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.TreeType;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -21,10 +21,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.NotePlayEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -43,13 +45,13 @@ public class CustomBlockRegistry implements Listener {
     private static CustomBlockRegistry instance;
     
     private final Map<Material, CustomBlockItem> defaults = new HashMap<>();
-    private final EnumSet<Material> blockTypes = EnumSet.of(Material.RED_MUSHROOM, Material.BROWN_MUSHROOM);
-    private final EnumSet<Material> itemTypes = EnumSet.of(Material.RED_MUSHROOM, Material.BROWN_MUSHROOM);
+    private final EnumSet<Material> blockTypes = EnumSet.of(Material.RED_MUSHROOM_BLOCK, Material.BROWN_MUSHROOM_BLOCK);
+    private final EnumSet<Material> itemTypes = EnumSet.of(Material.RED_MUSHROOM_BLOCK, Material.BROWN_MUSHROOM_BLOCK);
     private CLStuff plugin;
     private ConditionalPagedMenu gui;
     private List<CustomBlockItem> customBlockItems;
     
-    private Map<Location, BlockState> runTimeCustomBlocks = new HashMap<>();
+    private Map<Block, BlockState> runTimeCustomBlocks = new HashMap<>();
     
     public CustomBlockRegistry(CLStuff plugin) {
         ConfigurationSerialization.registerClass(CustomBlockItem.class);
@@ -68,10 +70,10 @@ public class CustomBlockRegistry implements Listener {
         
         customBlockItems = (List<CustomBlockItem>) config.getList("customBlockItems", new ArrayList<>());
         
-        defaults.put(Material.RED_MUSHROOM, new CustomMushroomItem("defaultRedMushroom", new ItemStack(Material.RED_MUSHROOM),
-                Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN)));
-        defaults.put(Material.BROWN_MUSHROOM, new CustomMushroomItem("defaultBrownMushroom", new ItemStack(Material.BROWN_MUSHROOM),
-                Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN)));
+        defaults.put(Material.RED_MUSHROOM_BLOCK, new CustomMushroomItem("defaultRedMushroom", new ItemStack(Material.RED_MUSHROOM),
+                Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN), false));
+        defaults.put(Material.BROWN_MUSHROOM_BLOCK, new CustomMushroomItem("defaultBrownMushroom", new ItemStack(Material.BROWN_MUSHROOM),
+                Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN), false));
     }
     
     public void save() {
@@ -100,7 +102,6 @@ public class CustomBlockRegistry implements Listener {
         if (!itemTypes.contains(item.getType()))
             return;
 
-
 //        if (item.getType() == Material.STRING && block.getLocation().getY() > 0)
 //            if (!block.getRelative(0, -1, 0).getType().isSolid()) {
 //                event.setCancelled(true);
@@ -110,18 +111,23 @@ public class CustomBlockRegistry implements Listener {
         Optional<CustomBlockItem> optional = customBlockItems.stream()
                 .filter(n -> n.compareItem(item)).findFirst();
         
+        CustomBlockItem customBlockItem;
+        
         if (!optional.isPresent()) {
-            player.sendMessage("§cThis item cannot be placed.");
-            event.setCancelled(true);
-            return;
-        }
+            if (defaults.containsKey(item.getType()))
+                customBlockItem = defaults.get(item.getType());
+            else {
+                player.sendMessage("§cThis item cannot be placed.");
+                event.setCancelled(true);
+                return;
+            }
+        } else
+            customBlockItem = optional.get();
         
-        CustomBlockItem customBlockItem = optional.get();
+        block.setBlockData(customBlockItem.getBlockData(block.getBlockData()));
         
-        customBlockItem.setBlockData(block);
-        
-        runTimeCustomBlocks.put(block.getLocation(), block.getState());
-        new LambdaRunnable(() -> runTimeCustomBlocks.get(block.getLocation()).update(true)).runTaskLater(plugin, 1);
+        runTimeCustomBlocks.put(block, block.getState());
+        new LambdaRunnable(() -> runTimeCustomBlocks.get(block).update(true)).runTaskLater(plugin, 1);
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -131,7 +137,7 @@ public class CustomBlockRegistry implements Listener {
         if (!blockTypes.contains(block.getType()))
             return;
         
-        runTimeCustomBlocks.remove(block.getLocation());
+        runTimeCustomBlocks.remove(block);
         
         if (dropCustomBlockIfPresent(block))
             event.setDropItems(false);
@@ -221,10 +227,11 @@ public class CustomBlockRegistry implements Listener {
         if (!blockTypes.contains(block.getType()))
             return;
         
-        if (!runTimeCustomBlocks.containsKey(block.getLocation()))
-            runTimeCustomBlocks.put(block.getLocation(), block.getState());
+        if (!runTimeCustomBlocks.containsKey(block))
+            runTimeCustomBlocks.put(block, block.getState());
         
-        runTimeCustomBlocks.get(block.getLocation()).update(true);
+        
+        runTimeCustomBlocks.get(block).update(true);
         event.setCancelled(true);
     }
     
@@ -246,14 +253,12 @@ public class CustomBlockRegistry implements Listener {
             return true;
         });
     }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onPistonExtend(BlockPistonExtendEvent event) {
+        if (event.getBlocks().stream().anyMatch(b -> blockTypes.contains(b.getType())))
+            event.setCancelled(true);
 
-//    @EventHandler(ignoreCancelled = true)
-//    public void onPistonExtend(BlockPistonExtendEvent event) {
-//        if (event.getBlocks().stream().anyMatch(b -> b.getType() == Material.NOTE_BLOCK)) {
-//            event.setCancelled(true);
-//            return;
-//        }
-//
 //        for (Block block : event.getBlocks()) {
 //            if (block.getType() == Material.TRIPWIRE)
 //                if (dropCustomBlockIfPresent(block))
@@ -263,15 +268,13 @@ public class CustomBlockRegistry implements Listener {
 //
 //        for (Block key : event.getBlocks())
 //            runTimeCustomBlocks.remove(key.getLocation());
-//    }
-//
-//    @EventHandler(ignoreCancelled = true)
-//    public void onPistonRetract(BlockPistonRetractEvent event) {
-//        if (event.getBlocks().stream().anyMatch(b -> b.getType() == Material.NOTE_BLOCK)) {
-//            event.setCancelled(true);
-//            return;
-//        }
-//
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onPistonRetract(BlockPistonRetractEvent event) {
+        if (event.getBlocks().stream().anyMatch(b -> blockTypes.contains(b.getType())))
+            event.setCancelled(true);
+
 //        for (Block block : event.getBlocks()) {
 //            if (block.getType() == Material.TRIPWIRE)
 //                if (dropCustomBlockIfPresent(block))
@@ -281,7 +284,23 @@ public class CustomBlockRegistry implements Listener {
 //
 //        for (Block key : event.getBlocks())
 //            runTimeCustomBlocks.remove(key.getLocation());
-//    }
+    }
+    
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onMushroomGrow(StructureGrowEvent event) {
+        TreeType type = event.getSpecies();
+        
+        if (type != TreeType.BROWN_MUSHROOM && type != TreeType.RED_MUSHROOM)
+            return;
+        
+        event.getBlocks().stream().filter(b -> blockTypes.contains(b.getType()))
+                .forEach(state -> {
+                    CustomBlockItem def = type == TreeType.RED_MUSHROOM ? defaults.get(Material.RED_MUSHROOM_BLOCK) : defaults.get(Material.BROWN_MUSHROOM_BLOCK);
+                    
+                    state.setBlockData(def.getBlockData(state.getBlockData()));
+                    state.update(true);
+                });
+    }
     
     public void createInventory() {
         gui = new ConditionalPagedMenu(plugin, 6, getPageItems(), true, true,
@@ -300,20 +319,23 @@ public class CustomBlockRegistry implements Listener {
             return pageItem;
         }).collect(Collectors.toList());
     }
-    
-    @EventHandler(ignoreCancelled = true)
-    public void onNotePlay(NotePlayEvent event) {
-        event.setCancelled(true);
-    }
+
+//    @EventHandler(ignoreCancelled = true)
+//    public void onNotePlay(NotePlayEvent event) {
+//        event.setCancelled(true);
+//    }
     
     public Optional<CustomBlockItem> getCustomBlockItem(Block block) {
-        return customBlockItems.stream().filter(b -> b.equals(block)).findFirst();
+        return customBlockItems.stream().filter(b -> b.equals(block.getBlockData())).findFirst();
     }
     
     public boolean dropCustomBlockIfPresent(Block block) {
         Optional<CustomBlockItem> optional = getCustomBlockItem(block);
         
         if (!optional.isPresent())
+            return false;
+        
+        if (!optional.get().isDropItem())
             return false;
         
         block.getWorld().dropItemNaturally(block.getLocation(), optional.get().getItem());
