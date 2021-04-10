@@ -70,9 +70,9 @@ public class AdminShop {
             Menu m = menu.getMenu("defaultAdmin");
             
             for (int j = 0; j < 7; j++)
-                trade.setInput(j, m.getMenuItem(9 + 9 * i + j).getItem());
+                trade.setInput(j, m.getMenuItem(9 + 9 * i + j).getItem().getType() == Material.AIR ? null : m.getMenuItem(9 + 9 * i + j).getItem());
             
-            trade.setOutput(m.getMenuItem(9 + 9 * i + 8).getItem());
+            trade.setOutput(m.getMenuItem(9 + 9 * i + 8).getItem().getType() == Material.AIR ? null : m.getMenuItem(9 + 9 * i + 8).getItem());
         }
         
         
