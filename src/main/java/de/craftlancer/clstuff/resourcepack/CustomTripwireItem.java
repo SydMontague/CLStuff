@@ -1,8 +1,8 @@
 package de.craftlancer.clstuff.resourcepack;
 
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Tripwire;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -69,11 +69,11 @@ public class CustomTripwireItem extends CustomBlockItem {
     }
     
     @Override
-    public void setBlockData(Block block) {
-        if (!(block.getBlockData() instanceof Tripwire))
-            return;
+    public BlockData getBlockData(BlockData data) {
+        if (!(data instanceof Tripwire))
+            return data;
         
-        Tripwire tripwire = (Tripwire) block.getBlockData();
+        Tripwire tripwire = (Tripwire) data;
         
         tripwire.setPowered(false);
         tripwire.setDisarmed(!isArmed());
@@ -81,15 +81,15 @@ public class CustomTripwireItem extends CustomBlockItem {
         for (BlockFace face : Arrays.asList(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST))
             tripwire.setFace(face, faces.contains(face));
         
-        block.setBlockData(tripwire);
+        return data;
     }
     
     @Override
-    public boolean equals(Block block) {
-        if (block.getType() != getBlockMaterial())
+    public boolean equals(BlockData block) {
+        if (block.getMaterial() != getBlockMaterial())
             return false;
         
-        Tripwire tripwire = (Tripwire) block.getBlockData();
+        Tripwire tripwire = (Tripwire) block;
         
         if (tripwire.isPowered())
             return false;

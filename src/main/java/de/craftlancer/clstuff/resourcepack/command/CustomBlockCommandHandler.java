@@ -9,6 +9,7 @@ public class CustomBlockCommandHandler extends CommandHandler {
     public CustomBlockCommandHandler(CLStuff plugin, CustomBlockRegistry registry) {
         super(plugin, new TextComponent("§f[§4Craft§fCitizen]"));
         
-        registerSubCommand("registry", new CustomBlockRegistryCommand(plugin, registry));
+        registerSubCommand("list", new CustomBlockListCommand(plugin, registry));
+        registerSubCommand("add", new CustomBlockAddCommand(plugin, registry));
     }
 }
