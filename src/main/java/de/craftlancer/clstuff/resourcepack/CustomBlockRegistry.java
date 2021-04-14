@@ -1,6 +1,9 @@
 package de.craftlancer.clstuff.resourcepack;
 
 import com.google.common.collect.Sets;
+import de.craftlancer.clfeatures.CLFeatures;
+import de.craftlancer.clfeatures.Feature;
+import de.craftlancer.clfeatures.ManualPlacementFeature;
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.menu.ConditionalPagedMenu;
@@ -8,6 +11,7 @@ import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.resourcepack.TranslateSpaceFont;
 import de.craftlancer.core.util.ItemBuilder;
 import de.craftlancer.core.util.Tuple;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
 import org.bukkit.block.Block;
@@ -124,10 +128,27 @@ public class CustomBlockRegistry implements Listener {
         } else
             customBlockItem = optional.get();
         
+        CustomBlockPlaceEvent e = new CustomBlockPlaceEvent(event, customBlockItem);
+        
+        Bukkit.getPluginManager().callEvent(e);
+        
+        if (e.isCancelled()) {
+            event.setCancelled(true);
+            return;
+        }
+        
         block.setBlockData(customBlockItem.getBlockData(block.getBlockData()));
         
         runTimeCustomBlocks.put(block, block.getState());
         new LambdaRunnable(() -> runTimeCustomBlocks.get(block).update(true)).runTaskLater(plugin, 1);
+        
+        Optional<Feature<?>> feature = CLFeatures.getInstance().getFeatures().values().stream().filter(a ->
+                a instanceof ManualPlacementFeature && a.getName().equalsIgnoreCase(customBlockItem.getId())).findFirst();
+        
+        if (!feature.isPresent())
+            return;
+        
+        ((ManualPlacementFeature) feature.get()).createInstance(event.getPlayer(), event.getBlock(), event.getItemInHand().clone());
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
