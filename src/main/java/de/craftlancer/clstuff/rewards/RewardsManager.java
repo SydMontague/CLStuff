@@ -4,11 +4,15 @@ import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.util.MessageRegisterable;
 import de.craftlancer.core.util.MessageUtil;
+import me.sizzlemcgrizzle.blueprints.api.BlueprintPostPasteEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class RewardsManager implements MessageRegisterable {
+public class RewardsManager implements MessageRegisterable, Listener {
     
     public static NamespacedKey REWARD_KEY;
     private static RewardsManager instance;
@@ -40,6 +44,13 @@ public class RewardsManager implements MessageRegisterable {
         
         //Run later to let all plugins register rewards
         new LambdaRunnable(this::load).runTaskLater(plugin, 40);
+        
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onBlueprintPaste(BlueprintPostPasteEvent event) {
+        RewardsManager.getInstance().getReward(event.getType()).ifPresent(r -> r.reward(event.getPlayer(), true));
     }
     
     private void load() {

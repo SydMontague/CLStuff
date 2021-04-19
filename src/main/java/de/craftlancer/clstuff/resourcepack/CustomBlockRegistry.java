@@ -144,6 +144,7 @@ public class CustomBlockRegistry implements Listener {
             if (!feature.checkFeatureLimit(event.getPlayer())) {
                 event.getPlayer().sendMessage(CLFeatures.CC_PREFIX + ChatColor.DARK_RED + "You've reached your limit for this feature.");
                 event.setCancelled(true);
+                return;
             } else
                 ((ManualPlacementFeature) feature).createInstance(event.getPlayer(), event.getBlock(), event.getItemInHand().clone());
         }
