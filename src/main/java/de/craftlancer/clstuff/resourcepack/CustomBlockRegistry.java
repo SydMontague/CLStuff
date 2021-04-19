@@ -11,6 +11,7 @@ import de.craftlancer.core.menu.MenuItem;
 import de.craftlancer.core.resourcepack.TranslateSpaceFont;
 import de.craftlancer.core.util.ItemBuilder;
 import de.craftlancer.core.util.Tuple;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
@@ -137,18 +138,20 @@ public class CustomBlockRegistry implements Listener {
             return;
         }
         
+        Feature feature = CLFeatures.getInstance().getFeature(customBlockItem.getId());
+        
+        if (feature instanceof ManualPlacementFeature) {
+            if (!feature.checkFeatureLimit(event.getPlayer())) {
+                event.getPlayer().sendMessage(CLFeatures.CC_PREFIX + ChatColor.DARK_RED + "You've reached your limit for this feature.");
+                event.setCancelled(true);
+            } else
+                ((ManualPlacementFeature) feature).createInstance(event.getPlayer(), event.getBlock(), event.getItemInHand().clone());
+        }
+        
         block.setBlockData(customBlockItem.getBlockData(block.getBlockData()));
         
         runTimeCustomBlocks.put(block, block.getState());
         new LambdaRunnable(() -> runTimeCustomBlocks.get(block).update(true)).runTaskLater(plugin, 1);
-        
-        Optional<Feature<?>> feature = CLFeatures.getInstance().getFeatures().values().stream().filter(a ->
-                a instanceof ManualPlacementFeature && a.getName().equalsIgnoreCase(customBlockItem.getId())).findFirst();
-        
-        if (!feature.isPresent())
-            return;
-        
-        ((ManualPlacementFeature) feature.get()).createInstance(event.getPlayer(), event.getBlock(), event.getItemInHand().clone());
     }
     
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
