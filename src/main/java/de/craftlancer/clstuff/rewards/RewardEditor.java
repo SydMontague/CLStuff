@@ -97,7 +97,7 @@ public class RewardEditor {
         }, ClickType.RIGHT);
         
         inventory.setClickAction(1, p -> {
-            reward.getItemRewards().add(p.getInventory().getItemInMainHand());
+            reward.getItemRewards().add(p.getInventory().getItemInMainHand().clone());
             contact(p, "Item added.", MessageLevel.SUCCESS, Sound.BLOCK_NOTE_BLOCK_PLING);
             setItemRewardsItem();
         }, ClickType.LEFT);
