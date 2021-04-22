@@ -3,7 +3,6 @@ package de.craftlancer.clstuff.rankings;
 import de.craftlancer.clfeatures.CLFeatures;
 import de.craftlancer.clfeatures.trophydepositor.TrophyDepositorFeature;
 import de.craftlancer.clstuff.rewards.Reward;
-import de.craftlancer.clstuff.rewards.RewardRegisterable;
 import de.craftlancer.clstuff.rewards.RewardsManager;
 import de.craftlancer.core.CLCore;
 import de.craftlancer.core.LambdaRunnable;
@@ -43,7 +42,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class Rankings implements CommandExecutor, MessageRegisterable, RewardRegisterable {
+public class Rankings implements CommandExecutor, MessageRegisterable {
     private final Plugin plugin;
     private final File rankingsFile;
     
@@ -55,7 +54,6 @@ public class Rankings implements CommandExecutor, MessageRegisterable, RewardReg
     private Map<Integer, String> rewardMap = new HashMap<>();
     
     public Rankings(Plugin plugin) {
-        RewardsManager.getInstance().register(this);
         this.plugin = plugin;
         this.lastSeenCache = CLCore.getInstance().getLastSeenCache();
         this.rankingsFile = new File(plugin.getDataFolder(), "rankings.yml");
@@ -203,11 +201,6 @@ public class Rankings implements CommandExecutor, MessageRegisterable, RewardReg
     
     void clearRewards() {
         rewardMap.clear();
-    }
-    
-    @Override
-    public String getKey() {
-        return "Scoring";
     }
     
     public class RankingsEntry implements ConfigurationSerializable {

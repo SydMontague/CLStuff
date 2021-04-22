@@ -21,14 +21,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class RewardsManager implements MessageRegisterable, Listener {
     
     public static NamespacedKey REWARD_KEY;
     private static RewardsManager instance;
     
-    private List<RewardRegisterable> registered = new ArrayList<>();
     private List<Reward> rewards = new ArrayList<>();
     private Map<Reward, RewardEditor> editors = new HashMap<>();
     private CLStuff plugin;
@@ -110,8 +108,8 @@ public class RewardsManager implements MessageRegisterable, Listener {
         rewards.add(reward);
     }
     
-    public void addReward(RewardRegisterable registerable, String key, boolean publicAnnouncement) {
-        rewards.add(new Reward(registerable, key, publicAnnouncement));
+    public void addReward(String key, boolean publicAnnouncement) {
+        rewards.add(new Reward(key, publicAnnouncement));
     }
     
     @Override
@@ -121,28 +119,5 @@ public class RewardsManager implements MessageRegisterable, Listener {
     
     public static RewardsManager getInstance() {
         return instance;
-    }
-    
-    public void register(RewardRegisterable registerable) {
-        if (registered.stream().anyMatch(r -> r.getKey().equalsIgnoreCase(registerable.getKey())))
-            throw new IllegalArgumentException("A class has already been registered with this RewardRegisterable key");
-        
-        registered.add(registerable);
-    }
-    
-    public Optional<RewardRegisterable> getRegisterable(String key) {
-        return registered.stream().filter(r -> r.getKey().equalsIgnoreCase(key)).findFirst();
-    }
-    
-    public List<RewardRegisterable> getRegistered() {
-        return registered;
-    }
-    
-    public List<Reward> getRewards(RewardRegisterable registerable) {
-        return rewards.stream().filter(r -> r.getRegisterable().getKey().equalsIgnoreCase(registerable.getKey())).collect(Collectors.toList());
-    }
-    
-    public void clearAll(RewardRegisterable registerable) {
-        rewards.removeIf(r -> r.getRegisterable().equals(registerable));
     }
 }
