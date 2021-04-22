@@ -14,13 +14,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class Reward implements ConfigurationSerializable {
     
-    private RewardRegisterable registerable;
     private String key;
     private List<ItemStack> itemRewards = new ArrayList<>();
     private List<String> commandsRewards = new ArrayList<>();
@@ -33,15 +31,12 @@ public class Reward implements ConfigurationSerializable {
     private String chatMessage = "";
     private boolean publicAnnouncement;
     
-    public Reward(RewardRegisterable registerable, String key, boolean publicAnnouncement) {
-        this.registerable = registerable;
+    public Reward(String key, boolean publicAnnouncement) {
         this.key = key;
         this.publicAnnouncement = publicAnnouncement;
     }
     
     public Reward(Map<String, Object> map) {
-        Optional<RewardRegisterable> optional = RewardsManager.getInstance().getRegisterable((String) map.get("registerable"));
-        this.registerable = optional.orElse(null);
         this.key = (String) map.get("key");
         this.itemRewards = (List<ItemStack>) map.get("itemRewards");
         this.commandsRewards = (List<String>) map.get("commandsRewards");
@@ -58,7 +53,6 @@ public class Reward implements ConfigurationSerializable {
     public @NotNull Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
         
-        map.put("registerable", registerable.getKey());
         map.put("key", key);
         map.put("itemRewards", itemRewards);
         map.put("commandsRewards", commandsRewards);
@@ -162,10 +156,6 @@ public class Reward implements ConfigurationSerializable {
     
     public void setChatMessage(String chatMessage) {
         this.chatMessage = chatMessage;
-    }
-    
-    public RewardRegisterable getRegisterable() {
-        return registerable;
     }
     
     public boolean removeReceived(UUID uuid) {
