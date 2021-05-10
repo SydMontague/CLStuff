@@ -165,9 +165,10 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
     }
     
     private void updatePlayer(OfflinePlayer player, boolean isBanned) {
-        if (!player.isOnline() && !player.hasPlayedBefore()) return;
-        
         long lastSeen = lastSeenCache.getLastSeen(player);
+
+        if (lastSeen == 0) return;
+        
         RankingsEntry entry = scoreMap.computeIfAbsent(player.getUniqueId(), a -> new RankingsEntry(player.getUniqueId()));
         entry.isBanned = isBanned;
         
