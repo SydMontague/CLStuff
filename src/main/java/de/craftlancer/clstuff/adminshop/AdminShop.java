@@ -120,7 +120,7 @@ public class AdminShop {
             }), "defaultAdmin", "resourceAdmin");
             menu.set(17 + i * 9, output.clone().addClickAction(p -> menu.replace(17 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
             
-            Consumer<Player> action = new TradeAction(trade);
+            Consumer<Player> action = new TradeAction(this, trade, i);
             
             menu.set(9 + i * 9, input0.clone(), "defaultUser", "resourceUser");
             menu.set(10 + i * 9, input1.clone(), "defaultUser", "resourceUser");
@@ -194,10 +194,15 @@ public class AdminShop {
     }
     
     private class TradeAction implements Consumer<Player> {
-        private final AdminShopTrade trade;
         
-        public TradeAction(AdminShopTrade trade) {
+        private final AdminShop shop;
+        private final AdminShopTrade trade;
+        private final int row;
+        
+        public TradeAction(AdminShop shop, AdminShopTrade trade, int row) {
             this.trade = trade;
+            this.row = row;
+            this.shop = shop;
         }
         
         @Override
@@ -225,7 +230,7 @@ public class AdminShop {
                 Bukkit.broadcastMessage(message);
             }
             
-            Bukkit.getPluginManager().callEvent(new AdminShopTransactionEvent(p, trade));
+            Bukkit.getPluginManager().callEvent(new AdminShopTransactionEvent(p, getManager().getLocationsOf(shop).get(), trade, row));
         }
         
     }

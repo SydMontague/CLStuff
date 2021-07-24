@@ -31,9 +31,12 @@ public class Reward implements ConfigurationSerializable {
     private String chatMessage = "";
     private boolean publicAnnouncement;
     
+    private RewardEditor editor;
+    
     public Reward(String key, boolean publicAnnouncement) {
         this.key = key;
         this.publicAnnouncement = publicAnnouncement;
+        this.editor = new RewardEditor(RewardsManager.getInstance(), this);
     }
     
     public Reward(Map<String, Object> map) {
@@ -47,6 +50,7 @@ public class Reward implements ConfigurationSerializable {
         this.chatMessage = (String) map.get("chatMessage");
         this.publicAnnouncement = (boolean) map.get("publicAnnouncement");
         this.information = (List<String>) map.getOrDefault("information", new ArrayList<>());
+        this.editor = new RewardEditor(RewardsManager.getInstance(), this);
     }
     
     @Override
@@ -65,6 +69,10 @@ public class Reward implements ConfigurationSerializable {
         map.put("information", information);
         
         return map;
+    }
+    
+    public RewardEditor getEditor() {
+        return editor;
     }
     
     /**

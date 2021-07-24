@@ -49,7 +49,7 @@ public class RewardsRemoveCommand extends SubCommand {
             return null;
         }
         
-        manager.removeReward(key);
+        manager.getRewards().removeIf(r -> r.getKey().equals(key));
         
         MessageUtil.sendMessage(manager, sender, MessageLevel.SUCCESS, "Successfully removed reward with key " + ChatColor.DARK_GREEN + key);
         
