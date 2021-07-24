@@ -195,6 +195,10 @@ public class AdminShop {
         return manager;
     }
     
+    public Location getLocation() {
+        return location;
+    }
+    
     private class TradeAction implements Consumer<Player> {
         
         private final AdminShop shop;
