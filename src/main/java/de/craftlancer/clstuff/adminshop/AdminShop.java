@@ -13,6 +13,7 @@ import de.craftlancer.core.util.MessageUtil;
 import de.craftlancer.core.util.Tuple;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -40,25 +41,26 @@ public class AdminShop {
     private CLStuff plugin;
     private AdminShopManager manager;
     private AdminShopTrade[] trades = new AdminShopTrade[4];
+    private Location location;
     
     private ConditionalMenu menu;
     
-    public AdminShop(CLStuff plugin, AdminShopManager manager) {
+    public AdminShop(CLStuff plugin, AdminShopManager manager, Location location) {
         this.plugin = plugin;
         this.manager = manager;
+        this.location = location;
         
         trades[0] = new AdminShopTrade();
         trades[1] = new AdminShopTrade();
         trades[2] = new AdminShopTrade();
         trades[3] = new AdminShopTrade();
-        
     }
     
-    public AdminShop(CLStuff plugin, AdminShopManager manager, AdminShopTrade[] trades) {
+    public AdminShop(CLStuff plugin, AdminShopManager manager, AdminShopTrade[] trades, Location location) {
         this.plugin = plugin;
         this.manager = manager;
         this.trades = trades;
-        
+        this.location = location;
     }
     
     private void updateTrades() {
@@ -120,7 +122,7 @@ public class AdminShop {
             }), "defaultAdmin", "resourceAdmin");
             menu.set(17 + i * 9, output.clone().addClickAction(p -> menu.replace(17 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
             
-            Consumer<Player> action = new TradeAction(trade);
+            Consumer<Player> action = new TradeAction(this, trade, i);
             
             menu.set(9 + i * 9, input0.clone(), "defaultUser", "resourceUser");
             menu.set(10 + i * 9, input1.clone(), "defaultUser", "resourceUser");
@@ -193,11 +195,20 @@ public class AdminShop {
         return manager;
     }
     
+    public Location getLocation() {
+        return location;
+    }
+    
     private class TradeAction implements Consumer<Player> {
-        private final AdminShopTrade trade;
         
-        public TradeAction(AdminShopTrade trade) {
+        private final AdminShop shop;
+        private final AdminShopTrade trade;
+        private final int row;
+        
+        public TradeAction(AdminShop shop, AdminShopTrade trade, int row) {
             this.trade = trade;
+            this.row = row;
+            this.shop = shop;
         }
         
         @Override
@@ -225,7 +236,7 @@ public class AdminShop {
                 Bukkit.broadcastMessage(message);
             }
             
-            Bukkit.getPluginManager().callEvent(new AdminShopTransactionEvent(p, trade));
+            Bukkit.getPluginManager().callEvent(new AdminShopTransactionEvent(p, shop, trade, row));
         }
         
     }

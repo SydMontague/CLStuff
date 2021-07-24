@@ -17,9 +17,7 @@ import org.bukkit.event.Listener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class RewardsManager implements MessageRegisterable, Listener {
@@ -28,7 +26,6 @@ public class RewardsManager implements MessageRegisterable, Listener {
     private static RewardsManager instance;
     
     private List<Reward> rewards = new ArrayList<>();
-    private Map<Reward, RewardEditor> editors = new HashMap<>();
     private CLStuff plugin;
     
     public RewardsManager(CLStuff plugin) {
@@ -60,8 +57,6 @@ public class RewardsManager implements MessageRegisterable, Listener {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         
         this.rewards = (List<Reward>) config.getList("rewards", new ArrayList<>());
-        
-        rewards.forEach(r -> editors.put(r, new RewardEditor(this, r)));
     }
     
     public void save() {
@@ -81,27 +76,12 @@ public class RewardsManager implements MessageRegisterable, Listener {
         }
     }
     
-    public RewardEditor getEditor(Reward reward) {
-        return editors.getOrDefault(reward, new RewardEditor(this, reward));
-    }
-    
     public List<Reward> getRewards() {
         return rewards;
     }
     
     public Optional<Reward> getReward(String key) {
         return rewards.stream().filter(r -> r.getKey().equals(key)).findFirst();
-    }
-    
-    public void removeReward(String key) {
-        rewards.removeIf(r -> {
-            if (r.getKey().equals(key)) {
-                editors.remove(r);
-                return true;
-            }
-            
-            return false;
-        });
     }
     
     public void addReward(Reward reward) {

@@ -52,7 +52,7 @@ public class RewardsEditorCommand extends SubCommand {
             return null;
         }
         
-        manager.getEditor(optional.get()).display((Player) sender);
+        optional.get().getEditor().display((Player) sender);
         
         return null;
     }

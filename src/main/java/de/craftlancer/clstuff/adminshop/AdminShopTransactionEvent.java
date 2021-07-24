@@ -9,16 +9,28 @@ import javax.annotation.Nonnull;
 public class AdminShopTransactionEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     
+    private AdminShop shop;
     private AdminShopTrade trade;
     private Player player;
+    private int row;
     
-    public AdminShopTransactionEvent(Player player, AdminShopTrade trade) {
+    public AdminShopTransactionEvent(Player player, AdminShop shop, AdminShopTrade trade, int row) {
         this.player = player;
         this.trade = trade;
+        this.row = row;
+        this.shop = shop;
     }
     
     public Player getPlayer() {
         return player;
+    }
+    
+    public AdminShop getShop() {
+        return shop;
+    }
+    
+    public int getRow() {
+        return row;
     }
     
     public AdminShopTrade getTrade() {
