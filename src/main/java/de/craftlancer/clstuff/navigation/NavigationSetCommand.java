@@ -2,6 +2,7 @@ package de.craftlancer.clstuff.navigation;
 
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.command.SubCommand;
+import de.craftlancer.core.navigation.NavigationManager;
 import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 import org.bukkit.Location;
@@ -61,7 +62,9 @@ public class NavigationSetCommand extends SubCommand {
             return null;
         }
         
-        manager.getDestinations().put(((Player) sender).getUniqueId(), new Location(((Player) sender).getWorld(), x, y, z));
+        manager.register((Player) sender,
+                new NavigationManager.NavigationGoal("§6Continue to location.",
+                        new Location(((Player) sender).getWorld(), x, y, z), manager));
         MessageUtil.sendMessage(manager, sender, MessageLevel.SUCCESS, "Navigation set.");
         return null;
     }

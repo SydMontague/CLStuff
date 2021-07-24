@@ -2,6 +2,7 @@ package de.craftlancer.clstuff.navigation;
 
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.command.SubCommand;
+import de.craftlancer.core.navigation.NavigationManager;
 import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 import org.bukkit.command.Command;
@@ -35,7 +36,7 @@ public class NavigationStopCommand extends SubCommand {
             return null;
         }
         
-        if (manager.getDestinations().remove(((Player) sender).getUniqueId()) != null)
+        if (manager.unregister((Player) sender, manager))
             MessageUtil.sendMessage(manager, sender, MessageLevel.SUCCESS, "Navigation stopped.");
         else
             MessageUtil.sendMessage(manager, sender, MessageLevel.INFO, "You did not have a navigation set.");

@@ -2,6 +2,7 @@ package de.craftlancer.clstuff.navigation;
 
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.command.CommandHandler;
+import de.craftlancer.core.navigation.NavigationManager;
 
 public class NavigationCommandHandler extends CommandHandler {
     public NavigationCommandHandler(CLStuff plugin, NavigationManager manager) {

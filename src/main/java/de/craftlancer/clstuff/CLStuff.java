@@ -24,7 +24,6 @@ import de.craftlancer.clstuff.inventorymanagement.InventoryManagementCommandHand
 import de.craftlancer.clstuff.mobcontrol.ItemCooldowns;
 import de.craftlancer.clstuff.mobcontrol.MobControl;
 import de.craftlancer.clstuff.navigation.NavigationCommandHandler;
-import de.craftlancer.clstuff.navigation.NavigationManager;
 import de.craftlancer.clstuff.premium.DonatorTicketCommandHandler;
 import de.craftlancer.clstuff.premium.DonatorTicketRegistry;
 import de.craftlancer.clstuff.premium.ModelToken;
@@ -36,6 +35,7 @@ import de.craftlancer.clstuff.resourcepack.command.CustomBlockCommandHandler;
 import de.craftlancer.clstuff.rewards.RewardsCommandHandler;
 import de.craftlancer.clstuff.rewards.RewardsManager;
 import de.craftlancer.clstuff.squest.ServerQuests;
+import de.craftlancer.core.CLCore;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.NMSUtils;
 import de.craftlancer.core.Utils;
@@ -101,7 +101,6 @@ public class CLStuff extends JavaPlugin implements Listener {
     private InventoryManagement inventoryManagement;
     private RewardsManager rewardsManager;
     private CustomBlockRegistry customBlockRegistry;
-    private NavigationManager navigationManager;
     
     @Override
     public void onLoad() {
@@ -311,8 +310,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
         
-        navigationManager = new NavigationManager(this);
-        getCommand("navigation").setExecutor(new NavigationCommandHandler(this, navigationManager));
+        getCommand("navigation").setExecutor(new NavigationCommandHandler(this, CLCore.getInstance().getNavigationManager()));
         
         new LambdaRunnable(this::save).runTaskTimer(this, 18000L, 18000L);
         
@@ -460,7 +458,6 @@ public class CLStuff extends JavaPlugin implements Listener {
         inventoryManagement.save();
         rewardsManager.save();
         customBlockRegistry.save();
-        navigationManager.save();
     }
     
     public CitizenSetsManager getCitizenSets() {
