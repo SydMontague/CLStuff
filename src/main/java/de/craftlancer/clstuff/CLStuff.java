@@ -23,6 +23,8 @@ import de.craftlancer.clstuff.inventorymanagement.InventoryManagement;
 import de.craftlancer.clstuff.inventorymanagement.InventoryManagementCommandHandler;
 import de.craftlancer.clstuff.mobcontrol.ItemCooldowns;
 import de.craftlancer.clstuff.mobcontrol.MobControl;
+import de.craftlancer.clstuff.navigation.NavigationCommandHandler;
+import de.craftlancer.clstuff.navigation.NavigationManager;
 import de.craftlancer.clstuff.premium.DonatorTicketCommandHandler;
 import de.craftlancer.clstuff.premium.DonatorTicketRegistry;
 import de.craftlancer.clstuff.premium.ModelToken;
@@ -99,6 +101,7 @@ public class CLStuff extends JavaPlugin implements Listener {
     private InventoryManagement inventoryManagement;
     private RewardsManager rewardsManager;
     private CustomBlockRegistry customBlockRegistry;
+    private NavigationManager navigationManager;
     
     @Override
     public void onLoad() {
@@ -308,6 +311,9 @@ public class CLStuff extends JavaPlugin implements Listener {
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
         
+        navigationManager = new NavigationManager(this);
+        getCommand("navigation").setExecutor(new NavigationCommandHandler(this, navigationManager));
+        
         new LambdaRunnable(this::save).runTaskTimer(this, 18000L, 18000L);
         
         this.mobControl = new MobControl(this);
@@ -454,6 +460,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         inventoryManagement.save();
         rewardsManager.save();
         customBlockRegistry.save();
+        navigationManager.save();
     }
     
     public CitizenSetsManager getCitizenSets() {

@@ -13,6 +13,7 @@ import de.craftlancer.core.util.MessageUtil;
 import de.craftlancer.core.util.Tuple;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -40,25 +41,26 @@ public class AdminShop {
     private CLStuff plugin;
     private AdminShopManager manager;
     private AdminShopTrade[] trades = new AdminShopTrade[4];
+    private Location location;
     
     private ConditionalMenu menu;
     
-    public AdminShop(CLStuff plugin, AdminShopManager manager) {
+    public AdminShop(CLStuff plugin, AdminShopManager manager, Location location) {
         this.plugin = plugin;
         this.manager = manager;
+        this.location = location;
         
         trades[0] = new AdminShopTrade();
         trades[1] = new AdminShopTrade();
         trades[2] = new AdminShopTrade();
         trades[3] = new AdminShopTrade();
-        
     }
     
-    public AdminShop(CLStuff plugin, AdminShopManager manager, AdminShopTrade[] trades) {
+    public AdminShop(CLStuff plugin, AdminShopManager manager, AdminShopTrade[] trades, Location location) {
         this.plugin = plugin;
         this.manager = manager;
         this.trades = trades;
-        
+        this.location = location;
     }
     
     private void updateTrades() {
@@ -230,7 +232,7 @@ public class AdminShop {
                 Bukkit.broadcastMessage(message);
             }
             
-            Bukkit.getPluginManager().callEvent(new AdminShopTransactionEvent(p, getManager().getLocationsOf(shop).get(), trade, row));
+            Bukkit.getPluginManager().callEvent(new AdminShopTransactionEvent(p, shop, trade, row));
         }
         
     }

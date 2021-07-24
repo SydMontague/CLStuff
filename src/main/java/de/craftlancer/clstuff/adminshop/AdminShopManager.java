@@ -24,9 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 public class AdminShopManager implements Listener {
     private static final String PERMISSION = "clstuff.adminshop";
@@ -65,7 +63,7 @@ public class AdminShopManager implements Listener {
             trades[2] = (AdminShopTrade) section.get("trade3");
             trades[3] = (AdminShopTrade) section.get("trade4");
             
-            shops.put(loc, new AdminShop(plugin, this, trades));
+            shops.put(loc, new AdminShop(plugin, this, trades, loc));
         });
         
         plugin.getCommand("adminshop").setExecutor(new AdminShopCommandHandler(plugin, this));
@@ -132,7 +130,7 @@ public class AdminShopManager implements Listener {
             player.removeMetadata(METADATA, plugin);
             
             if (!shops.containsKey(clicked) && METADATA_CREATE.equals(mode)) {
-                shops.put(clicked, new AdminShop(plugin, this));
+                shops.put(clicked, new AdminShop(plugin, this, clicked));
                 MessageUtil.sendMessage(plugin, player, MessageLevel.NORMAL, "AdminShop created");
             } else if (shops.containsKey(clicked) && METADATA_REMOVE.equals(mode)) {
                 shops.remove(clicked);
@@ -190,9 +188,5 @@ public class AdminShopManager implements Listener {
     
     public String getDefaultBroadcast() {
         return defaultBroadcast;
-    }
-    
-    public Optional<Location> getLocationsOf(AdminShop shop) {
-        return shops.entrySet().stream().filter(e -> e.getValue().equals(shop)).map(Map.Entry::getKey).collect(Collectors.toList()).stream().findAny();
     }
 }

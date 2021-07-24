@@ -1,6 +1,5 @@
 package de.craftlancer.clstuff.adminshop;
 
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -10,24 +9,24 @@ import javax.annotation.Nonnull;
 public class AdminShopTransactionEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
     
-    private Location location;
+    private AdminShop shop;
     private AdminShopTrade trade;
     private Player player;
     private int row;
     
-    public AdminShopTransactionEvent(Player player, Location location, AdminShopTrade trade, int row) {
+    public AdminShopTransactionEvent(Player player, AdminShop shop, AdminShopTrade trade, int row) {
         this.player = player;
         this.trade = trade;
         this.row = row;
-        this.location = location;
+        this.shop = shop;
     }
     
     public Player getPlayer() {
         return player;
     }
     
-    public Location getLocation() {
-        return location;
+    public AdminShop getShop() {
+        return shop;
     }
     
     public int getRow() {
