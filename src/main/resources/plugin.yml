@@ -2,8 +2,8 @@ name: CLStuff
 main: de.craftlancer.clstuff.CLStuff
 version: ${project.version}
 api-version: 1.14
-depend: [ CLCore, CLFeatures ]
-softdepend: [ DiscordSRV, CombatLogX, MythicMobs ]
+depend: [ CLCore, CLFeatures, GriefPrevention ]
+softdepend: [ DiscordSRV, CombatLogX, MythicMobs, WorldGuardEvents ]
 loadbefore: [ WorldGuard ]
 commands:
   customblock:

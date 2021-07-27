@@ -3,7 +3,6 @@ package de.craftlancer.clstuff;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -35,8 +34,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
-import com.SirBlobman.combatlogx.api.ICombatLogX;
-
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.logging.PluginFileLogger;
 import me.ryanhamshire.GriefPrevention.Claim;
@@ -49,14 +46,9 @@ public class CLAntiCheat implements Listener {
     private Logger logger;
     private Plugin plugin;
     
-    private ICombatLogX combatLogPlugin = null;
-    
     public CLAntiCheat(Plugin plugin) {
         this.plugin = plugin;
         this.logger = new PluginFileLogger(CLAntiCheat.class.getCanonicalName(), plugin, "anticheat.log");
-        
-        if (Bukkit.getPluginManager().isPluginEnabled("CombatLogX"))
-            combatLogPlugin = (ICombatLogX) Bukkit.getPluginManager().getPlugin("CombatLogX");
     }
     
     /*

@@ -1,9 +1,11 @@
 package de.craftlancer.clstuff.pvp;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -12,7 +14,10 @@ import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.conversation.ClickableBooleanPrompt;
@@ -20,50 +25,107 @@ import de.craftlancer.core.conversation.FormattedConversable;
 import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageRegisterable;
 import de.craftlancer.core.util.MessageUtil;
+import me.ryanhamshire.GriefPrevention.Claim;
+import me.ryanhamshire.GriefPrevention.ClaimPermission;
+import me.ryanhamshire.GriefPrevention.events.ClaimPermissionCheckEvent;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.raidstone.wgevents.WorldGuardEvents;
 
 // TODO just use a map, can't check PvP Status for offline players otherwise
 public class PvPProtection implements Listener, MessageRegisterable {
     
+    private static final String UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
     private static final String DISABLE_REGION = "Valgard";
-    private static final long DISABLE_TIMER = 60 * 60 * 1000L;
+    private static final long DISABLE_TIMER = 1 * 60 * 1000L;
     
     private final ConversationFactory enableConvo;
     
     private Map<UUID, Long> map = new HashMap<>();
     
     public PvPProtection(CLStuff plugin) {
-        MessageUtil.register(this,
-                             new TextComponent(""),
-                             ChatColor.WHITE,
-                             ChatColor.YELLOW,
-                             ChatColor.RED,
-                             ChatColor.DARK_RED,
-                             ChatColor.DARK_AQUA,
-                             ChatColor.GREEN);
+        MessageUtil.register(this, null, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA, ChatColor.GREEN);
         
         this.enableConvo = new ConversationFactory(plugin).withFirstPrompt(new EnablePvPPrompt()).withTimeout(30).withLocalEcho(false).withModality(false);
         plugin.getCommand("togglepvp").setExecutor(this::togglePvPCommand);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
     
-    public Long getPvPEnabledValue(OfflinePlayer player) {
-        return map.getOrDefault(player.getUniqueId(), 0L);
+    @EventHandler
+    public void onSiegeCommend(PlayerCommandPreprocessEvent event) {
+        if (!event.getMessage().startsWith("/siege"))
+            return;
+        
+        Player player = event.getPlayer();
+        
+        if (!hasPvPEnabled(player)) {
+            MessageUtil.sendMessage(this, player, MessageLevel.NORMAL, "You can't siege while you have PvP disabled. Use /togglepvp to enable it.");
+            event.setCancelled(true);
+            return;
+        }
+        
+        String[] args = event.getMessage().split(" ");
+        
+        if (args.length < 2 || Bukkit.getPlayer(args[1]) == null)
+            return;
+        
+        Player other = Bukkit.getPlayer(args[1]);
+        
+        if (!hasPvPEnabled(other)) {
+            MessageUtil.sendMessage(this, player, MessageLevel.NORMAL, "You can can only siege players who have PvP enabled.");
+            event.setCancelled(true);
+        }
     }
     
-    public boolean hasPvPEnabled(OfflinePlayer player) {
-        long val = map.getOrDefault(player.getUniqueId(), 0L);
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInventoryOpen(ClaimPermissionCheckEvent event) {
+        if (event.getRequiredPermission() != ClaimPermission.Inventory)
+            return;
+
+        if (!hasPvPEnabled(event.getCheckedUUID()))
+            return;
+
+        Claim claim = event.getClaim();
+        
+        ArrayList<String> trusted = new ArrayList<>();
+        claim.getPermissions(trusted, trusted, trusted, trusted);
+        trusted.add(claim.getOwnerID().toString());
+        
+        if(trusted.stream().filter(a -> a.matches(UUID_REGEX)).map(UUID::fromString).anyMatch(this::hasPvPEnabled))
+            event.setDenialReason(null);
+    }
+    
+    public Long getPvPEnabledValue(UUID player) {
+        return map.getOrDefault(player, 0L);
+    }
+    
+    public boolean hasPvPEnabled(UUID player) {
+        long val = map.getOrDefault(player, 0L);
         
         return val == Long.MAX_VALUE || System.currentTimeMillis() < val;
     }
     
+    public void setPvPEnabled(UUID player) {
+        map.put(player, Long.MAX_VALUE);
+    }
+    
+    public void setPvPDisabled(UUID player, long timer) {
+        map.merge(player, System.currentTimeMillis() + timer, Math::min);
+    }
+    
+    public Long getPvPEnabledValue(OfflinePlayer player) {
+        return getPvPEnabledValue(player.getUniqueId());
+    }
+    
+    public boolean hasPvPEnabled(OfflinePlayer player) {
+        return hasPvPEnabled(player.getUniqueId());
+    }
+    
     public void setPvPEnabled(OfflinePlayer player) {
-        map.put(player.getUniqueId(), Long.MAX_VALUE);
+        setPvPEnabled(player.getUniqueId());
     }
     
     public void setPvPDisabled(OfflinePlayer player, long timer) {
-        map.merge(player.getUniqueId(), System.currentTimeMillis() + timer, Math::min);
+        setPvPDisabled(player.getUniqueId(), timer);
     }
     
     private void handlePvPDisable(Player player) {

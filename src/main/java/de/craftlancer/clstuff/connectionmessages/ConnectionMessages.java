@@ -80,8 +80,8 @@ public class ConnectionMessages implements Listener {
         loginPrefix = messagesConfig.getString("joinPrefix", "&8[&a+&8]&e");
         logoutPrefix = messagesConfig.getString("leavePrefix", "&8[&c-&8]&e");
         prefix = "§8[§dConnectionMessages§8]§a ";
-        defaultLoginMessage = messagesConfig.getString("defaultLoginMessage");
-        defaultLogoutMessage = messagesConfig.getString("defaultLogoutMessage");
+        defaultLoginMessage = messagesConfig.getString("defaultLoginMessage", "");
+        defaultLogoutMessage = messagesConfig.getString("defaultLogoutMessage", "");
         
         loginSection.getKeys(false).forEach(key -> {
             Permission permission = new Permission(key.replace("_", "."));
