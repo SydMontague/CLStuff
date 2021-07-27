@@ -30,7 +30,9 @@ public class DonatorTicketRegistry {
         dataFile = new File(plugin.getDataFolder(), "donatorTicketRegistry.yml");
         
         load();
-        new LambdaRunnable(() -> run()).runTaskTimer(plugin, 0, 1200);
+        new LambdaRunnable(this::run).runTaskTimer(plugin, 0, 1200);
+
+        plugin.getCommand("donatortickets").setExecutor(new DonatorTicketCommandHandler(plugin, this));
     }
     
     private void load() {

@@ -1,21 +1,17 @@
 package de.craftlancer.clstuff.rankings;
 
-import de.craftlancer.clfeatures.CLFeatures;
-import de.craftlancer.clfeatures.trophydepositor.TrophyDepositorFeature;
-import de.craftlancer.clstuff.rewards.Reward;
-import de.craftlancer.clstuff.rewards.RewardsManager;
-import de.craftlancer.core.CLCore;
-import de.craftlancer.core.LambdaRunnable;
-import de.craftlancer.core.LastSeenCache;
-import de.craftlancer.core.Utils;
-import de.craftlancer.core.util.MessageRegisterable;
-import de.craftlancer.core.util.MessageUtil;
-import de.craftlancer.core.util.Tuple;
-import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import me.ryanhamshire.GriefPrevention.PlayerData;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.io.File;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Statistic;
@@ -30,17 +26,23 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
+import de.craftlancer.clfeatures.CLFeatures;
+import de.craftlancer.clfeatures.trophydepositor.TrophyDepositorFeature;
+import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.clstuff.rewards.Reward;
+import de.craftlancer.clstuff.rewards.RewardsManager;
+import de.craftlancer.core.CLCore;
+import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.LastSeenCache;
+import de.craftlancer.core.Utils;
+import de.craftlancer.core.util.MessageRegisterable;
+import de.craftlancer.core.util.MessageUtil;
+import de.craftlancer.core.util.Tuple;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import me.ryanhamshire.GriefPrevention.PlayerData;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class Rankings implements CommandExecutor, MessageRegisterable {
     private final Plugin plugin;
@@ -53,7 +55,7 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
     private Map<UUID, RankingsEntry> scoreMap = new HashMap<>();
     private Map<Integer, String> rewardMap = new HashMap<>();
     
-    public Rankings(Plugin plugin) {
+    public Rankings(CLStuff plugin) {
         this.plugin = plugin;
         this.lastSeenCache = CLCore.getInstance().getLastSeenCache();
         this.rankingsFile = new File(plugin.getDataFolder(), "rankings.yml");
@@ -72,6 +74,7 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
         
         BaseComponent component = new TextComponent("§8[§bScores§8]");
         MessageUtil.register(this, component, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA, ChatColor.GREEN);
+        plugin.getCommand("rankings").setExecutor(new RankingsCommandHandler(plugin, this));
         
         new LambdaRunnable(this::checkRankingRewards).runTaskTimer(plugin, 10, 20);
     }

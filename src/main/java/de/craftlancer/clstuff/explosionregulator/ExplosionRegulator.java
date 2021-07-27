@@ -46,6 +46,7 @@ public class ExplosionRegulator implements Listener {
         itemGroups = config.getKeys(false).stream().collect(Collectors.toMap(a -> a, a -> (ItemGroup) config.get(a)));
         
         plugin.getCommand("explonerf").setExecutor(new ExplosionRegulatorCommandHandler(plugin, this));
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
         new LambdaRunnable(() -> itemGroups.forEach((a, b) -> b.tick())).runTaskTimer(plugin, 1200L, 1200L);
     }
     

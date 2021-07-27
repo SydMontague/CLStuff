@@ -5,6 +5,7 @@ import de.craftlancer.clfeatures.CLFeatures;
 import de.craftlancer.clfeatures.Feature;
 import de.craftlancer.clfeatures.ManualPlacementFeature;
 import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.clstuff.resourcepack.command.CustomBlockCommandHandler;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.menu.ConditionalPagedMenu;
 import de.craftlancer.core.menu.MenuItem;
@@ -79,6 +80,9 @@ public class CustomBlockRegistry implements Listener {
                 Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN), false));
         defaults.put(Material.BROWN_MUSHROOM_BLOCK, new CustomMushroomItem("defaultBrownMushroom", new ItemStack(Material.BROWN_MUSHROOM),
                 Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN), false));
+
+        plugin.getCommand("customblock").setExecutor(new CustomBlockCommandHandler(plugin, this));
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
     
     public void save() {

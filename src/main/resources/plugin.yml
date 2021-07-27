@@ -97,7 +97,8 @@ commands:
     description: Global reward utility for players and plugins
   navigation:
     description: Navigation api for players and plugins
-
+  togglepvp:
+    description: Toggles PvP on/off. Can only be disabled in Valgard.
 permissions:
   clstuff.centermap:
     default: false

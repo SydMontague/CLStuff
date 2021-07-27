@@ -57,6 +57,9 @@ public class ConnectionMessages implements Listener {
         this.dataFile = new File(plugin.getDataFolder(), "connectionMessagesData.yml");
         
         load(true);
+
+        plugin.getCommand("connectionmessages").setExecutor(new ConnectionMessagesCommandHandler(plugin, this));
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
     
     protected void load(boolean data) {

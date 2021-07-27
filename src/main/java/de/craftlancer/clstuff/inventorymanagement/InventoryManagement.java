@@ -1,6 +1,8 @@
 package de.craftlancer.clstuff.inventorymanagement;
 
 import de.craftlancer.clstuff.CLStuff;
+
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -36,6 +38,9 @@ public class InventoryManagement implements Listener {
         this.lastInventoryFile = new File(directory, "inventoryManagementData.yml");
         
         load();
+
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+        plugin.getCommand("inventorymanagement").setExecutor(new InventoryManagementCommandHandler(plugin, this));
     }
     
     private void load() {

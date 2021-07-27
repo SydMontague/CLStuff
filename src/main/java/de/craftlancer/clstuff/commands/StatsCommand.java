@@ -59,6 +59,7 @@ public class StatsCommand implements CommandExecutor {
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "Money: " + Utils.TEXT_COLOR_IMPORTANT + MONEY_FORMAT.format(entry.getBalance()));
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + String.format("Claimblocks:%s %d Spent / %d Total", Utils.TEXT_COLOR_IMPORTANT, entry.getSpent(), entry.getSpent() + entry.getUnspent()));
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "Score: " + Utils.TEXT_COLOR_IMPORTANT + plugin.getRankings().getScore(player));
+        sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "PvP: " + Utils.TEXT_COLOR_IMPORTANT + getPvPString(player));
         if (clan != null) {
             BaseComponent comp = new TextComponent(Utils.INDENTATION + "Clan: ");
             comp.setColor(Utils.TEXT_COLOR_UNIMPORTANT.asBungee());
@@ -71,5 +72,16 @@ public class StatsCommand implements CommandExecutor {
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "Last Seen: " + Utils.TEXT_COLOR_IMPORTANT + ClanUtils.toDate(player.getLastPlayed()));
         
         return true;
+    }
+    
+    private String getPvPString(OfflinePlayer player) {
+        long time = plugin.getPvPProtection().getPvPEnabledValue(player);
+
+        if(time == Long.MAX_VALUE)
+            return "Enabled";
+        else if(System.currentTimeMillis() < time)
+            return "Enabled until " + ClanUtils.toDate(time);
+        else
+            return "Disabled";
     }
 }

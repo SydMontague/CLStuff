@@ -67,6 +67,7 @@ public class AdminShopManager implements Listener {
         });
         
         plugin.getCommand("adminshop").setExecutor(new AdminShopCommandHandler(plugin, this));
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
         
         new LambdaRunnable(this::displayParticles).runTaskTimer(plugin, 0, 10);
     }

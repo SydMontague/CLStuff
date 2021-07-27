@@ -77,8 +77,6 @@ public class ModelToken implements Listener {
     public ModelToken(CLStuff plugin) {
         this.plugin = plugin;
         
-        plugin.getCommand("modeltoken").setExecutor(new ModelTokenCommandHandler(plugin, this));
-        
         Configuration config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "modelTokens.yml"));
         
         tokenMap = config.getMapList("modelTokens").stream()
@@ -90,6 +88,9 @@ public class ModelToken implements Listener {
         if (blacklist != null)
             cmdBlacklist = blacklist.getValues(false).entrySet().stream()
                                     .collect(Collectors.toMap(a -> Material.getMaterial(a.getKey()), a -> (List<Integer>) a.getValue()));
+        
+        plugin.getCommand("modeltoken").setExecutor(new ModelTokenCommandHandler(plugin, this));
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
     
     public void save() {

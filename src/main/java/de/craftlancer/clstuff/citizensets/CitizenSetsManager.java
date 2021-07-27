@@ -1,11 +1,14 @@
 package de.craftlancer.clstuff.citizensets;
 
 import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.clstuff.citizensets.commands.CitizenSetCommandHandler;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.gui.PageItem;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -60,6 +63,9 @@ public class CitizenSetsManager implements Listener {
         
         load();
         createGui();
+
+        plugin.getCommand("citizensets").setExecutor(new CitizenSetCommandHandler(plugin, this));
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
     
     public void createGui() {

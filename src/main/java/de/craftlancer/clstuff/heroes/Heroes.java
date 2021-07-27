@@ -14,12 +14,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Skull;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.clstuff.heroes.commands.HeroesCommandHandler;
 import de.craftlancer.clstuff.heroes.runnables.BaltopCalculateRunnable;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.util.Tuple;
@@ -51,7 +51,8 @@ public class Heroes {
         heroesLocations = (List<HeroesLocation>) locationConfig.getList("locations", new ArrayList<>());
         
         new BaltopCalculateRunnable(this).runTaskTimerAsynchronously(plugin, 0, refreshDelay);
-        
+
+        plugin.getCommand("heroes").setExecutor(new HeroesCommandHandler(plugin, this));
         // one head per minute
         new LambdaRunnable(this::applyHeads).runTaskTimer(getPlugin(), 1200L, 1200L);
     }

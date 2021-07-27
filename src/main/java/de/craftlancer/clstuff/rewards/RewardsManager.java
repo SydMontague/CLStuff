@@ -41,6 +41,7 @@ public class RewardsManager implements MessageRegisterable, Listener {
         new LambdaRunnable(this::load).runTaskLater(plugin, 40);
         
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        plugin.getCommand("rewards").setExecutor(new RewardsCommandHandler(plugin, this));
     }
     
     @EventHandler(ignoreCancelled = true)

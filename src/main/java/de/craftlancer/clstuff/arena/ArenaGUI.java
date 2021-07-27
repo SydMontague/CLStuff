@@ -96,9 +96,9 @@ public class ArenaGUI implements Listener {
         this.plugin = plugin;
         
         loadConfig();
-        plugin.getCommand("arenagui").setExecutor(new ArenaCommand(plugin, this));
         
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        plugin.getCommand("arenagui").setExecutor(new ArenaCommand(plugin, this));
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
     
     @SuppressWarnings("unchecked")

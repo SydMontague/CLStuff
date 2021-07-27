@@ -33,6 +33,8 @@ public class EmoteManager {
         this.plugin = plugin;
         ConfigurationSerialization.registerClass(Emote.class);
         load();
+
+        plugin.getCommand("emote").setExecutor(new EmoteCommand(this));
     }
     
     private void load() {
