@@ -1,11 +1,10 @@
 package de.craftlancer.clstuff.adminshop;
 
+import de.craftlancer.core.command.CommandHandler;
 import org.bukkit.plugin.Plugin;
 
-import de.craftlancer.core.command.CommandHandler;
-
 public class AdminShopCommandHandler extends CommandHandler {
-
+    
     public AdminShopCommandHandler(Plugin plugin, AdminShopManager manager) {
         super(plugin);
         
@@ -13,5 +12,6 @@ public class AdminShopCommandHandler extends CommandHandler {
         registerSubCommand("remove", new AdminShopRemoveCommand(plugin));
         registerSubCommand("setbroadcast", new AdminShopSetBroadcastCommand(plugin));
         registerSubCommand("defaultbroadcast", new AdminShopDefaultBroadcastCommand(plugin, manager));
+        registerSubCommand("setDisplayItem", new AdminShopSetDisplayItemCommand(plugin, manager));
     }
 }

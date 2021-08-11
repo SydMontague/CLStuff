@@ -1,6 +1,8 @@
 package de.craftlancer.clstuff.adminshop;
 
 import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.LambdaRunnable;
+import de.craftlancer.core.Utils;
 import de.craftlancer.core.menu.ConditionalMenu;
 import de.craftlancer.core.menu.Menu;
 import de.craftlancer.core.menu.MenuItem;
@@ -15,10 +17,13 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -41,7 +46,12 @@ public class AdminShop {
     private CLStuff plugin;
     private AdminShopManager manager;
     private AdminShopTrade[] trades = new AdminShopTrade[4];
+    private ItemStack[] displayItems = new ItemStack[4];
     private Location location;
+    
+    private BukkitTask stopDisplayTask;
+    private BukkitTask tickTask;
+    private AdminShopDisplayItem displayItem;
     
     private ConditionalMenu menu;
     
@@ -54,13 +64,31 @@ public class AdminShop {
         trades[1] = new AdminShopTrade();
         trades[2] = new AdminShopTrade();
         trades[3] = new AdminShopTrade();
+        
+        displayItems[0] = new ItemStack(Material.AIR);
+        displayItems[1] = new ItemStack(Material.AIR);
+        displayItems[2] = new ItemStack(Material.AIR);
+        displayItems[3] = new ItemStack(Material.AIR);
+        
+        this.displayItem = new AdminShopDisplayItem(this);
+        
+        this.tickTask = new LambdaRunnable(this::tick).runTaskTimer(plugin, 0, 10);
     }
     
-    public AdminShop(CLStuff plugin, AdminShopManager manager, AdminShopTrade[] trades, Location location) {
+    public AdminShop(CLStuff plugin, AdminShopManager manager, AdminShopTrade[] trades, ItemStack[] displayItems, Location location) {
         this.plugin = plugin;
         this.manager = manager;
         this.trades = trades;
+        this.displayItems = displayItems;
         this.location = location;
+        this.displayItem = new AdminShopDisplayItem(this);
+        
+        this.tickTask = new LambdaRunnable(this::tick).runTaskTimer(plugin, 0, 10);
+    }
+    
+    private void tick() {
+        if (!displayItem.tick() && Utils.isChunkLoaded(location))
+            location.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, location.clone().add(0.5, 1.2, 0.5), 5, 0.2D, 0.2D, 0.2D);
     }
     
     private void updateTrades() {
@@ -81,6 +109,10 @@ public class AdminShop {
         createMenu();
     }
     
+    public AdminShopDisplayItem getDisplayItem() {
+        return displayItem;
+    }
+    
     public void createMenu() {
         this.menu = new ConditionalMenu(plugin, 6,
                 Arrays.asList(new Tuple<>("defaultUser", "Admin Shop"), new Tuple<>("defaultAdmin", "Admin Shop Editor"),
@@ -95,6 +127,7 @@ public class AdminShop {
         
         for (int i = 0; i < 4; i++) {
             AdminShopTrade trade = trades[i];
+            ItemStack displayItem = displayItems[i];
             
             MenuItem input0 = new MenuItem(trade.getInput()[0]);
             MenuItem input1 = new MenuItem(trade.getInput()[1]);
@@ -105,7 +138,6 @@ public class AdminShop {
             MenuItem input6 = new MenuItem(trade.getInput()[6]);
             MenuItem arrow = new MenuItem(ARROW_GREEN_ITEM);
             MenuItem isBroadcast = new MenuItem(trade.isBroadcast() ? BROADCAST_ON_ITEM : BROADCAST_OFF_ITEM);
-            MenuItem output = new MenuItem(trade.getOutput());
             
             final int localI = i;
             menu.set(9 + i * 9, input0.clone().addClickAction(p -> menu.replace(9 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
@@ -120,7 +152,14 @@ public class AdminShop {
                 menu.replace(16 + localI * 9, trade.isBroadcast() ? BROADCAST_ON_ITEM : BROADCAST_OFF_ITEM, "defaultAdmin", "resourceAdmin");
                 c.getPlayer().playSound(c.getPlayer().getLocation(), Sound.UI_BUTTON_CLICK, 1, 1);
             }), "defaultAdmin", "resourceAdmin");
-            menu.set(17 + i * 9, output.clone().addClickAction(p -> menu.replace(17 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            menu.set(17 + i * 9, new MenuItem(trade.getOutput()).addClickAction(p -> menu.replace(17 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
+            
+            ItemBuilder outputBuilder = new ItemBuilder(trade.getOutput() == null ? new ItemStack(Material.AIR) : trade.getOutput().clone());
+            
+            if (!displayItem.getType().isAir())
+                outputBuilder.addLore("", "&8→ &6Right click to see item display");
+            
+            MenuItem output = new MenuItem(outputBuilder.build());
             
             Consumer<Player> action = new TradeAction(this, trade, i);
             
@@ -132,7 +171,23 @@ public class AdminShop {
             menu.set(14 + i * 9, input5.clone(), "defaultUser", "resourceUser");
             menu.set(15 + i * 9, input6.clone(), "defaultUser", "resourceUser");
             menu.set(16 + i * 9, arrow.clone().addClickAction(c -> action.accept(c.getPlayer())), "defaultUser", "resourceUser");
-            menu.set(17 + i * 9, output.clone().addClickAction(c -> action.accept(c.getPlayer())), "defaultUser", "resourceUser");
+            menu.set(17 + i * 9, output.clone().addClickAction(c -> action.accept(c.getPlayer()), ClickType.LEFT)
+                    .addClickAction(click -> {
+                        Player player = click.getPlayer();
+                        
+                        if (displayItem.getType().isAir())
+                            return;
+                        
+                        player.closeInventory();
+                        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                        
+                        this.displayItem.setItemStack(displayItems[localI]);
+                        
+                        if (stopDisplayTask != null)
+                            stopDisplayTask.cancel();
+                        
+                        stopDisplayTask = new LambdaRunnable(() -> this.displayItem.setItemStack(null)).runTaskLater(plugin, 200);
+                    }), "defaultUser", "resourceUser");
         }
         
         menu.set(48, new MenuItem(REVERT_CHANGE_ITEM).addClickAction(click -> {
@@ -162,7 +217,7 @@ public class AdminShop {
     public void display(Player player) {
         boolean usingResourcePack = ResourcePackManager.getInstance().isFullyAccepted(player);
         String key;
-        if (player.hasPermission("clstuff.adminshop")) {
+        if (player.hasPermission("clstuff.adminshop") && player.isSneaking()) {
             if (usingResourcePack)
                 key = "resourceAdmin";
             else
@@ -197,6 +252,14 @@ public class AdminShop {
     
     public Location getLocation() {
         return location;
+    }
+    
+    public ItemStack[] getDisplayItems() {
+        return displayItems;
+    }
+    
+    public BukkitTask getTickTask() {
+        return tickTask;
     }
     
     private class TradeAction implements Consumer<Player> {

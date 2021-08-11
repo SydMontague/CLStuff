@@ -6,18 +6,25 @@ import de.craftlancer.core.util.MessageLevel;
 import de.craftlancer.core.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Particle;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityPortalEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.entity.ItemMergeEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -41,7 +48,7 @@ public class AdminShopManager implements Listener {
     
     private final CLStuff plugin;
     private Map<Location, AdminShop> shops = new HashMap<>();
-    private String defaultBroadcast = "%player% bought %item%.";
+    private String defaultBroadcast;
     
     public AdminShopManager(CLStuff plugin) {
         this.plugin = plugin;
@@ -49,7 +56,7 @@ public class AdminShopManager implements Listener {
         File configFile = new File(plugin.getDataFolder(), "adminShops.yml");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
         
-        defaultBroadcast = config.getString("defaultBroadcast");
+        defaultBroadcast = config.getString("defaultBroadcast", "%player% bought %item%.");
         
         config.getKeys(false).forEach(a -> {
             if (a.equalsIgnoreCase("defaultBroadcast"))
@@ -63,13 +70,18 @@ public class AdminShopManager implements Listener {
             trades[2] = (AdminShopTrade) section.get("trade3");
             trades[3] = (AdminShopTrade) section.get("trade4");
             
-            shops.put(loc, new AdminShop(plugin, this, trades, loc));
+            ItemStack[] displayItems = new ItemStack[4];
+            
+            displayItems[0] = (ItemStack) section.get("displayItem1", new ItemStack(Material.AIR));
+            displayItems[1] = (ItemStack) section.get("displayItem2", new ItemStack(Material.AIR));
+            displayItems[2] = (ItemStack) section.get("displayItem3", new ItemStack(Material.AIR));
+            displayItems[3] = (ItemStack) section.get("displayItem4", new ItemStack(Material.AIR));
+            
+            shops.put(loc, new AdminShop(plugin, this, trades, displayItems, loc));
         });
         
         plugin.getCommand("adminshop").setExecutor(new AdminShopCommandHandler(plugin, this));
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        
-        new LambdaRunnable(this::displayParticles).runTaskTimer(plugin, 0, 10);
     }
     
     private static String toConfigKey(Location loc) {
@@ -97,6 +109,13 @@ public class AdminShopManager implements Listener {
             section.set("trade2", b.getTrade(1));
             section.set("trade3", b.getTrade(2));
             section.set("trade4", b.getTrade(3));
+            
+            section.set("displayItem1", b.getDisplayItems()[0]);
+            section.set("displayItem2", b.getDisplayItems()[1]);
+            section.set("displayItem3", b.getDisplayItems()[2]);
+            section.set("displayItem4", b.getDisplayItems()[3]);
+            
+            b.getDisplayItem().remove();
         });
         
         BukkitRunnable saveTask = new LambdaRunnable(() -> {
@@ -134,7 +153,7 @@ public class AdminShopManager implements Listener {
                 shops.put(clicked, new AdminShop(plugin, this, clicked));
                 MessageUtil.sendMessage(plugin, player, MessageLevel.NORMAL, "AdminShop created");
             } else if (shops.containsKey(clicked) && METADATA_REMOVE.equals(mode)) {
-                shops.remove(clicked);
+                shops.remove(clicked).getTickTask().cancel();
                 MessageUtil.sendMessage(plugin, player, MessageLevel.NORMAL, "AdminShop removed");
             }
         }
@@ -172,15 +191,47 @@ public class AdminShopManager implements Listener {
         event.setCancelled(true);
     }
     
+    /*
+     * DUPE PREVENTION
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onItemPickup(EntityPickupItemEvent event) {
+        if (event.getItem().hasMetadata(AdminShopDisplayItem.DISPLAY_ITEM_METADATA))
+            event.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void onInventoryPickup(InventoryPickupItemEvent event) {
+        if (event.getItem().hasMetadata(AdminShopDisplayItem.DISPLAY_ITEM_METADATA))
+            event.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void onItemDespawn(ItemDespawnEvent event) {
+        if (event.getEntity().hasMetadata(AdminShopDisplayItem.DISPLAY_ITEM_METADATA))
+            event.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void onItemPortalUse(EntityPortalEvent event) {
+        if (event.getEntityType() != EntityType.DROPPED_ITEM)
+            return;
+        
+        if (event.getEntity().hasMetadata(AdminShopDisplayItem.DISPLAY_ITEM_METADATA))
+            event.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void onItemMerge(ItemMergeEvent event) {
+        if (event.getEntity().hasMetadata(AdminShopDisplayItem.DISPLAY_ITEM_METADATA)
+                || event.getTarget().hasMetadata(AdminShopDisplayItem.DISPLAY_ITEM_METADATA))
+            event.setCancelled(true);
+    }
+    
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         if (shops.containsKey(event.getBlock().getLocation()))
             event.setCancelled(true);
-    }
-    
-    private void displayParticles() {
-        shops.keySet().stream().filter(a -> a.getWorld().isChunkLoaded(a.getBlockX() >> 4, a.getBlockZ() >> 4))
-                .forEach(a -> a.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, a.clone().add(0.5, 1.2, 0.5), 5, 0.2D, 0.2D, 0.2D));
     }
     
     public void setDefaultBroadcast(String message) {
@@ -189,5 +240,9 @@ public class AdminShopManager implements Listener {
     
     public String getDefaultBroadcast() {
         return defaultBroadcast;
+    }
+    
+    protected AdminShop getShop(Location loc) {
+        return shops.get(loc);
     }
 }
