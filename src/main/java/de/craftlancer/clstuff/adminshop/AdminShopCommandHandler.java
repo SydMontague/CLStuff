@@ -13,5 +13,6 @@ public class AdminShopCommandHandler extends CommandHandler {
         registerSubCommand("setbroadcast", new AdminShopSetBroadcastCommand(plugin));
         registerSubCommand("defaultbroadcast", new AdminShopDefaultBroadcastCommand(plugin, manager));
         registerSubCommand("setDisplayItem", new AdminShopSetDisplayItemCommand(plugin, manager));
+        registerSubCommand("removeDisplayItem", new AdminShopRemoveDisplayItemCommand(plugin, manager));
     }
 }

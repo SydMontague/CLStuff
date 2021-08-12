@@ -1,6 +1,7 @@
 package de.craftlancer.clstuff.adminshop;
 
 import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.clstuff.premium.TokenData;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.Utils;
 import de.craftlancer.core.menu.ConditionalMenu;
@@ -34,7 +35,8 @@ public class AdminShop {
     private static final ItemStack ADMIN_QUESTION_MARK = new ItemBuilder(Material.STONE).setCustomModelData(5).setDisplayName("§6To default page...").build();
     private static final ItemStack QUESTION_MARK = new ItemBuilder(Material.STONE).setCustomModelData(5).setDisplayName("§6What is this?")
             .setLore("", "§7Click on an arrow to make", "§7a trade. You must have all", "§7Items listed on the left side of", "§7the arrow to make a trade.").build();
-    private static final ItemStack ARROW_GREEN_ITEM = new ItemBuilder(Material.ARROW).setCustomModelData(2).setDisplayName("Trade for").build();
+    private static final ItemStack ARROW_GREEN_ITEM = new ItemBuilder(Material.ARROW).setCustomModelData(2).setDisplayName("&eTrade for")
+            .addLore("", "&8→ &6Left click to trade").build();
     
     private static final ItemStack BROADCAST_OFF_ITEM = new ItemBuilder(Material.ARROW).setCustomModelData(1).setDisplayName("Broadcast Off").build();
     private static final ItemStack BROADCAST_ON_ITEM = new ItemBuilder(Material.ARROW).setCustomModelData(2).setDisplayName("Broadcast On").build();
@@ -157,7 +159,7 @@ public class AdminShop {
             ItemBuilder outputBuilder = new ItemBuilder(trade.getOutput() == null ? new ItemStack(Material.AIR) : trade.getOutput().clone());
             
             if (!displayItem.getType().isAir())
-                outputBuilder.addLore("", "&8→ &6Right click to see item display");
+                outputBuilder.addLore("", "&8→ &6Left click to trade", "&8→ &6Right click to see item display");
             
             MenuItem output = new MenuItem(outputBuilder.build());
             
@@ -175,13 +177,14 @@ public class AdminShop {
                     .addClickAction(click -> {
                         Player player = click.getPlayer();
                         
-                        if (displayItem.getType().isAir())
-                            return;
-                        
                         player.closeInventory();
                         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5F, 1F);
                         
-                        this.displayItem.setItemStack(displayItems[localI]);
+                        TokenData tokenData = plugin.getModelToken().getTokenData(trade.getOutput());
+                        
+                        this.displayItem.setItemStack(displayItem.getType().isAir() ?
+                                tokenData == null ? trade.getOutput() : tokenData.toItemStack()
+                                : displayItem);
                         
                         if (stopDisplayTask != null)
                             stopDisplayTask.cancel();
