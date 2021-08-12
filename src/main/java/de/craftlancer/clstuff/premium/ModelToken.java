@@ -1,16 +1,7 @@
 package de.craftlancer.clstuff.premium;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-
+import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.LambdaRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -36,8 +27,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import de.craftlancer.clstuff.CLStuff;
-import de.craftlancer.core.LambdaRunnable;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 // TODO Anvil name input
 // TODO token ID, for give?
@@ -45,15 +44,15 @@ import de.craftlancer.core.LambdaRunnable;
  * TokenItem
  * CustomModelData
  * TokenTargetItem
- * 
+ *
  * Mainhand Token
  * Offhand Target Item
- * 
+ *
  * Type
  * CustomModelData
  * Lore
  * Name
- * 
+ *
  * add
  * remove
  * list
@@ -73,21 +72,20 @@ public class ModelToken implements Listener {
         ConfigurationSerialization.registerClass(TokenData.class);
     }
     
-    @SuppressWarnings("unchecked")
     public ModelToken(CLStuff plugin) {
         this.plugin = plugin;
         
         Configuration config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "modelTokens.yml"));
         
         tokenMap = config.getMapList("modelTokens").stream()
-                         .collect(Collectors.toMap(a -> (ItemStack) a.get("tokenItem"), a -> (TokenData) a.get("tokenData")));
+                .collect(Collectors.toMap(a -> (ItemStack) a.get("tokenItem"), a -> (TokenData) a.get("tokenData")));
         
         idList.addAll(tokenMap.keySet());
         
         ConfigurationSection blacklist = config.getConfigurationSection("blacklist");
         if (blacklist != null)
             cmdBlacklist = blacklist.getValues(false).entrySet().stream()
-                                    .collect(Collectors.toMap(a -> Material.getMaterial(a.getKey()), a -> (List<Integer>) a.getValue()));
+                    .collect(Collectors.toMap(a -> Material.getMaterial(a.getKey()), a -> (List<Integer>) a.getValue()));
         
         plugin.getCommand("modeltoken").setExecutor(new ModelTokenCommandHandler(plugin, this));
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -113,8 +111,7 @@ public class ModelToken implements Listener {
         BukkitRunnable saveTask = new LambdaRunnable(() -> {
             try {
                 config.save(tokenFile);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "Error while saving Token: ", e);
             }
         });
@@ -273,10 +270,14 @@ public class ModelToken implements Listener {
         return result;
     }
     
+    public TokenData getTokenData(ItemStack token) {
+        return tokenMap.get(token);
+    }
+    
     public Map<Material, List<Integer>> getBlacklist() {
         return Collections.unmodifiableMap(cmdBlacklist);
     }
-
+    
     public int getIndex(ItemStack key) {
         return idList.indexOf(key);
     }
