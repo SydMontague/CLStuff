@@ -59,10 +59,10 @@ public class StatsCommand implements CommandExecutor {
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "Money: " + Utils.TEXT_COLOR_IMPORTANT + MONEY_FORMAT.format(entry.getBalance()));
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + String.format("Claimblocks:%s %d Spent / %d Total", Utils.TEXT_COLOR_IMPORTANT, entry.getSpent(), entry.getSpent() + entry.getUnspent()));
         sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "Score: " + Utils.TEXT_COLOR_IMPORTANT + plugin.getRankings().getScore(player));
-        sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "PvP: " + Utils.TEXT_COLOR_IMPORTANT + getPvPString(player));
+        //sender.sendMessage(Utils.INDENTATION + Utils.TEXT_COLOR_UNIMPORTANT + "PvP: " + Utils.TEXT_COLOR_IMPORTANT + getPvPString(player));
         if (clan != null) {
             BaseComponent comp = new TextComponent(Utils.INDENTATION + "Clan: ");
-            comp.setColor(Utils.TEXT_COLOR_UNIMPORTANT.asBungee());
+            comp.setColor(Utils.TEXT_COLOR_UNIMPORTANT);
             comp.addExtra(ClanUtils.getClanTagAndNameComponent(clan));
             comp.addExtra(" | ");
             comp.addExtra(ClanUtils.getRankComponent(clan, clan.getMember(player).getRank()));

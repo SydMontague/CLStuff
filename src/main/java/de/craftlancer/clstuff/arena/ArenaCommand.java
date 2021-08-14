@@ -10,6 +10,7 @@ public class ArenaCommand extends CommandHandler {
         super(plugin);
         
         registerSubCommand("create", new ArenaCreateCommand(plugin));
+        registerSubCommand("remove", new ArenaRemoveCommand(plugin));
         registerSubCommand("reload", new ArenaReloadCommand(plugin, arena));
     }
     

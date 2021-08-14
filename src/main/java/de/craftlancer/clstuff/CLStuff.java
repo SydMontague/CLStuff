@@ -149,7 +149,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         this.inventoryManagement = new InventoryManagement(this);
         this.mobControl = new MobControl(this);
         this.itemCooldowns = new ItemCooldowns(this);
-        this.pvp = new PvPProtection(this);
+        //this.pvp = new PvPProtection(this);
         
         try {
             this.arenaGUI = new ArenaGUI(this);

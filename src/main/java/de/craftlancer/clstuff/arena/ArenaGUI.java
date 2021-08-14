@@ -2,6 +2,7 @@ package de.craftlancer.clstuff.arena;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.Plugin;
 
 import de.craftlancer.clstuff.CLStuff;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
 
 /*
  * Each Arena GUI has a list of bosses that may only exist once
@@ -170,5 +173,31 @@ public class ArenaGUI implements Listener {
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onInteractDestroy(PlayerInteractEvent event) {
+
+        if (!event.hasBlock())
+            return;
+        
+        if (!event.getPlayer().hasMetadata("arena.remove"))
+            return;
+        
+        if(!entry.containsKey(event.getClickedBlock().getLocation()))
+            return;
+        
+        event.getPlayer().removeMetadata("arena.remove", plugin);
+        File file = new File(plugin.getDataFolder(), "arenas" + File.separator + toFilename(event.getClickedBlock().getLocation()));
+        
+        entry.remove(event.getClickedBlock().getLocation());
+        try {
+            Files.deleteIfExists(file.toPath());
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+        MessageUtil.sendMessage(plugin, event.getPlayer(), MessageLevel.SUCCESS, "Arena removed");
     }
 }
