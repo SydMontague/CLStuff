@@ -99,6 +99,8 @@ commands:
     description: Navigation api for players and plugins
   togglepvp:
     description: Toggles PvP on/off. Can only be disabled in Valgard.
+  deathmessages:
+    description: Commands for deathmessages
 permissions:
   clstuff.centermap:
     default: false

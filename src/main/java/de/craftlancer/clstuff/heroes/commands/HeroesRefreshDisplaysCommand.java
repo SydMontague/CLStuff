@@ -2,8 +2,9 @@ package de.craftlancer.clstuff.heroes.commands;
 
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.heroes.Heroes;
-import de.craftlancer.clstuff.heroes.runnables.BaltopCalculateRunnable;
 import de.craftlancer.core.command.SubCommand;
+import de.craftlancer.core.util.MessageLevel;
+import de.craftlancer.core.util.MessageUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -20,8 +21,14 @@ public class HeroesRefreshDisplaysCommand extends SubCommand {
     
     @Override
     protected String execute(CommandSender commandSender, Command command, String s, String[] strings) {
-        new BaltopCalculateRunnable(heroes).runTaskAsynchronously(heroes.getPlugin());
-        return heroes.getPrefix() + "§aRefreshing displays... please wait.";
+        if (!checkSender(commandSender)) {
+            MessageUtil.sendMessage(heroes, commandSender, MessageLevel.WARNING, "You do not have access to this command.");
+            return null;
+        }
+        
+        heroes.refreshDisplays();
+        MessageUtil.sendMessage(heroes, commandSender, MessageLevel.SUCCESS, "Refreshing displays. Heads will be updated once every minute.");
+        return null;
     }
     
     @Override

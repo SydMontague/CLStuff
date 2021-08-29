@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.heroes;
 
+import de.craftlancer.clapi.clstuff.heroes.AbstractHeroesLocation;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -8,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HeroesLocation implements ConfigurationSerializable {
+public class HeroesLocation implements ConfigurationSerializable, AbstractHeroesLocation {
     //baltop, clantop, or player score top
     private String category;
     //1, 2, or 3, the ranking for the category
@@ -47,18 +48,22 @@ public class HeroesLocation implements ConfigurationSerializable {
         return map;
     }
     
+    @Override
     public String getCategory() {
         return category;
     }
     
+    @Override
     public String getRanking() {
         return ranking;
     }
     
+    @Override
     public List<Location> getDisplayLocations() {
         return displayLocations;
     }
     
+    @Override
     public List<Location> getSignLocations() {
         return signLocations;
     }

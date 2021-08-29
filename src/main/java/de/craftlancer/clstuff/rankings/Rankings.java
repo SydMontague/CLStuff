@@ -1,33 +1,9 @@
 package de.craftlancer.clstuff.rankings;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Statistic;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
-
-import de.craftlancer.clfeatures.CLFeatures;
-import de.craftlancer.clfeatures.trophydepositor.TrophyDepositorFeature;
+import de.craftlancer.clapi.clfeatures.PluginCLFeatures;
+import de.craftlancer.clapi.clfeatures.trophydepositor.AbstractTrophyDepositorFeature;
+import de.craftlancer.clapi.clstuff.rankings.AbstractRankingsEntry;
+import de.craftlancer.clapi.clstuff.rankings.RankingsManager;
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.rewards.Reward;
 import de.craftlancer.clstuff.rewards.RewardsManager;
@@ -43,13 +19,38 @@ import me.ryanhamshire.GriefPrevention.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Statistic;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.ServicePriority;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 
-public class Rankings implements CommandExecutor, MessageRegisterable {
+import java.io.File;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
+public class Rankings implements CommandExecutor, MessageRegisterable, RankingsManager {
     private final Plugin plugin;
     private final File rankingsFile;
     
     final LastSeenCache lastSeenCache;
-    final TrophyDepositorFeature trophyDepositor;
     
     private boolean isUpdating = false;
     private Map<UUID, RankingsEntry> scoreMap = new HashMap<>();
@@ -59,8 +60,20 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
         this.plugin = plugin;
         this.lastSeenCache = CLCore.getInstance().getLastSeenCache();
         this.rankingsFile = new File(plugin.getDataFolder(), "rankings.yml");
-        this.trophyDepositor = ((TrophyDepositorFeature) CLFeatures.getInstance().getFeature("trophyDepositor"));
         
+        Bukkit.getServicesManager().register(RankingsManager.class, this, plugin, ServicePriority.Highest);
+        
+        load();
+        
+        BaseComponent component = new TextComponent("§8[§bScores§8]");
+        MessageUtil.register(this, component, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA, ChatColor.GREEN);
+        plugin.getCommand("rankings").setExecutor(new RankingsCommandHandler(plugin, this));
+        
+        new LambdaRunnable(this::checkRankingRewards).runTaskTimer(plugin, 10, 20);
+    }
+    
+    @Override
+    public void load() {
         if (rankingsFile.exists()) {
             YamlConfiguration config = YamlConfiguration.loadConfiguration(rankingsFile);
             scoreMap = config.getMapList("scoreMap").stream().map(RankingsEntry::new).collect(Collectors.toMap(RankingsEntry::getUUID, a -> a));
@@ -71,12 +84,6 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
                     rewardMap.put(Integer.parseInt(key), rewardsSection.getString(key));
             
         }
-        
-        BaseComponent component = new TextComponent("§8[§bScores§8]");
-        MessageUtil.register(this, component, ChatColor.WHITE, ChatColor.YELLOW, ChatColor.RED, ChatColor.DARK_RED, ChatColor.DARK_AQUA, ChatColor.GREEN);
-        plugin.getCommand("rankings").setExecutor(new RankingsCommandHandler(plugin, this));
-        
-        new LambdaRunnable(this::checkRankingRewards).runTaskTimer(plugin, 10, 20);
     }
     
     @Override
@@ -106,6 +113,7 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
         return true;
     }
     
+    @Override
     public void save() {
         YamlConfiguration config = new YamlConfiguration();
         config.set("scoreMap", scoreMap.values().stream().map(RankingsEntry::serialize).collect(Collectors.toList()));
@@ -125,7 +133,8 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
         else saveTask.run();
     }
     
-    public Map<UUID, RankingsEntry> updateScores() {
+    @Override
+    public Map<UUID, ? extends AbstractRankingsEntry> updateScores() {
         if (isUpdating) return scoreMap;
         
         isUpdating = true;
@@ -136,11 +145,11 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
             updatePlayer(p, bannedPlayer.contains(p));
         
         checkRankingRewards();
-        
         isUpdating = false;
         return scoreMap;
     }
     
+    @Override
     public void checkRankingRewards() {
         for (Player p : Bukkit.getOnlinePlayers())
             for (Map.Entry<Integer, String> entry : rewardMap.entrySet())
@@ -151,25 +160,29 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
                 }
     }
     
+    @Override
     public RankingsEntry getRankingsEntry(OfflinePlayer player) {
         return scoreMap.get(player.getUniqueId());
     }
     
+    @Override
     public RankingsEntry getRankingsEntry(UUID uuid) {
         return scoreMap.get(uuid);
     }
     
+    @Override
     public double getScore(UUID uuid) {
         return scoreMap.containsKey(uuid) ? scoreMap.get(uuid).getScore() : 0;
     }
     
+    @Override
     public double getScore(OfflinePlayer player) {
         return getScore(player.getUniqueId());
     }
     
     private void updatePlayer(OfflinePlayer player, boolean isBanned) {
         long lastSeen = lastSeenCache.getLastSeen(player);
-
+        
         if (lastSeen == 0) return;
         
         RankingsEntry entry = scoreMap.computeIfAbsent(player.getUniqueId(), a -> new RankingsEntry(player.getUniqueId()));
@@ -207,7 +220,7 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
         rewardMap.clear();
     }
     
-    public class RankingsEntry implements ConfigurationSerializable {
+    public class RankingsEntry implements ConfigurationSerializable, AbstractRankingsEntry {
         private final UUID uuid;
         
         long lastUpdate = -1;
@@ -247,32 +260,39 @@ public class Rankings implements CommandExecutor, MessageRegisterable {
             return map;
         }
         
+        @Override
         public UUID getUUID() {
             return uuid;
         }
         
+        @Override
         public double getScore() {
             if (isBanned) return 0;
             
-            return trophyDepositor.getScore(uuid);
+            return ((AbstractTrophyDepositorFeature) Bukkit.getServicesManager().load(PluginCLFeatures.class).getFeature("trophyDepositor")).getScore(uuid);
         }
         
+        @Override
         public double getBalance() {
             return balance;
         }
         
+        @Override
         public int getPlaytime() {
             return playtime;
         }
         
+        @Override
         public int getSpent() {
             return spent;
         }
         
+        @Override
         public int getUnspent() {
             return unspent;
         }
         
+        @Override
         public long getLastUpdate() {
             return lastUpdate;
         }

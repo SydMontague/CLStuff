@@ -1,9 +1,9 @@
 package de.craftlancer.clstuff.resourcepack;
 
 import com.google.common.collect.Sets;
-import de.craftlancer.clfeatures.CLFeatures;
-import de.craftlancer.clfeatures.Feature;
-import de.craftlancer.clfeatures.ManualPlacementFeature;
+import de.craftlancer.clapi.clfeatures.AbstractFeature;
+import de.craftlancer.clapi.clfeatures.AbstractManualPlacementFeature;
+import de.craftlancer.clapi.clfeatures.PluginCLFeatures;
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.resourcepack.command.CustomBlockCommandHandler;
 import de.craftlancer.core.LambdaRunnable;
@@ -80,7 +80,7 @@ public class CustomBlockRegistry implements Listener {
                 Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN), false));
         defaults.put(Material.BROWN_MUSHROOM_BLOCK, new CustomMushroomItem("defaultBrownMushroom", new ItemStack(Material.BROWN_MUSHROOM),
                 Sets.newHashSet(BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN), false));
-
+        
         plugin.getCommand("customblock").setExecutor(new CustomBlockCommandHandler(plugin, this));
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
@@ -142,15 +142,16 @@ public class CustomBlockRegistry implements Listener {
             return;
         }
         
-        Feature feature = CLFeatures.getInstance().getFeature(customBlockItem.getId());
+        PluginCLFeatures clfeatures = Bukkit.getServicesManager().load(PluginCLFeatures.class);
+        AbstractFeature feature = clfeatures.getFeature(customBlockItem.getId());
         
-        if (feature instanceof ManualPlacementFeature) {
+        if (feature instanceof AbstractManualPlacementFeature) {
             if (!feature.checkFeatureLimit(event.getPlayer())) {
-                event.getPlayer().sendMessage(CLFeatures.CC_PREFIX + ChatColor.DARK_RED + "You've reached your limit for this feature.");
+                event.getPlayer().sendMessage(ChatColor.DARK_RED + "You've reached your limit for this feature.");
                 event.setCancelled(true);
                 return;
             } else
-                ((ManualPlacementFeature) feature).createInstance(event.getPlayer(), event.getBlock(), event.getItemInHand().clone());
+                ((AbstractManualPlacementFeature) feature).createInstance(event.getPlayer(), event.getBlock(), event.getItemInHand().clone());
         }
         
         block.setBlockData(customBlockItem.getBlockData(block.getBlockData()));

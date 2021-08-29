@@ -1,10 +1,10 @@
 package de.craftlancer.clstuff.rewards;
 
+import de.craftlancer.clapi.blueprints.event.BlueprintPostPasteEvent;
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.util.MessageRegisterable;
 import de.craftlancer.core.util.MessageUtil;
-import me.sizzlemcgrizzle.blueprints.api.BlueprintPostPasteEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
