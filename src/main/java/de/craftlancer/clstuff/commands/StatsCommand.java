@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.commands;
 
+import de.craftlancer.clapi.LazyService;
 import de.craftlancer.clapi.clclans.AbstractClan;
 import de.craftlancer.clapi.clclans.PluginClans;
 import de.craftlancer.clstuff.CLStuff;
@@ -21,6 +22,7 @@ import org.bukkit.entity.Player;
 import java.text.DecimalFormat;
 
 public class StatsCommand implements CommandExecutor {
+    private static final LazyService<PluginClans> CLANS = new LazyService<>(PluginClans.class);
     private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("0.00");
     
     private CLStuff plugin;
@@ -49,7 +51,7 @@ public class StatsCommand implements CommandExecutor {
         
         plugin.getRankings().updateScores();
         RankingsEntry entry = plugin.getRankings().getRankingsEntry(player);
-        AbstractClan clan = Bukkit.getServicesManager().load(PluginClans.class).getClan(player);
+        AbstractClan clan = CLANS.get().getClan(player);
         
         String primaryGroup = player.isOnline() ? CLCore.getInstance().getPermissions().getPrimaryGroup(null, player) : "";
         

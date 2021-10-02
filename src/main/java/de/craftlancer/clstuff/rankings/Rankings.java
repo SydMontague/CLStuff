@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.rankings;
 
+import de.craftlancer.clapi.LazyService;
 import de.craftlancer.clapi.clfeatures.PluginCLFeatures;
 import de.craftlancer.clapi.clfeatures.trophydepositor.AbstractTrophyDepositorFeature;
 import de.craftlancer.clapi.clstuff.rankings.AbstractRankingsEntry;
@@ -47,6 +48,9 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class Rankings implements CommandExecutor, MessageRegisterable, RankingsManager {
+    
+    private static final LazyService<PluginCLFeatures> CLFEATURES = new LazyService<>(PluginCLFeatures.class);
+    
     private final Plugin plugin;
     private final File rankingsFile;
     
@@ -269,7 +273,7 @@ public class Rankings implements CommandExecutor, MessageRegisterable, RankingsM
         public double getScore() {
             if (isBanned) return 0;
             
-            return ((AbstractTrophyDepositorFeature) Bukkit.getServicesManager().load(PluginCLFeatures.class).getFeature("trophyDepositor")).getScore(uuid);
+            return CLFEATURES.isPresent() ? ((AbstractTrophyDepositorFeature) CLFEATURES.get().getFeature("trophyDepositor")).getScore(uuid) : 0;
         }
         
         @Override

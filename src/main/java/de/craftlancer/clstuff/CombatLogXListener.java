@@ -2,6 +2,7 @@ package de.craftlancer.clstuff;
 
 import com.SirBlobman.combatlogx.api.ICombatLogX;
 import com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent;
+import de.craftlancer.clapi.LazyService;
 import de.craftlancer.clapi.clclans.AbstractClan;
 import de.craftlancer.clapi.clclans.PluginClans;
 import de.craftlancer.clapi.clfeatures.portal.event.PortalTeleportEvent;
@@ -13,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 public class CombatLogXListener implements Listener {
+    private static final LazyService<PluginClans> CLANS = new LazyService<>(PluginClans.class);
     private ICombatLogX combatLogPlugin = null;
     
     public CombatLogXListener() {
@@ -25,10 +27,11 @@ public class CombatLogXListener implements Listener {
         if (!(event.getEnemy() instanceof OfflinePlayer))
             return;
         
-        PluginClans clans = Bukkit.getServicesManager().load(PluginClans.class);
+        if (!CLANS.isPresent())
+            return;
         
-        AbstractClan self = clans.getClan(event.getPlayer());
-        AbstractClan other = clans.getClan((OfflinePlayer) event.getEnemy());
+        AbstractClan self = CLANS.get().getClan(event.getPlayer());
+        AbstractClan other = CLANS.get().getClan((OfflinePlayer) event.getEnemy());
         
         if (self != null && self.equals(other))
             event.setCancelled(true);

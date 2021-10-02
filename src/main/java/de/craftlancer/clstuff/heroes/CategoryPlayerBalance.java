@@ -1,5 +1,6 @@
 package de.craftlancer.clstuff.heroes;
 
+import de.craftlancer.clapi.LazyService;
 import de.craftlancer.clapi.clclans.PluginClans;
 import de.craftlancer.clapi.clstuff.heroes.CalculatedPlacement;
 import de.craftlancer.clapi.clstuff.heroes.HeroesCategory;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 public class CategoryPlayerBalance implements HeroesCategory {
     
+    private static final LazyService<PluginClans> CLANS = new LazyService<>(PluginClans.class);
     private CLStuff plugin;
     
     public CategoryPlayerBalance(CLStuff plugin) {
@@ -23,7 +25,6 @@ public class CategoryPlayerBalance implements HeroesCategory {
     
     @Override
     public List<CalculatedPlacement> calculate() {
-        PluginClans clans = Bukkit.getServicesManager().load(PluginClans.class);
         
         return plugin.getRankings().updateScores().values().stream()
                 .sorted(Comparator.comparingDouble(AbstractRankingsEntry::getBalance).reversed()).limit(3)
@@ -33,8 +34,8 @@ public class CategoryPlayerBalance implements HeroesCategory {
                                 ChatColor.WHITE + Bukkit.getOfflinePlayer(e.getUUID()).getName(),
                                 ChatColor.GOLD + "$" + String.format("%.2f", e.getBalance()),
                                 ""
-                        ), clans == null ? null : (clans.getClan(Bukkit.getOfflinePlayer(e.getUUID())) == null ? null
-                                : clans.getClan(Bukkit.getOfflinePlayer(e.getUUID())).getBanner()),
+                        ), !CLANS.isPresent() ? null : (CLANS.get().getClan(Bukkit.getOfflinePlayer(e.getUUID())) == null ? null
+                                : CLANS.get().getClan(Bukkit.getOfflinePlayer(e.getUUID())).getBanner()),
                                 e.getUUID())).collect(Collectors.toList());
     }
     

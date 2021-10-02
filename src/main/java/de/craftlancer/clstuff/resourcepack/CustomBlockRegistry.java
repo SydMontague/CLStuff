@@ -1,6 +1,7 @@
 package de.craftlancer.clstuff.resourcepack;
 
 import com.google.common.collect.Sets;
+import de.craftlancer.clapi.LazyService;
 import de.craftlancer.clapi.clfeatures.AbstractFeature;
 import de.craftlancer.clapi.clfeatures.AbstractManualPlacementFeature;
 import de.craftlancer.clapi.clfeatures.PluginCLFeatures;
@@ -47,7 +48,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CustomBlockRegistry implements Listener {
-    
+    private static final LazyService<PluginCLFeatures> CLFEATURES = new LazyService<>(PluginCLFeatures.class);
     private static CustomBlockRegistry instance;
     
     private final Map<Material, CustomBlockItem> defaults = new HashMap<>();
@@ -142,8 +143,7 @@ public class CustomBlockRegistry implements Listener {
             return;
         }
         
-        PluginCLFeatures clfeatures = Bukkit.getServicesManager().load(PluginCLFeatures.class);
-        AbstractFeature feature = clfeatures.getFeature(customBlockItem.getId());
+        AbstractFeature feature = CLFEATURES.get().getFeature(customBlockItem.getId());
         
         if (feature instanceof AbstractManualPlacementFeature) {
             if (!feature.checkFeatureLimit(event.getPlayer())) {
