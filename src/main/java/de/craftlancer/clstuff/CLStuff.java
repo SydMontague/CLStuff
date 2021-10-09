@@ -1,27 +1,5 @@
 package de.craftlancer.clstuff;
 
-import java.io.StringReader;
-import java.util.Arrays;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.Statistic;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import de.craftlancer.clstuff.adminshop.AdminShopManager;
 import de.craftlancer.clstuff.afk.AFKListener;
 import de.craftlancer.clstuff.arena.ArenaGUI;
@@ -33,6 +11,8 @@ import de.craftlancer.clstuff.commands.ItemBuilderCommand;
 import de.craftlancer.clstuff.commands.StatsCommand;
 import de.craftlancer.clstuff.commands.WildCommand;
 import de.craftlancer.clstuff.connectionmessages.ConnectionMessages;
+import de.craftlancer.clstuff.deathmessages.DeathMessageCommandHandler;
+import de.craftlancer.clstuff.deathmessages.DeathMessageListener;
 import de.craftlancer.clstuff.emotes.EmoteManager;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
@@ -56,6 +36,27 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.Statistic;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.StringReader;
+import java.util.Arrays;
 
 public class CLStuff extends JavaPlugin implements Listener {
     
@@ -126,6 +127,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         getCommand("centermap").setExecutor(new CenterMapCommand(this));
         getCommand("navigation").setExecutor(new NavigationCommandHandler(this, CLCore.getInstance().getNavigationManager()));
         getCommand("tablistreload").setExecutor(new Tablist(this));
+        getCommand("deathmessages").setExecutor(new DeathMessageCommandHandler(this));
         
         this.customBlockRegistry = new CustomBlockRegistry(this);
         this.rewardsManager = new RewardsManager(this);
@@ -141,6 +143,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
         Bukkit.getPluginManager().registerEvents(new AFKListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PreventCMDUpgrade(this), this);
+        Bukkit.getPluginManager().registerEvents(new DeathMessageListener(this), this);
         
         this.citizenSets = new CitizenSetsManager(this);
         this.emotes = new EmoteManager(this);
@@ -160,7 +163,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         
         if (Bukkit.getPluginManager().getPlugin("CombatLogX") != null)
             Bukkit.getPluginManager().registerEvents(new CombatLogXListener(), this);
-
+        
         Bukkit.getPluginManager().registerEvents(this, this);
         new LambdaRunnable(this::save).runTaskTimer(this, 18000L, 18000L);
     }

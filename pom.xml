@@ -1,169 +1,170 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>de.craftlancer</groupId>
-  <artifactId>clstuff</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
-  <name>CLStuff</name>
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.craftlancer</groupId>
+    <artifactId>clstuff</artifactId>
+    <version>0.3.0-SNAPSHOT</version>
+    <name>CLStuff</name>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-  <repositories>
-    <!-- Spigot -->
-    <repository>
-      <id>spigot-repo</id>
-      <url>http://hub.spigotmc.org/nexus/content/groups/public/</url>
-    </repository>
+    <repositories>
+        <!-- Spigot -->
+        <repository>
+            <id>spigot-repo</id>
+            <url>http://hub.spigotmc.org/nexus/content/groups/public/</url>
+        </repository>
 
-    <!-- GriefPrevention -->
-    <repository>
-      <id>jitpack.io</id>
-      <url>https://jitpack.io</url>
-    </repository>
+        <!-- GriefPrevention -->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
 
-    <!-- CombatLogX -->
-    <repository>
-      <id>codemc-repo</id>
-      <url>https://repo.codemc.io/repository/maven-public/</url>
-    </repository>
+        <!-- CombatLogX -->
+        <repository>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
+        </repository>
 
-    <!-- WorldGuard/WorldEdit -->
-    <repository>
-      <id>sk89q-repo</id>
-      <url>http://maven.sk89q.com/repo/</url>
-    </repository>
+        <!-- WorldGuard/WorldEdit -->
+        <repository>
+            <id>sk89q-repo</id>
+            <url>http://maven.sk89q.com/repo/</url>
+        </repository>
 
-    <!-- Essentials -->
-    <repository>
-      <id>Essentials</id>
-      <url>https://repo.essentialsx.net/releases/</url>
-    </repository>
+        <!-- Essentials -->
+        <repository>
+            <id>Essentials</id>
+            <url>https://repo.essentialsx.net/releases/</url>
+        </repository>
 
-    <!-- DiscordSRV -->
-    <repository>
-      <id>Scarsz-Nexus</id>
-      <url>https://nexus.scarsz.me/content/groups/public/</url>
-    </repository>
+        <!-- DiscordSRV -->
+        <repository>
+            <id>Scarsz-Nexus</id>
+            <url>https://nexus.scarsz.me/content/groups/public/</url>
+        </repository>
 
-    <!-- MythicMobs -->
-    <repository>
-      <id>nexus</id>
-      <name>Lumine Releases</name>
-      <url>https://mvn.lumine.io/repository/maven-public/</url>
-    </repository>
-  </repositories>
+        <!-- MythicMobs -->
+        <repository>
+            <id>nexus</id>
+            <name>Lumine Releases</name>
+            <url>https://mvn.lumine.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.spigotmc</groupId>
-      <artifactId>spigot-api</artifactId>
-      <version>1.16.5-R0.1-SNAPSHOT</version>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
+        </dependency>
 
-    <dependency>
-      <groupId>de.craftlancer</groupId>
-      <artifactId>clcore</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>de.craftlancer</groupId>
-      <artifactId>clfeatures</artifactId>
-      <version>0.3.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>de.craftlancer</groupId>
-      <artifactId>clclans</artifactId>
-      <version>0.3.0-SNAPSHOT</version>
-    </dependency>
+        <dependency>
+            <groupId>de.craftlancer</groupId>
+            <artifactId>clapi</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
 
-    <dependency>
-      <groupId>com.SirBlobman.combatlogx</groupId>
-      <artifactId>CombatLogX-API</artifactId>
-      <version>10.0.0.0-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
+        <dependency>
+            <groupId>de.craftlancer</groupId>
+            <artifactId>clcore</artifactId>
+            <version>0.5.0-SNAPSHOT</version>
+        </dependency>
 
-    <dependency>
-      <groupId>me.sizzlemcgrizzle</groupId>
-      <artifactId>blueprints</artifactId>
-      <version>1.7.0</version>
-      <scope>provided</scope>
-    </dependency>
+        <dependency>
+            <groupId>com.SirBlobman.combatlogx</groupId>
+            <artifactId>CombatLogX-API</artifactId>
+            <version>10.0.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-    <dependency>
-      <groupId>com.github.TechFortress</groupId>
-      <artifactId>GriefPrevention</artifactId>
-      <version>master-SNAPSHOT</version>
-      <exclusions>
-        <exclusion>
-          <groupId>*</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+        <dependency>
+            <groupId>com.github.TechFortress</groupId>
+            <artifactId>GriefPrevention</artifactId>
+            <version>master-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-    <dependency>
-      <groupId>com.sk89q.worldguard</groupId>
-      <artifactId>worldguard-legacy</artifactId>
-      <version>7.0.0-SNAPSHOT</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bukkit</groupId>
-          <artifactId>bukkit</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldguard</groupId>
+            <artifactId>worldguard-legacy</artifactId>
+            <version>7.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-    <dependency>
-      <groupId>com.discordsrv</groupId>
-      <artifactId>discordsrv</artifactId>
-      <version>1.18.4</version>
-      <scope>provided</scope>
-    </dependency>
+        <dependency>
+            <groupId>com.discordsrv</groupId>
+            <artifactId>discordsrv</artifactId>
+            <version>1.18.4</version>
+            <scope>provided</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>io.lumine.xikage</groupId>
-      <artifactId>MythicMobs</artifactId>
-      <version>4.9.1</version>
-      <scope>provided</scope>
-    </dependency>
+        <dependency>
+            <groupId>io.lumine.xikage</groupId>
+            <artifactId>MythicMobs</artifactId>
+            <version>4.9.1</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-    <dependency>
-      <groupId>net.ess3</groupId> <!-- TODO change to net.essentialsx with 2.19.0 -->
-      <artifactId>EssentialsX</artifactId>
-      <version>2.18.2</version>
-    </dependency>
+        <dependency>
+            <groupId>net.ess3</groupId> <!-- TODO change to net.essentialsx with 2.19.0 -->
+            <artifactId>EssentialsX</artifactId>
+            <version>2.18.2</version>
+        </dependency>
 
-    <dependency>
-      <groupId>net.raidstone</groupId>
-      <artifactId>WorldGuardEvents</artifactId>
-      <version>1.16.4</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>net.raidstone</groupId>
+            <artifactId>WorldGuardEvents</artifactId>
+            <version>1.16.4</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
-  <build>
-    <resources>
-      <resource>
-        <directory>${basedir}/src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-    <finalName>${project.name}</finalName>
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <finalName>${project.name}</finalName>
 
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

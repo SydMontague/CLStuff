@@ -1,17 +1,17 @@
 package de.craftlancer.clstuff.adminshop;
 
+import de.craftlancer.clapi.clstuff.adminshop.AbstractAdminShopTrade;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.inventory.ItemStack;
-
-public class AdminShopTrade implements ConfigurationSerializable {
+public class AdminShopTrade implements ConfigurationSerializable, AbstractAdminShopTrade {
     private ItemStack[] input = new ItemStack[7];
     private ItemStack output;
     private boolean broadcast = false;
@@ -33,35 +33,43 @@ public class AdminShopTrade implements ConfigurationSerializable {
         this.input[6] = (ItemStack) map.get("input7");
     }
     
+    @Override
     @Nonnull
     public ItemStack[] getInput() {
         return input;
     }
     
+    @Override
     public boolean isValid() {
         return output != null && Arrays.stream(input).anyMatch(Objects::nonNull);
     }
     
+    @Override
     public void setInput(int j, @Nullable ItemStack item) {
         input[j] = item;
     }
     
+    @Override
     public void setOutput(@Nullable ItemStack output) {
         this.output = output;
     }
     
+    @Override
     public void setBroadcast(boolean broadcast) {
         this.broadcast = broadcast;
     }
     
+    @Override
     public ItemStack getOutput() {
         return output;
     }
     
+    @Override
     public boolean isBroadcast() {
         return broadcast;
     }
     
+    @Override
     @Nullable
     public String getBroadcastString() {
         return broadcastString;

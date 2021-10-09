@@ -1,5 +1,7 @@
 package de.craftlancer.clstuff.adminshop;
 
+import de.craftlancer.clapi.clstuff.adminshop.AbstractAdminShop;
+import de.craftlancer.clapi.clstuff.adminshop.event.AdminShopTransactionEvent;
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.premium.TokenData;
 import de.craftlancer.core.LambdaRunnable;
@@ -30,7 +32,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class AdminShop {
+public class AdminShop implements AbstractAdminShop {
     private static final ItemStack BORDER_ITEM = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).setDisplayName(" ").build();
     private static final ItemStack ADMIN_QUESTION_MARK = new ItemBuilder(Material.STONE).setCustomModelData(5).setDisplayName("§6To default page...").build();
     private static final ItemStack QUESTION_MARK = new ItemBuilder(Material.STONE).setCustomModelData(5).setDisplayName("§6What is this?")
@@ -156,12 +158,12 @@ public class AdminShop {
             }), "defaultAdmin", "resourceAdmin");
             menu.set(17 + i * 9, new MenuItem(trade.getOutput()).addClickAction(p -> menu.replace(17 + localI * 9, p.getCursor(), "defaultAdmin", "resourceAdmin")), "defaultAdmin", "resourceAdmin");
             
-            ItemBuilder outputBuilder = new ItemBuilder(trade.getOutput() == null ? new ItemStack(Material.AIR) : trade.getOutput().clone());
+            ItemBuilder builder = new ItemBuilder(trade.getOutput() == null ? new ItemStack(Material.AIR) : trade.getOutput().clone());
             
-            if (!displayItem.getType().isAir())
-                outputBuilder.addLore("", "&8→ &6Left click to trade", "&8→ &6Right click to see item display");
+            if (trade.getOutput() != null)
+                builder.addLore("", "&8→ &6Left click to trade", "&8→ &6Right click to see item display");
             
-            MenuItem output = new MenuItem(outputBuilder.build());
+            MenuItem output = new MenuItem(builder.build());
             
             Consumer<Player> action = new TradeAction(this, trade, i);
             
@@ -241,6 +243,7 @@ public class AdminShop {
         player.openInventory(menu.getMenu(key).getInventory());
     }
     
+    @Override
     public AdminShopTrade getTrade(int id) {
         return trades[id];
     }
@@ -253,6 +256,7 @@ public class AdminShop {
         return manager;
     }
     
+    @Override
     public Location getLocation() {
         return location;
     }

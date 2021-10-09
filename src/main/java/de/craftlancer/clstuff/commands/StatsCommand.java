@@ -1,12 +1,13 @@
 package de.craftlancer.clstuff.commands;
 
-import de.craftlancer.clclans.CLClans;
-import de.craftlancer.clclans.Clan;
-import de.craftlancer.clclans.ClanUtils;
+import de.craftlancer.clapi.LazyService;
+import de.craftlancer.clapi.clclans.AbstractClan;
+import de.craftlancer.clapi.clclans.PluginClans;
 import de.craftlancer.clstuff.CLStuff;
 import de.craftlancer.clstuff.rankings.Rankings.RankingsEntry;
 import de.craftlancer.core.CLCore;
 import de.craftlancer.core.Utils;
+import de.craftlancer.core.util.ClanUtils;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ import org.bukkit.entity.Player;
 import java.text.DecimalFormat;
 
 public class StatsCommand implements CommandExecutor {
+    private static final LazyService<PluginClans> CLANS = new LazyService<>(PluginClans.class);
     private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("0.00");
     
     private CLStuff plugin;
@@ -29,7 +31,6 @@ public class StatsCommand implements CommandExecutor {
         this.plugin = plugin;
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         OfflinePlayer player = null;
@@ -50,7 +51,7 @@ public class StatsCommand implements CommandExecutor {
         
         plugin.getRankings().updateScores();
         RankingsEntry entry = plugin.getRankings().getRankingsEntry(player);
-        Clan clan = CLClans.getInstance().getClan(player);
+        AbstractClan clan = CLANS.get().getClan(player);
         
         String primaryGroup = player.isOnline() ? CLCore.getInstance().getPermissions().getPrimaryGroup(null, player) : "";
         
@@ -76,10 +77,10 @@ public class StatsCommand implements CommandExecutor {
     
     private String getPvPString(OfflinePlayer player) {
         long time = plugin.getPvPProtection().getPvPEnabledValue(player);
-
-        if(time == Long.MAX_VALUE)
+        
+        if (time == Long.MAX_VALUE)
             return "Enabled";
-        else if(System.currentTimeMillis() < time)
+        else if (System.currentTimeMillis() < time)
             return "Enabled until " + ClanUtils.toDate(time);
         else
             return "Disabled";
