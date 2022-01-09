@@ -101,6 +101,10 @@ commands:
     description: Toggles PvP on/off. Can only be disabled in Valgard.
   deathmessages:
     description: Commands for deathmessages
+  togglebalancedisplay:
+    description: Shows the in game balance for a player
+  bankmanager:
+    description: Commands for the bank manager
 permissions:
   clstuff.centermap:
     default: false
