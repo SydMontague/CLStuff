@@ -13,6 +13,8 @@ import de.craftlancer.clstuff.commands.WildCommand;
 import de.craftlancer.clstuff.connectionmessages.ConnectionMessages;
 import de.craftlancer.clstuff.deathmessages.DeathMessageCommandHandler;
 import de.craftlancer.clstuff.deathmessages.DeathMessageListener;
+import de.craftlancer.clstuff.economy.BankManager;
+import de.craftlancer.clstuff.economy.ToggleBalanceDisplay;
 import de.craftlancer.clstuff.emotes.EmoteManager;
 import de.craftlancer.clstuff.explosionregulator.ExplosionRegulator;
 import de.craftlancer.clstuff.help.CCHelpCommandHandler;
@@ -83,6 +85,8 @@ public class CLStuff extends JavaPlugin implements Listener {
     private CustomBlockRegistry customBlockRegistry;
     private PvPProtection pvp;
     private ItemCooldowns itemCooldowns;
+    private BankManager bankManager;
+    private ToggleBalanceDisplay balanceDisplay;
     
     @Override
     public void onLoad() {
@@ -138,6 +142,8 @@ public class CLStuff extends JavaPlugin implements Listener {
         this.tokens = new ModelToken(this);
         this.exploNerf = new ExplosionRegulator(this);
         this.adminShop = new AdminShopManager(this);
+        this.bankManager = new BankManager(this);
+        this.balanceDisplay = new ToggleBalanceDisplay(this);
         
         Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
         Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
@@ -230,6 +236,10 @@ public class CLStuff extends JavaPlugin implements Listener {
         return rankings;
     }
     
+    public ToggleBalanceDisplay getBalanceDisplay() {
+        return balanceDisplay;
+    }
+    
     @Override
     public void onDisable() {
         save();
@@ -250,6 +260,7 @@ public class CLStuff extends JavaPlugin implements Listener {
         inventoryManagement.save();
         rewardsManager.save();
         customBlockRegistry.save();
+        bankManager.save();
     }
     
     public CitizenSetsManager getCitizenSets() {
