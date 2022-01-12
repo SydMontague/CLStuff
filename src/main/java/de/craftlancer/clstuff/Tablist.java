@@ -55,10 +55,12 @@ public class Tablist implements Listener, CommandExecutor {
         setNextHeader();
         setNextFooter();
         
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.setPlayerListName(player.getDisplayName());
-            player.setPlayerListHeaderFooter(replace(header, player), replace(footer, player));
-        }
+        Bukkit.getOnlinePlayers().forEach(this::apply);
+    }
+    
+    private void apply(Player player) {
+        player.setPlayerListName(player.getDisplayName());
+        player.setPlayerListHeaderFooter(replace(header, player), replace(footer, player));
     }
     
     private void setNextHeader() {
@@ -81,7 +83,7 @@ public class Tablist implements Listener, CommandExecutor {
     @EventHandler(ignoreCancelled = true)
     public void playerJoinEvent(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        player.setPlayerListHeaderFooter(replace(header, player), replace(footer, player));
+        this.apply(player);
     }
     
     @Override
