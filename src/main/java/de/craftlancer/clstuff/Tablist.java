@@ -55,8 +55,10 @@ public class Tablist implements Listener, CommandExecutor {
         setNextHeader();
         setNextFooter();
         
-        for (Player player : Bukkit.getOnlinePlayers())
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.setPlayerListName(player.getDisplayName());
             player.setPlayerListHeaderFooter(replace(header, player), replace(footer, player));
+        }
     }
     
     private void setNextHeader() {
