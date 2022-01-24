@@ -173,7 +173,14 @@ public class CLAntiCheat implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent e) {
-        if (!(e.getMessage().startsWith("/sethome") || e.getMessage().startsWith("/ecreatehome")))
+        if (!(e.getMessage().startsWith("/sethome") 
+           || e.getMessage().startsWith("/createhome") 
+           || e.getMessage().startsWith("/esethome")
+           || e.getMessage().startsWith("/essentials:sethome")
+           || e.getMessage().startsWith("/essentials:esethome")
+           || e.getMessage().startsWith("/essentials:createhome")
+           || e.getMessage().startsWith("/essentials:ecreatehome")
+           || e.getMessage().startsWith("/ecreatehome")))
             return;
         
         Player p = e.getPlayer();
