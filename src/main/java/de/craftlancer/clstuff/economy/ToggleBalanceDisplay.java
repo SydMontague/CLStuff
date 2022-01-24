@@ -11,6 +11,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -19,9 +20,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ToggleBalanceDisplay implements CommandExecutor {
     
     private static final LazyService<Economy> eco = new LazyService<>(Economy.class);
+    private static final Map<Integer, TextComponent> balanceDisplayCache = new HashMap<>();
     
     private CLStuff plugin;
     private NamespacedKey displayDisabled;
@@ -38,7 +43,7 @@ public class ToggleBalanceDisplay implements CommandExecutor {
                     return;
                 send(player);
             }
-        }).runTaskTimer(plugin, 0, 10);
+        }).runTaskTimer(plugin, 0, 4);
     }
     
     @Override
@@ -63,9 +68,23 @@ public class ToggleBalanceDisplay implements CommandExecutor {
     }
     
     public void send(Player player) {
-        String bal = EconomyFont.getBalance((int) eco.get().getBalance(player));
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
-                TranslateSpaceFont.getSpecificAmount(166 - bal.length() * 6) + bal + EconomyFont.AETHER));
+        if (player.getWorld().getBlockAt(player.getEyeLocation()).getType() == Material.WATER)
+            return;
+        
+        int playerBalance = (int) eco.get().getBalance(player);
+        
+        if (balanceDisplayCache.containsKey(playerBalance)) {
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, balanceDisplayCache.get(playerBalance));
+            return;
+        }
+        
+        String bal = EconomyFont.getBalance(playerBalance);
+        int balanceLength = String.valueOf(playerBalance).length();
+        TextComponent c = new TextComponent(
+                TranslateSpaceFont.getSpecificAmount(172 -
+                        balanceLength * 6 - ((String.valueOf(playerBalance).length() - 1) / 3) * 2) + bal + EconomyFont.AETHER);
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, c);
+        balanceDisplayCache.put(playerBalance, c);
     }
     
     private boolean isDisplayEnabled(Player player) {
