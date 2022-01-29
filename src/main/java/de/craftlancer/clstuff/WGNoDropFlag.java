@@ -176,7 +176,7 @@ public class WGNoDropFlag implements Listener, TabExecutor {
     
     @EventHandler
     public void onNPCDropItemEvent(NPCDropItemEvent event) {
-        if (event.getItem().getEnchantments().keySet().stream().anyMatch(e -> e == Enchantment.VANISHING_CURSE)) {
+        if (event.getItem().getEnchantments().containsKey(Enchantment.VANISHING_CURSE)) {
             event.setCancelled(true);
             return;
         }
