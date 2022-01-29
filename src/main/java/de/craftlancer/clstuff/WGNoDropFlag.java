@@ -1,25 +1,6 @@
 package de.craftlancer.clstuff;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.inventory.ItemStack;
-
+import com.github.sirblobman.combatlogx.api.event.NPCDropItemEvent;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
@@ -27,12 +8,32 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-
 import de.craftlancer.core.Utils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.ItemStack;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class WGNoDropFlag implements Listener, TabExecutor {
     private static final StateFlag NO_DROP_FLAG = new StateFlag("keep-inventory", false);
@@ -51,7 +52,6 @@ public class WGNoDropFlag implements Listener, TabExecutor {
         return NO_DROP_FLAG;
     }
     
-    @SuppressWarnings("unchecked")
     public WGNoDropFlag(CLStuff plugin) {
         if (Bukkit.getPluginManager().getPlugin("WorldGuard") == null)
             return;
@@ -90,8 +90,7 @@ public class WGNoDropFlag implements Listener, TabExecutor {
                     excluded.add(stack);
                     saveExcludedList();
                     sender.sendMessage("Item added to exclusion list.");
-                }
-                else
+                } else
                     sender.sendMessage("Couldn't add item to exclusion list (already on it?)");
                 
                 break;
@@ -109,11 +108,9 @@ public class WGNoDropFlag implements Listener, TabExecutor {
                         sender.sendMessage("Item successfully removed.");
                         printExcludedList(sender);
                         saveExcludedList();
-                    }
-                    else
+                    } else
                         sender.sendMessage("Given item index out of bounds.");
-                }
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     sender.sendMessage("You must give an item index as number.");
                 }
                 break;
@@ -128,8 +125,7 @@ public class WGNoDropFlag implements Listener, TabExecutor {
         config.set("excludedItems", excluded);
         try {
             config.save(configFile);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             Bukkit.getLogger().warning("[NoDropFlag] Error while saving config.");
         }
     }
@@ -176,6 +172,23 @@ public class WGNoDropFlag implements Listener, TabExecutor {
             e.getDrops().removeIf(a -> excluded.stream().noneMatch(a::isSimilar));
             e.getDrops().forEach(a -> player.getInventory().removeItem(a));
         }
+    }
+    
+    @EventHandler
+    public void onNPCDropItemEvent(NPCDropItemEvent event) {
+        if (event.getItem().getEnchantments().containsKey(Enchantment.VANISHING_CURSE)) {
+            event.setCancelled(true);
+            return;
+        }
+        
+        Location location = event.getLocation();
+        
+        com.sk89q.worldedit.util.Location wgLoc = BukkitAdapter.adapt(location);
+        RegionQuery query = wg.getPlatform().getRegionContainer().createQuery();
+        StateFlag.State state = query.queryState(wgLoc, null, NO_DROP_FLAG);
+        
+        if (state == State.ALLOW)
+            event.setCancelled(true);
     }
     
     public List<ItemStack> getExcluded() {
