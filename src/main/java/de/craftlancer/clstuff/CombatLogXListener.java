@@ -1,7 +1,7 @@
 package de.craftlancer.clstuff;
 
-import com.SirBlobman.combatlogx.api.ICombatLogX;
-import com.SirBlobman.combatlogx.api.event.PlayerPreTagEvent;
+import com.github.sirblobman.combatlogx.api.ICombatLogX;
+import com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent;
 import de.craftlancer.clapi.LazyService;
 import de.craftlancer.clapi.clclans.AbstractClan;
 import de.craftlancer.clapi.clclans.PluginClans;

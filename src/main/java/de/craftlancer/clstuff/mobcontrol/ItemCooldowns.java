@@ -23,7 +23,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerRiptideEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.SirBlobman.combatlogx.api.ICombatLogX;
+import com.github.sirblobman.combatlogx.api.ICombatLogX;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;

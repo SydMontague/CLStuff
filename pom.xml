@@ -4,11 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.craftlancer</groupId>
     <artifactId>clstuff</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.4.0-SNAPSHOT</version>
     <name>CLStuff</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <repositories>
@@ -22,12 +24,6 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
-        </repository>
-
-        <!-- CombatLogX -->
-        <repository>
-            <id>codemc-repo</id>
-            <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
 
         <!-- WorldGuard/WorldEdit -->
@@ -54,44 +50,37 @@
             <name>Lumine Releases</name>
             <url>https://mvn.lumine.io/repository/maven-public/</url>
         </repository>
+
+        <!-- CombatLogX -->
+        <repository>
+            <id>sirblobman-public</id>
+            <url>https://nexus.sirblobman.xyz/repository/public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
+            <version>1.18.1-R0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>de.craftlancer</groupId>
             <artifactId>clapi</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>de.craftlancer</groupId>
             <artifactId>clcore</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.SirBlobman.combatlogx</groupId>
-            <artifactId>CombatLogX-API</artifactId>
-            <version>10.0.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>0.6.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.TechFortress</groupId>
             <artifactId>GriefPrevention</artifactId>
-            <version>master-SNAPSHOT</version>
+            <version>16.18-RC1</version>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -102,8 +91,8 @@
 
         <dependency>
             <groupId>com.sk89q.worldguard</groupId>
-            <artifactId>worldguard-legacy</artifactId>
-            <version>7.0.0-SNAPSHOT</version>
+            <artifactId>worldguard-bukkit</artifactId>
+            <version>7.0.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.bukkit</groupId>
@@ -120,12 +109,26 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.sirblobman.api</groupId>
+            <artifactId>core</artifactId>
+            <version>2.3-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.sirblobman.combatlogx</groupId>
             <artifactId>api</artifactId>
             <version>11.0.0.0-SNAPSHOT</version>
             <scope>system</scope>
             <systemPath>${basedir}/depend/CombatLogX.jar</systemPath>
         </dependency>
+
 
         <dependency>
             <groupId>io.lumine.xikage</groupId>
@@ -152,12 +155,6 @@
             <version>1.16.4</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -173,11 +170,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
+                <version>3.9.0</version>
             </plugin>
         </plugins>
     </build>

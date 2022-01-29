@@ -134,8 +134,6 @@ public class WildCommand implements CommandExecutor, Listener {
         
         switch (loc.getWorld().getBiome(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
             case DESERT:
-            case DESERT_HILLS:
-            case DESERT_LAKES:
             case ICE_SPIKES:
             case BADLANDS:
             case COLD_OCEAN:
@@ -143,10 +141,8 @@ public class WildCommand implements CommandExecutor, Listener {
             case DEEP_FROZEN_OCEAN:
             case DEEP_LUKEWARM_OCEAN:
             case DEEP_OCEAN:
-            case DEEP_WARM_OCEAN:
             case ERODED_BADLANDS:
             case FROZEN_OCEAN:
-            case MUSHROOM_FIELD_SHORE:
             case MUSHROOM_FIELDS:
             case WARM_OCEAN:
             case OCEAN:
