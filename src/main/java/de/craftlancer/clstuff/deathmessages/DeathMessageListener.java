@@ -16,6 +16,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.HoverEvent.Action;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -275,7 +277,7 @@ public class DeathMessageListener implements Listener {
         String displayName = item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : beautify(item.getType().name());
         
         BaseComponent component = new TextComponent(displayName);
-        component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new BaseComponent[]{NMSUtils.getItemHoverComponent(item)}));
+        component.setHoverEvent(new HoverEvent(Action.SHOW_ITEM, NMSUtils.getItemHoverTag(item)));
         
         return component;
     }
