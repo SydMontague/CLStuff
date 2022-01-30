@@ -31,7 +31,6 @@ import de.craftlancer.clstuff.rankings.Rankings;
 import de.craftlancer.clstuff.resourcepack.CustomBlockRegistry;
 import de.craftlancer.clstuff.rewards.RewardsManager;
 import de.craftlancer.clstuff.squest.ServerQuests;
-import de.craftlancer.clstuff.tag.NameTagManager;
 import de.craftlancer.core.CLCore;
 import de.craftlancer.core.LambdaRunnable;
 import de.craftlancer.core.util.MessageUtil;
@@ -145,8 +144,6 @@ public class CLStuff extends JavaPlugin implements Listener {
         this.adminShop = new AdminShopManager(this);
         this.bankManager = new BankManager(this);
         this.balanceDisplay = new ToggleBalanceDisplay(this);
-        
-        new NameTagManager(this);
         
         Bukkit.getPluginManager().registerEvents(new CLAntiCheat(this), this);
         Bukkit.getPluginManager().registerEvents(new LagFixes(this), this);
