@@ -130,12 +130,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.lkeehl</groupId>
-            <artifactId>tagapi</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-
-        <dependency>
             <groupId>io.lumine.xikage</groupId>
             <artifactId>MythicMobs</artifactId>
             <version>4.9.1</version>
