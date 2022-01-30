@@ -129,6 +129,11 @@
             <systemPath>${basedir}/depend/CombatLogX.jar</systemPath>
         </dependency>
 
+        <dependency>
+            <groupId>com.lkeehl</groupId>
+            <artifactId>tagapi</artifactId>
+            <version>1.0.1</version>
+        </dependency>
 
         <dependency>
             <groupId>io.lumine.xikage</groupId>
